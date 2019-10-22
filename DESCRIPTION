@@ -1,0 +1,16 @@
+Package: cytoqc
+Type: Package
+Title: Quality control for cytometry
+Version: 0.99.0
+Author: Mike Jiang, Jake Wagner
+Maintainer: Mike Jiang <wjiang2@fhcrc.org>
+Description: Provides quality control and quality assessment tools for cytometry data. 
+Depends: R (>= 3.5.0), flowWorkspace(>= 4.0.0)
+Imports: methods, BiocGenerics, flowCore, flowWorkspace
+License: Artistic-2.0
+biocViews: ImmunoOncology, Infrastructure, FlowCytometry, CellBasedAssays
+Suggests:  knitr
+VignetteBuilder: knitr
+RoxygenNote: 6.1.1
+
+

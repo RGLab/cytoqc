@@ -1,0 +1,68 @@
+---
+title: "cytoqc -- a quality control tool for openCyto gating"
+output:
+  html_document: 
+    keep_md: yes
+    toc: yes
+---
+
+*cytoqc* performs pre-cleaning, pre-gating and post-gating QC checks.
+```{r}
+library(cytoqc)
+```
+
+```{r cache=TRUE, include=FALSE}
+# prepare the test data
+data("GvHD")
+data_dir <- tempfile()
+dir.create(data_dir)
+write.flowSet(GvHD, data_dir)
+```
+
+### 1. preload the data into h5-based `cytoframe` objects.
+
+```{r}
+files <- list.files(data_dir, ".fcs", full.names = TRUE)
+cq_data <- cq_load_fcs(files)
+cq_data
+```
+
+### 2. Precleaning and standardization
+```{r include=FALSE}
+#simulate channel discrepancy
+
+#case
+cf <- cq_data[[1]]
+colnames(cf)[1] <- "fsc-h"
+
+#typo
+cf <- cq_data[[2]]
+colnames(cf)[2] <- "SCC-H"
+
+#order
+cf <- cq_data[[3]]
+cf_swap_colnames(cf, "FL1-H", "FL2-H")
+
+#missing
+cf <- cq_data[[4]]
+cq_data[[4]] <- cf[,1:7]
+
+#redundant
+fr <- read.FCS(files[5])
+new_col <- exprs(fr)[,8,drop=F]
+colnames(new_col) <- "new_col"
+fr <- cbind2(fr, new_col)
+write.FCS(fr, files[5])
+cq_data[[5]] <- load_cytoframe_from_fcs(files[5], is_h5 = TRUE)
+```
+
+2.1 QC for channels
+```{r}
+#identify the reference channels by selecting the set shared by majority samples
+#this step can be skipped by manually supplying 'expected_channels` vector
+expected_channels <- cq_find_reference_channels(cq_data)
+expected_channels
+#run qc check after examin and verify the expected_channels
+#cq_check_channels(cq_data, expected_channels)
+```
+
