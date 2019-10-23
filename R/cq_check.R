@@ -1,7 +1,6 @@
 #' @export
 cq_load_fcs <- function(files, is_h5 = TRUE, ...){
   res <- sapply(files, function(file)load_cytoframe_from_fcs(file, is_h5 = is_h5, ...))
-  names(res) <- basename(names(res))
   attr(res, "class") <- "cq_data"
   res
 }
@@ -45,6 +44,7 @@ cq_find_reference_params <- function(cq_data, delimiter = "|", ...){
 cq_check_params <- function(cq_data, reference_params, ...){
   res <- sapply(cq_data, function(cf){
                 params <- cf_get_params(cf, ...)
+
                 unmatched <- setdiff(params, reference_params)
                 missing <- setdiff(reference_params, params)
                 if(length(unmatched) > 0 || length(missing) > 0)
@@ -54,8 +54,7 @@ cq_check_params <- function(cq_data, reference_params, ...){
                              , stringsAsFactors = FALSE)
                 }
                     }, simplify = FALSE)
-
-  bind_rows(res, .id = "FCS")
+  bind_rows(res)
 }
 
 #' QA processes of cellcount
