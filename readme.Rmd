@@ -11,6 +11,8 @@ output:
 library(flowCore)
 library(flowWorkspace)
 library(cytoqc)
+library(knitr)
+library(kableExtra)
 ```
 
 ```{r cache=TRUE, include=FALSE}
@@ -75,8 +77,8 @@ This step can be skipped if you want to manually supply 'reference` .
 
 Then run qc check after you've examined and verified the `reference` (and modifed if necessary)
 ```{r}
-report <- cq_check_params(cq_data, reference, type = "channel")
-report
+check_results <- cq_check_params(cq_data, reference, type = "channel")
+check_results
 ```
 Each row in the check report represent one problematic sample and three columns are:
 * `FCS`: the sample file
@@ -98,15 +100,21 @@ colnames(cf)[1] <- "FSC-H"
 Or use the convenient tool to correct them in batch. 
 First, use the helper function to draft the fix solution 
 ```{r}
-solution <- cq_fix_param_solution(report) 
+solution <- cq_fix_param_solution(check_results) 
+kable(solution)
 ```
+```{r}
+dplyr::distinct(solution[,-1])
+
+```
+
 Then review the `solution` and make adjustment or correction as needed, pass it to the `cq_fix_params`
 ```{r}
-cq_fix_params(cq_data, solution)
+# cq_fix_params(cq_data, solution)
 ```
 The verify whethe the data has been cleaned, run the QA check again
 ```{r}
-cq_check_params(cq_data, reference, type = "channel")
+# cq_check_params(cq_data, reference, type = "channel")
 ```
 This should return an empty table, which indicates the problems are fixed. Otherwise, inspect and revise the `solution` to rerun the fix accordingly.
 

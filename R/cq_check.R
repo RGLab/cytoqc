@@ -23,6 +23,7 @@ cf_get_params <- function(cf, type = c("channel", "marker", "both")){
     params <- markers[!is.na(markers)]
   else
   {
+    stop("type = 'both' is not supported yet!")
     markers[is.na(markers)] <- ""
     params <- paste(channels, markers, sep = ":")
 
@@ -50,14 +51,80 @@ cq_check_params <- function(cq_data, reference_params, ...){
                 missing <- setdiff(reference_params, params)
                 if(length(unmatched) > 0 || length(missing) > 0)
                 {
-                  data.frame(unmatched = paste(unmatched, collapse = ",")
-                             , missing = paste(missing, collapse = ",")
-                             , stringsAsFactors = FALSE)
+                  list(unmatched = unmatched, missing = missing)
                 }
                     }, simplify = FALSE)
-  bind_rows(res, .id = "FCS")
+  res <- Filter(Negate(is.null), res)
+
+  attr(res, "class") <- "cq_param_report"
+  res
+}
+#' @export
+print.cq_param_report <- function(x){
+  res <- sapply(x, function(i){
+
+      data.frame(unmatched = paste(i[["unmatched"]], collapse = ",")
+                 , missing = paste(i[["missing"]], collapse = ",")
+                 , stringsAsFactors = FALSE)
+
+  }, simplify = FALSE)
+  print(bind_rows(res, .id = "FCS"))
 }
 
+#' @param max.distance Maximum distance allowed for a match. See ?agrep
+#' @export
+cq_fix_param_solution <- function(check_results, max.distance = 0.1){
+  res <- sapply(check_results, function(check_result){
+
+        unmatched <- check_result[["unmatched"]]
+        missing <- check_result[["missing"]]
+        solution <- NULL
+        #iteratively try to find the aproximate match between two vecs
+        while(length(unmatched) >0 && length(missing) >0)
+        {
+          #Levenshtein (edit) distance
+          dist_mat <- adist(unmatched, missing, ignore.case = TRUE)
+          nrows <- nrow(dist_mat)
+          ncols <- ncol(dist_mat)
+          #pick the best match
+          idx <- which.min(dist_mat)
+          # browser()
+          #get x, y coordinates
+          ridx <- idx %% nrows
+          if(ridx==0)
+            ridx = nrows
+          cidx <- ceiling(idx / nrows)
+          #get the pair
+          x <- unmatched[ridx]
+          y <- missing[cidx]
+          #check if exceeds max.distance
+          #agrep can be avoided if the formula of max.distance used by agrep is figured out
+          ind <- agrep(x, y, ignore.case = TRUE, max.distance = max.distance)
+          if(length(ind) > 0)#
+          {
+            #pop the matched item
+            unmatched <- unmatched[-ridx]
+            missing <- missing[-cidx]
+            solution <- rbind(solution, data.frame(from = x, to = y, stringsAsFactors = FALSE))
+          }else
+            break #otherwise stop the maatching process
+
+        }
+        solution
+      })
+   res <- bind_rows(res, .id = "FCS")
+  # res <- Filter(Negate(is.null), res)
+  #
+  # attr(res, "class") <- c(attr(res, "class"), "cq_param_solution")
+  res
+}
+
+# summary.cq_param_solution <- function(x){
+#   distinct(x[,-1])
+# }
+cq_fix_params <- function(cq_data, solution){
+
+}
 #' QA processes of cellcount
 #'
 #' detect aberations in the number of events per sample.
