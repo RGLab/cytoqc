@@ -47,11 +47,11 @@ cq_check_params <- function(cq_data, reference_params, ...){
   res <- sapply(cq_data, function(cf){
                 params <- cf_get_params(cf, ...)
 
-                unmatched <- setdiff(params, reference_params)
+                unknown <- setdiff(params, reference_params)
                 missing <- setdiff(reference_params, params)
-                if(length(unmatched) > 0 || length(missing) > 0)
+                if(length(unknown) > 0 || length(missing) > 0)
                 {
-                  list(unmatched = unmatched, missing = missing)
+                  list(unknown = unknown, missing = missing)
                 }
                     }, simplify = FALSE)
   res <- Filter(Negate(is.null), res)
@@ -63,7 +63,7 @@ cq_check_params <- function(cq_data, reference_params, ...){
 as.data.frame.cq_param_report <- function(x){
   res <- sapply(x, function(i){
 
-      data.frame(unmatched = paste(i[["unmatched"]], collapse = ",")
+      data.frame(unknown = paste(i[["unknown"]], collapse = ",")
                  , missing = paste(i[["missing"]], collapse = ",")
                  , stringsAsFactors = FALSE)
 
@@ -78,66 +78,108 @@ format.cq_param_report <- function(x){
 
 }
 #' @param max.distance Maximum distance allowed for a match. See ?agrep
+#' @importFrom tibble tibble add_row
 #' @export
 cq_fix_param_solution <- function(check_results, max.distance = 0.1){
-  res <- sapply(check_results, function(check_result){
+  res <- tibble(FCS = character(), from = character(), to = character())
+  for(sn in names(check_results))
+  {
+    check_result <- check_results[[sn]]
+    unknown <- check_result[["unknown"]]
+    missing <- check_result[["missing"]]
 
-        unmatched <- check_result[["unmatched"]]
-        missing <- check_result[["missing"]]
-        solution <- NULL
-        #iteratively try to find the aproximate match between two vecs
-        while(length(unmatched) >0 && length(missing) >0)
-        {
-          #Levenshtein (edit) distance
-          dist_mat <- adist(unmatched, missing, ignore.case = TRUE)
-          nrows <- nrow(dist_mat)
-          ncols <- ncol(dist_mat)
-          #pick the best match
-          idx <- which.min(dist_mat)
-          # browser()
-          #get x, y coordinates
-          ridx <- idx %% nrows
-          if(ridx==0)
-            ridx = nrows
-          cidx <- ceiling(idx / nrows)
-          #get the pair
-          x <- unmatched[ridx]
-          y <- missing[cidx]
-          #check if exceeds max.distance
-          #agrep can be avoided if the formula of max.distance used by agrep is figured out
-          ind <- agrep(x, y, ignore.case = TRUE, max.distance = max.distance)
-          if(length(ind) > 0)#
-          {
-            #pop the matched item
-            unmatched <- unmatched[-ridx]
-            missing <- missing[-cidx]
-            solution <- rbind(solution, data.frame(from = x, to = y, stringsAsFactors = FALSE))
-          }else
-            break #otherwise stop the maatching process
+    #iteratively try to find the aproximate match between two vecs
+    while(length(unknown) >0 && length(missing) >0)
+    {
+      #Levenshtein (edit) distance
+      dist_mat <- adist(unknown, missing, ignore.case = TRUE)
+      nrows <- nrow(dist_mat)
+      ncols <- ncol(dist_mat)
+      #pick the best match
+      idx <- which.min(dist_mat)
+      # browser()
+      #get x, y coordinates
+      ridx <- idx %% nrows
+      if(ridx==0)
+        ridx = nrows
+      cidx <- ceiling(idx / nrows)
+      #get the pair
+      x <- unknown[ridx]
+      y <- missing[cidx]
+      #check if exceeds max.distance
+      #agrep can be avoided if the formula of max.distance used by agrep is figured out
+      ind <- agrep(x, y, ignore.case = TRUE, max.distance = max.distance)
+      if(length(ind) > 0)#
+      {
+        #pop the matched item
+        unknown <- unknown[-ridx]
+        missing <- missing[-cidx]
+        res <- add_row(res, FCS = sn, from = x, to = y)
+      }else
+        break #otherwise stop the maatching process
 
-        }
-        solution
-      })
-   res <- bind_rows(res, .id = "FCS")
-  # res <- Filter(Negate(is.null), res)
-  #
+    }
+
+  }
+
   attr(res, "class") <- c("cq_param_solution", attr(res, "class"))
   res
 }
 
-#' @importFrom kableExtra collapse_rows
-#' @importFrom dplyr %>%
 #' @export
-format.cq_param_solution <- function(x){
-  kable(solution) %>% kable_styling() %>% collapse_rows(columns = 1, "top")
+print.cq_param_solution <- function(x){
+  attr(x, "class") <- attr(x, "class")[-1]
+  print(x)
+}
+#' @importFrom kableExtra collapse_rows
+#' @importFrom dplyr %>% select distinct
+#' @importFrom tidyr unite
+#' @export
+format.cq_param_solution <- function(x, itemize = FALSE){
+  if(!itemize)
+    x <- x %>% select(-1) %>% distinct()
+
+  x %>%
+    unite("Proposed change", from, to, sep = " --> ") %>%
+      kable() %>%
+        kable_styling() %>%
+          collapse_rows(columns = 1, "top")
 
 }
 
 # summary.cq_param_solution <- function(x){
 #   distinct(x[,-1])
 # }
+#' @export
 cq_fix_params <- function(cq_data, solution){
+  invisible(apply(solution, 1, function(row){
+                    sn <- row[["FCS"]]
+                    cf <- cq_data[[sn]]
+                    flowWorkspace:::setChannel(cf@pointer, row[["from"]], row[["to"]])
+                })
+              )
+}
 
+#' @export
+cq_drop_redundant_params <- function(cq_data, check_results){
+  for(sn in names(check_results))
+  {
+    check_result <- check_results[[sn]]
+    unknown <- check_result[["unknown"]]
+    missing <- check_result[["missing"]]
+    if(length(unknown) > 0 && length(missing) == 0)
+    {
+      cf <- cq_data[[sn]]
+      cq_data[[sn]] <- cf[, !colnames(cf) %in% unknown]
+    }
+  }
+  cq_data
+}
+
+#' @export
+cq_drop_samples <- function(cq_data, check_results){
+
+    cq_data[-match(names(check_results), names(cq_data))]
 }
 #' QA processes of cellcount
 #'

@@ -59,7 +59,7 @@ format(check_results)
  <thead>
   <tr>
    <th style="text-align:left;"> FCS </th>
-   <th style="text-align:left;"> unmatched </th>
+   <th style="text-align:left;"> unknown </th>
    <th style="text-align:left;"> missing </th>
   </tr>
  </thead>
@@ -67,11 +67,11 @@ format(check_results)
   <tr>
    <td style="text-align:left;"> s10a01.fcs </td>
    <td style="text-align:left;"> fsc-h </td>
-   <td style="text-align:left;"> FSC-H </td>
+   <td style="text-align:left;"> FSC-H,Time </td>
   </tr>
   <tr>
    <td style="text-align:left;"> s10a02.fcs </td>
-   <td style="text-align:left;"> SCC-H </td>
+   <td style="text-align:left;"> SSC1-H,channelA </td>
    <td style="text-align:left;"> SSC-H </td>
   </tr>
   <tr>
@@ -79,28 +79,11 @@ format(check_results)
    <td style="text-align:left;"> fsc-h,SSC1-H </td>
    <td style="text-align:left;"> FSC-H,SSC-H </td>
   </tr>
-  <tr>
-   <td style="text-align:left;"> s10a04.fcs </td>
-   <td style="text-align:left;">  </td>
-   <td style="text-align:left;"> Time </td>
-  </tr>
-  <tr>
-   <td style="text-align:left;"> s10a05.fcs </td>
-   <td style="text-align:left;"> channelA </td>
-   <td style="text-align:left;">  </td>
-  </tr>
 </tbody>
 </table>
 
-E.g. We've found 5 samples that have mismatched channels. 
 
-* `s10a01` has the case difference of `FSC` channel.
-* `s10a02` has typo in `SSC` channel.
-* `s10a03` has both above issues
-* `s10a04` has `Time` channel missing from the data.
-* `s10a05` has extra channel
-
-### Generate the fix solution 
+### Propose the fix solution 
 
 ```r
 solution <- cq_fix_param_solution(check_results) 
@@ -110,46 +93,185 @@ format(solution)
 <table class="table" style="margin-left: auto; margin-right: auto;">
  <thead>
   <tr>
+   <th style="text-align:left;"> Proposed change </th>
+  </tr>
+ </thead>
+<tbody>
+  <tr>
+   <td style="text-align:left;"> fsc-h --&gt; FSC-H </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> SSC1-H --&gt; SSC-H </td>
+  </tr>
+</tbody>
+</table>
+
+Show the itemized details
+
+```r
+format(solution, itemize = TRUE)
+```
+
+<table class="table" style="margin-left: auto; margin-right: auto;">
+ <thead>
+  <tr>
    <th style="text-align:left;"> FCS </th>
-   <th style="text-align:left;"> from </th>
-   <th style="text-align:left;"> to </th>
+   <th style="text-align:left;"> Proposed change </th>
   </tr>
  </thead>
 <tbody>
   <tr>
    <td style="text-align:left;"> s10a01.fcs </td>
-   <td style="text-align:left;"> fsc-h </td>
-   <td style="text-align:left;"> FSC-H </td>
+   <td style="text-align:left;"> fsc-h --&gt; FSC-H </td>
   </tr>
   <tr>
    <td style="text-align:left;"> s10a02.fcs </td>
-   <td style="text-align:left;"> SCC-H </td>
-   <td style="text-align:left;"> SSC-H </td>
+   <td style="text-align:left;"> SSC1-H --&gt; SSC-H </td>
   </tr>
   <tr>
    <td style="text-align:left;vertical-align: top !important;" rowspan="2"> s10a03.fcs </td>
-   <td style="text-align:left;"> fsc-h </td>
-   <td style="text-align:left;"> FSC-H </td>
+   <td style="text-align:left;"> fsc-h --&gt; FSC-H </td>
   </tr>
   <tr>
    
-   <td style="text-align:left;"> SSC1-H </td>
-   <td style="text-align:left;"> SSC-H </td>
+   <td style="text-align:left;"> SSC1-H --&gt; SSC-H </td>
   </tr>
 </tbody>
 </table>
+
 
 ### Apply the fix
 After reviewing the `solution` (revise it if needed), pass it to the `cq_fix_params`
 
 ```r
-# cq_fix_params(cq_data, solution)
+cq_fix_params(cq_data, solution)
 ```
-
+### Run QC check second time to show remaining issues
 
 ```r
-# cq_check_params(cq_data, reference, type = "channel")
+check_results <- cq_check_params(cq_data, reference, type = "channel")
+format(check_results)
 ```
+
+<table class="table" style="margin-left: auto; margin-right: auto;">
+ <thead>
+  <tr>
+   <th style="text-align:left;"> FCS </th>
+   <th style="text-align:left;"> unknown </th>
+   <th style="text-align:left;"> missing </th>
+  </tr>
+ </thead>
+<tbody>
+  <tr>
+   <td style="text-align:left;"> s10a01.fcs </td>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;"> Time </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> s10a02.fcs </td>
+   <td style="text-align:left;"> channelA </td>
+   <td style="text-align:left;">  </td>
+  </tr>
+</tbody>
+</table>
+
+### Drop redundant channel
+
+```r
+cq_data <- cq_drop_redundant_params(cq_data, check_results)
+```
+     
+### Refresh QC report and drop the samples that still can not be fixed
+
+```r
+check_results <- cq_check_params(cq_data, reference, type = "channel")
+cq_data <- cq_drop_samples(cq_data, check_results)
+length(cq_data)
+```
+
+```
+## [1] 34
+```
+
+### QC for marker
+
+```r
+reference <- cq_find_reference_params(cq_data, type = "marker")
+check_results <- cq_check_params(cq_data, reference, type = "marker")
+format(check_results)
+```
+
+<table class="table" style="margin-left: auto; margin-right: auto;">
+ <thead>
+  <tr>
+   <th style="text-align:left;"> FCS </th>
+   <th style="text-align:left;"> unknown </th>
+   <th style="text-align:left;"> missing </th>
+  </tr>
+ </thead>
+<tbody>
+  <tr>
+   <td style="text-align:left;"> s10a03.fcs </td>
+   <td style="text-align:left;"> Time (204.80 sec.) </td>
+   <td style="text-align:left;"> Time (102.40 sec.) </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> s10a04.fcs </td>
+   <td style="text-align:left;"> Time (204.80 sec.) </td>
+   <td style="text-align:left;"> Time (102.40 sec.) </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> s10a05.fcs </td>
+   <td style="text-align:left;"> Time (204.80 sec.) </td>
+   <td style="text-align:left;"> Time (102.40 sec.) </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> s10a06.fcs </td>
+   <td style="text-align:left;"> Time (204.80 sec.) </td>
+   <td style="text-align:left;"> Time (102.40 sec.) </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> s10a07.fcs </td>
+   <td style="text-align:left;"> Time (204.80 sec.) </td>
+   <td style="text-align:left;"> Time (102.40 sec.) </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> s5a01.fcs </td>
+   <td style="text-align:left;"> Time (51.20 sec.) </td>
+   <td style="text-align:left;"> Time (102.40 sec.) </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> s5a02.fcs </td>
+   <td style="text-align:left;"> Time (51.20 sec.) </td>
+   <td style="text-align:left;"> Time (102.40 sec.) </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> s5a03.fcs </td>
+   <td style="text-align:left;"> Time (51.20 sec.) </td>
+   <td style="text-align:left;"> Time (102.40 sec.) </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> s5a04.fcs </td>
+   <td style="text-align:left;"> Time (51.20 sec.) </td>
+   <td style="text-align:left;"> Time (102.40 sec.) </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> s5a05.fcs </td>
+   <td style="text-align:left;"> Time (51.20 sec.) </td>
+   <td style="text-align:left;"> Time (102.40 sec.) </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> s5a06.fcs </td>
+   <td style="text-align:left;"> Time (51.20 sec.) </td>
+   <td style="text-align:left;"> Time (102.40 sec.) </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> s5a07.fcs </td>
+   <td style="text-align:left;"> Time (51.20 sec.) </td>
+   <td style="text-align:left;"> Time (102.40 sec.) </td>
+  </tr>
+</tbody>
+</table>
 
 
 

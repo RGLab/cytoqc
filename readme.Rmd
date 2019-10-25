@@ -28,7 +28,7 @@ dir.create(data_dir)
 write.flowSet(GvHD, data_dir)
 ```
 
-## Preload the FCS
+## Load the FCS
 
 ```{r}
 files <- list.files(data_dir, ".fcs", full.names = TRUE)
@@ -43,28 +43,29 @@ cq_data
 cf <- cq_data[[1]]
 colnames(cf)[1] <- "fsc-h"
 
-#typo
-cf <- cq_data[[2]]
-colnames(cf)[2] <- "SCC-H"
-
-#order
-cf <- cq_data[[3]]
-colnames(cf)[1:2] <- c("fsc-h", "SSC1-H")
-
 #missing
-cf <- cq_data[[4]]
-cq_data[[4]] <- cf[,1:7]
+cq_data[[1]] <- cf[,1:7]
+
 
 #redundant
-fr <- read.FCS(files[5])
+thisfile <- files[2]
+fr <- read.FCS(thisfile)
 new_col <- exprs(fr)[,8,drop=F]
 colnames(new_col) <- "channelA"
 fr <- cbind2(fr, new_col)
-write.FCS(fr, files[5])
-cq_data[[5]] <- load_cytoframe_from_fcs(files[5], is_h5 = TRUE)
+write.FCS(fr, files[2])
+cq_data[[2]] <- load_cytoframe_from_fcs(thisfile, is_h5 = TRUE)
+
+#typo
+cf <- cq_data[[2]]
+colnames(cf)[2] <- "SSC1-H"
+
+#both case and typo
+cf <- cq_data[[3]]
+colnames(cf)[1:2] <- c("fsc-h", "SSC1-H")
 
 #order
-cf <- cq_data[[6]]
+cf <- cq_data[[4]]
 cf_swap_colnames(cf, "FL1-H", "FL2-H")
 
 ```
@@ -83,28 +84,48 @@ check_results <- cq_check_params(cq_data, reference, type = "channel")
 format(check_results)
 ```
 
-E.g. We've found 5 samples that have mismatched channels. 
 
-* `s10a01` has the case difference of `FSC` channel.
-* `s10a02` has typo in `SSC` channel.
-* `s10a03` has both above issues
-* `s10a04` has `Time` channel missing from the data.
-* `s10a05` has extra channel
-
-### Generate the fix solution 
+### Propose the fix 
 ```{r}
 solution <- cq_fix_param_solution(check_results) 
 format(solution)
 ```
 
+*Show the itemized details*
+```{r}
+format(solution, itemize = TRUE)
+```
+
+
 ### Apply the fix
 After reviewing the `solution` (revise it if needed), pass it to the `cq_fix_params`
 ```{r}
-# cq_fix_params(cq_data, solution)
+cq_fix_params(cq_data, solution)
+```
+### Update QC report
+```{r}
+check_results <- cq_check_params(cq_data, reference, type = "channel")
+format(check_results)
 ```
 
+### Drop redundant channel
 ```{r}
-# cq_check_params(cq_data, reference, type = "channel")
+cq_data <- cq_drop_redundant_params(cq_data, check_results)
+```
+     
+### Refresh QC report and drop the samples that still can not be fixed
+```{r}
+check_results <- cq_check_params(cq_data, reference, type = "channel")
+format(check_results)
+cq_data <- cq_drop_samples(cq_data, check_results)
+length(cq_data)
+```
+
+### QC for marker
+```{r eval=FALSE}
+reference <- cq_find_reference_params(cq_data, type = "marker")
+check_results <- cq_check_params(cq_data, reference, type = "marker")
+format(check_results)
 ```
 
 
