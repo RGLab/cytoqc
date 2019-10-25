@@ -60,7 +60,7 @@ cq_check_params <- function(cq_data, reference_params, ...){
   res
 }
 #' @export
-print.cq_param_report <- function(x){
+as.data.frame.cq_param_report <- function(x){
   res <- sapply(x, function(i){
 
       data.frame(unmatched = paste(i[["unmatched"]], collapse = ",")
@@ -68,9 +68,15 @@ print.cq_param_report <- function(x){
                  , stringsAsFactors = FALSE)
 
   }, simplify = FALSE)
-  print(bind_rows(res, .id = "FCS"))
+  bind_rows(res, .id = "FCS")
 }
+#' @importFrom knitr kable
+#' @importFrom kableExtra kable_styling
+#' @export
+format.cq_param_report <- function(x){
+  kable(as.data.frame(x)) %>% kable_styling()
 
+}
 #' @param max.distance Maximum distance allowed for a match. See ?agrep
 #' @export
 cq_fix_param_solution <- function(check_results, max.distance = 0.1){
@@ -115,8 +121,16 @@ cq_fix_param_solution <- function(check_results, max.distance = 0.1){
    res <- bind_rows(res, .id = "FCS")
   # res <- Filter(Negate(is.null), res)
   #
-  # attr(res, "class") <- c(attr(res, "class"), "cq_param_solution")
+  attr(res, "class") <- c("cq_param_solution", attr(res, "class"))
   res
+}
+
+#' @importFrom kableExtra collapse_rows
+#' @importFrom dplyr %>%
+#' @export
+format.cq_param_solution <- function(x){
+  kable(solution) %>% kable_styling() %>% collapse_rows(columns = 1, "top")
+
 }
 
 # summary.cq_param_solution <- function(x){

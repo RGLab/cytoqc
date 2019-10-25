@@ -1,11 +1,10 @@
 ---
-title: "cytoqc -- A QC tool for openCyto"
+title: "cytoqc -- A Quality Control tool for openCyto gating"
 output:
   html_document: 
     keep_md: yes
+    number_sections: yes
 ---
-
-*cytoqc* performs pre-cleaning, pre-gating and post-gating QC checks.
 
 ```{r include=FALSE}
 knitr::opts_chunk$set(warning = FALSE, message = FALSE)
@@ -13,7 +12,7 @@ library(knitr)
 library(kableExtra)
 ```
 
-
+*cytoqc* performs pre-cleaning, pre-gating and post-gating QC checks.
 ```{r}
 library(flowCore)
 library(flowWorkspace)
@@ -28,7 +27,7 @@ dir.create(data_dir)
 write.flowSet(GvHD, data_dir)
 ```
 
-## Preload the FCS
+### Preload the FCS
 
 ```{r}
 files <- list.files(data_dir, ".fcs", full.names = TRUE)
@@ -68,44 +67,58 @@ cf <- cq_data[[6]]
 cf_swap_colnames(cf, "FL1-H", "FL2-H")
 
 ```
-## QC for channels
+### Standardize the FCS
 
-### Determin the reference channels
+#### QC for channels
+
+Firstly, determin the reference channels, which can be either manually supplied or automatically detected by helper function `cq_find_reference_params`
 
 ```{r}
 reference <- cq_find_reference_params(cq_data, type = "channel")
-paste(reference, collapse = ", ")
+reference
 ```
 
-### QC check
+Then run qc check
 ```{r}
 check_results <- cq_check_params(cq_data, reference, type = "channel")
-format(check_results)
+check_results
 ```
 
-E.g. We've found 5 samples that have mismatched channels. 
+Each row in the check report represent one problematic sample and three columns are:
+* `FCS`: the sample file
+* `unmatched`: the channels found in the sample but not expected from the reference
+* `missing`: the channels that are expected but not present in the sample
 
+E.g. We've found 5 samples that have mismatched channels. 
 * `s10a01` has the case difference of `FSC` channel.
 * `s10a02` has typo in `SSC` channel.
 * `s10a03` has both above issues
 * `s10a04` has `Time` channel missing from the data.
 * `s10a05` has extra channel
 
-### Generate the fix solution 
+After reviewing the report, you can either manually fix these samples one by one
+```{r}
+cf <- cq_data[["s10a01.fcs"]]
+colnames(cf)[1] <- "FSC-H"
+```
+Or use the helper tools we provided to correct them in batch. 
+
+First, use the helper function to generate the fix solution 
 ```{r}
 solution <- cq_fix_param_solution(check_results) 
-format(solution)
+kable(solution)
 ```
 
-### Apply the fix
 After reviewing the `solution` (revise it if needed), pass it to the `cq_fix_params`
 ```{r}
 # cq_fix_params(cq_data, solution)
 ```
 
+The verify whethe the data has been cleaned, run the QA check again
 ```{r}
 # cq_check_params(cq_data, reference, type = "channel")
 ```
 
+This should return an empty table, which indicates the problems are fixed. Otherwise, inspect and revise the `solution` to rerun the fix accordingly.
 
 
