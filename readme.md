@@ -1,10 +1,9 @@
 ---
-title: "cytoqc -- A QC tool for openCyto"
 output:
-  html_document: 
-    keep_md: yes
+  github_document
 ---
 
+# cytoqc -- A QC tool for openCyto
 *cytoqc* performs pre-cleaning, pre-gating and post-gating QC checks.
 
 
@@ -19,7 +18,7 @@ library(cytoqc)
 
 
 
-## Preload the FCS
+## Load the FCS
 
 
 ```r
@@ -55,27 +54,27 @@ check_results <- cq_check_params(cq_data, reference, type = "channel")
 format(check_results)
 ```
 
-<table class="table" style="margin-left: auto; margin-right: auto;">
+<table class="table table-bordered" style="width: auto !important; ">
  <thead>
   <tr>
-   <th style="text-align:left;"> FCS </th>
-   <th style="text-align:left;"> unknown </th>
-   <th style="text-align:left;"> missing </th>
+   <th style="text-align:left;color: black !important;background-color: #9ebcda !important;"> FCS </th>
+   <th style="text-align:left;color: black !important;background-color: #9ebcda !important;"> unknown </th>
+   <th style="text-align:left;color: black !important;background-color: #9ebcda !important;"> missing </th>
   </tr>
  </thead>
 <tbody>
   <tr>
-   <td style="text-align:left;"> s10a01.fcs </td>
+   <td style="text-align:left;font-weight: bold;"> s10a01.fcs </td>
    <td style="text-align:left;"> fsc-h </td>
    <td style="text-align:left;"> FSC-H,Time </td>
   </tr>
   <tr>
-   <td style="text-align:left;"> s10a02.fcs </td>
+   <td style="text-align:left;font-weight: bold;"> s10a02.fcs </td>
    <td style="text-align:left;"> SSC1-H,channelA </td>
    <td style="text-align:left;"> SSC-H </td>
   </tr>
   <tr>
-   <td style="text-align:left;"> s10a03.fcs </td>
+   <td style="text-align:left;font-weight: bold;"> s10a03.fcs </td>
    <td style="text-align:left;"> fsc-h,SSC1-H </td>
    <td style="text-align:left;"> FSC-H,SSC-H </td>
   </tr>
@@ -83,17 +82,17 @@ format(check_results)
 </table>
 
 
-### Propose the fix solution 
+### Propose the fix 
 
 ```r
 solution <- cq_fix_param_solution(check_results) 
 format(solution)
 ```
 
-<table class="table" style="margin-left: auto; margin-right: auto;">
+<table class="table table-bordered" style="width: auto !important; ">
  <thead>
   <tr>
-   <th style="text-align:left;"> Proposed change </th>
+   <th style="text-align:left;color: black !important;background-color: #e5f5e0 !important;"> Proposed change </th>
   </tr>
  </thead>
 <tbody>
@@ -106,35 +105,35 @@ format(solution)
 </tbody>
 </table>
 
-Show the itemized details
+*Show the itemized details*
 
 ```r
 format(solution, itemize = TRUE)
 ```
 
-<table class="table" style="margin-left: auto; margin-right: auto;">
+<table class="table table-bordered" style="width: auto !important; ">
  <thead>
   <tr>
-   <th style="text-align:left;"> FCS </th>
-   <th style="text-align:left;"> Proposed change </th>
+   <th style="text-align:left;color: black !important;background-color: #e5f5e0 !important;"> FCS </th>
+   <th style="text-align:left;color: black !important;background-color: #e5f5e0 !important;"> Proposed change </th>
   </tr>
  </thead>
 <tbody>
   <tr>
-   <td style="text-align:left;"> s10a01.fcs </td>
+   <td style="text-align:left;font-weight: bold;"> s10a01.fcs </td>
    <td style="text-align:left;"> fsc-h --&gt; FSC-H </td>
   </tr>
   <tr>
-   <td style="text-align:left;"> s10a02.fcs </td>
+   <td style="text-align:left;font-weight: bold;"> s10a02.fcs </td>
    <td style="text-align:left;"> SSC1-H --&gt; SSC-H </td>
   </tr>
   <tr>
-   <td style="text-align:left;vertical-align: top !important;" rowspan="2"> s10a03.fcs </td>
+   <td style="text-align:left;vertical-align: top !important;font-weight: bold;" rowspan="2"> s10a03.fcs </td>
    <td style="text-align:left;"> fsc-h --&gt; FSC-H </td>
   </tr>
   <tr>
    
-   <td style="text-align:left;"> SSC1-H --&gt; SSC-H </td>
+   <td style="text-align:left;font-weight: bold;"> SSC1-H --&gt; SSC-H </td>
   </tr>
 </tbody>
 </table>
@@ -146,29 +145,29 @@ After reviewing the `solution` (revise it if needed), pass it to the `cq_fix_par
 ```r
 cq_fix_params(cq_data, solution)
 ```
-### Run QC check second time to show remaining issues
+### Update QC report
 
 ```r
 check_results <- cq_check_params(cq_data, reference, type = "channel")
 format(check_results)
 ```
 
-<table class="table" style="margin-left: auto; margin-right: auto;">
+<table class="table table-bordered" style="width: auto !important; ">
  <thead>
   <tr>
-   <th style="text-align:left;"> FCS </th>
-   <th style="text-align:left;"> unknown </th>
-   <th style="text-align:left;"> missing </th>
+   <th style="text-align:left;color: black !important;background-color: #9ebcda !important;"> FCS </th>
+   <th style="text-align:left;color: black !important;background-color: #9ebcda !important;"> unknown </th>
+   <th style="text-align:left;color: black !important;background-color: #9ebcda !important;"> missing </th>
   </tr>
  </thead>
 <tbody>
   <tr>
-   <td style="text-align:left;"> s10a01.fcs </td>
+   <td style="text-align:left;font-weight: bold;"> s10a01.fcs </td>
    <td style="text-align:left;">  </td>
    <td style="text-align:left;"> Time </td>
   </tr>
   <tr>
-   <td style="text-align:left;"> s10a02.fcs </td>
+   <td style="text-align:left;font-weight: bold;"> s10a02.fcs </td>
    <td style="text-align:left;"> channelA </td>
    <td style="text-align:left;">  </td>
   </tr>
@@ -185,6 +184,27 @@ cq_data <- cq_drop_redundant_params(cq_data, check_results)
 
 ```r
 check_results <- cq_check_params(cq_data, reference, type = "channel")
+format(check_results)
+```
+
+<table class="table table-bordered" style="width: auto !important; ">
+ <thead>
+  <tr>
+   <th style="text-align:left;color: black !important;background-color: #9ebcda !important;"> FCS </th>
+   <th style="text-align:left;color: black !important;background-color: #9ebcda !important;"> unknown </th>
+   <th style="text-align:left;color: black !important;background-color: #9ebcda !important;"> missing </th>
+  </tr>
+ </thead>
+<tbody>
+  <tr>
+   <td style="text-align:left;font-weight: bold;"> s10a01.fcs </td>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;"> Time </td>
+  </tr>
+</tbody>
+</table>
+
+```r
 cq_data <- cq_drop_samples(cq_data, check_results)
 length(cq_data)
 ```
@@ -200,78 +220,6 @@ reference <- cq_find_reference_params(cq_data, type = "marker")
 check_results <- cq_check_params(cq_data, reference, type = "marker")
 format(check_results)
 ```
-
-<table class="table" style="margin-left: auto; margin-right: auto;">
- <thead>
-  <tr>
-   <th style="text-align:left;"> FCS </th>
-   <th style="text-align:left;"> unknown </th>
-   <th style="text-align:left;"> missing </th>
-  </tr>
- </thead>
-<tbody>
-  <tr>
-   <td style="text-align:left;"> s10a03.fcs </td>
-   <td style="text-align:left;"> Time (204.80 sec.) </td>
-   <td style="text-align:left;"> Time (102.40 sec.) </td>
-  </tr>
-  <tr>
-   <td style="text-align:left;"> s10a04.fcs </td>
-   <td style="text-align:left;"> Time (204.80 sec.) </td>
-   <td style="text-align:left;"> Time (102.40 sec.) </td>
-  </tr>
-  <tr>
-   <td style="text-align:left;"> s10a05.fcs </td>
-   <td style="text-align:left;"> Time (204.80 sec.) </td>
-   <td style="text-align:left;"> Time (102.40 sec.) </td>
-  </tr>
-  <tr>
-   <td style="text-align:left;"> s10a06.fcs </td>
-   <td style="text-align:left;"> Time (204.80 sec.) </td>
-   <td style="text-align:left;"> Time (102.40 sec.) </td>
-  </tr>
-  <tr>
-   <td style="text-align:left;"> s10a07.fcs </td>
-   <td style="text-align:left;"> Time (204.80 sec.) </td>
-   <td style="text-align:left;"> Time (102.40 sec.) </td>
-  </tr>
-  <tr>
-   <td style="text-align:left;"> s5a01.fcs </td>
-   <td style="text-align:left;"> Time (51.20 sec.) </td>
-   <td style="text-align:left;"> Time (102.40 sec.) </td>
-  </tr>
-  <tr>
-   <td style="text-align:left;"> s5a02.fcs </td>
-   <td style="text-align:left;"> Time (51.20 sec.) </td>
-   <td style="text-align:left;"> Time (102.40 sec.) </td>
-  </tr>
-  <tr>
-   <td style="text-align:left;"> s5a03.fcs </td>
-   <td style="text-align:left;"> Time (51.20 sec.) </td>
-   <td style="text-align:left;"> Time (102.40 sec.) </td>
-  </tr>
-  <tr>
-   <td style="text-align:left;"> s5a04.fcs </td>
-   <td style="text-align:left;"> Time (51.20 sec.) </td>
-   <td style="text-align:left;"> Time (102.40 sec.) </td>
-  </tr>
-  <tr>
-   <td style="text-align:left;"> s5a05.fcs </td>
-   <td style="text-align:left;"> Time (51.20 sec.) </td>
-   <td style="text-align:left;"> Time (102.40 sec.) </td>
-  </tr>
-  <tr>
-   <td style="text-align:left;"> s5a06.fcs </td>
-   <td style="text-align:left;"> Time (51.20 sec.) </td>
-   <td style="text-align:left;"> Time (102.40 sec.) </td>
-  </tr>
-  <tr>
-   <td style="text-align:left;"> s5a07.fcs </td>
-   <td style="text-align:left;"> Time (51.20 sec.) </td>
-   <td style="text-align:left;"> Time (102.40 sec.) </td>
-  </tr>
-</tbody>
-</table>
 
 
 

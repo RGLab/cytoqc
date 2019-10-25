@@ -74,7 +74,10 @@ as.data.frame.cq_param_report <- function(x){
 #' @importFrom kableExtra kable_styling
 #' @export
 format.cq_param_report <- function(x){
-  kable(as.data.frame(x)) %>% kable_styling()
+  kable(as.data.frame(x)) %>%
+    kable_styling("bordered", full_width = F, position = "left") %>%
+      column_spec(1, bold = TRUE) %>%
+        row_spec(0, background = "#9ebcda", color = "black")
 
 }
 #' @param max.distance Maximum distance allowed for a match. See ?agrep
@@ -139,12 +142,15 @@ format.cq_param_solution <- function(x, itemize = FALSE){
   if(!itemize)
     x <- x %>% select(-1) %>% distinct()
 
-  x %>%
-    unite("Proposed change", from, to, sep = " --> ") %>%
-      kable() %>%
-        kable_styling() %>%
-          collapse_rows(columns = 1, "top")
-
+  x <- x %>%
+        unite("Proposed change", from, to, sep = " --> ") %>%
+          kable() %>%
+            kable_styling("bordered", full_width = F, position = "left") %>%
+              collapse_rows(columns = 1, "top")%>%
+                row_spec(0, background = "#e5f5e0", color = "black")
+  if(itemize)
+    x <- x %>% column_spec(1, bold = TRUE)
+  x
 }
 
 # summary.cq_param_solution <- function(x){
