@@ -1,6 +1,5 @@
 ---
-output:
-  github_document
+output:  github_document
 ---
 
 # cytoqc -- A QC tool for openCyto
