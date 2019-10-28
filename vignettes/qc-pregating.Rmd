@@ -1,0 +1,137 @@
+---
+output: github_document
+always_allow_html: yes
+---
+# cytoqc -- A QC tool for openCyto
+
+*cytoqc* performs pre-cleaning, pre-gating and post-gating QC checks.
+
+```{r include=FALSE}
+knitr::opts_chunk$set(warning = FALSE, message = FALSE)
+library(knitr)
+library(kableExtra)
+```
+
+
+```{r}
+library(flowCore)
+library(flowWorkspace)
+library(cytoqc)
+```
+
+```{r include=FALSE}
+# prepare the test data
+data("GvHD")
+fs <- GvHD[8:28]#exclude samples that has different Time length
+data_dir <- tempfile()
+dir.create(data_dir)
+write.flowSet(fs, data_dir)
+```
+
+## Load the FCS
+
+```{r}
+files <- list.files(data_dir, ".fcs", full.names = TRUE)
+cqc_data <- cqc_load_fcs(files)
+cqc_data
+```
+
+```{r include=FALSE}
+#simulate channel discrepancy
+
+#case
+cf <- cqc_data[[1]]
+colnames(cf)[1] <- "fsc-h"
+
+#missing
+cqc_data[[1]] <- cf[,1:7]
+
+
+#redundant
+thisfile <- files[2]
+fr <- read.FCS(thisfile)
+new_col <- exprs(fr)[,8,drop=F]
+colnames(new_col) <- "channelA"
+fr <- cbind2(fr, new_col)
+write.FCS(fr, files[2])
+cqc_data[[2]] <- load_cytoframe_from_fcs(thisfile, is_h5 = TRUE)
+
+#typo
+cf <- cqc_data[[2]]
+colnames(cf)[2] <- "SSC1-H"
+
+#both case and typo
+cf <- cqc_data[[3]]
+colnames(cf)[1:2] <- c("fsc-h", "SSC1-H")
+
+#order
+cf <- cqc_data[[4]]
+cf_swap_colnames(cf, "FL1-H", "FL2-H")
+
+```
+## Determine the reference
+
+```{r}
+reference <- cqc_params_find_reference(cqc_data, type = "channel")
+paste(reference, collapse = ", ")
+```
+
+## QC check
+```{r}
+check_results <- cqc_params_check(cqc_data, reference, type = "channel")
+format(check_results)
+```
+
+
+## Recommend the fix 
+```{r}
+solution <- cqc_params_propose_solution(check_results) 
+format(solution)
+```
+
+*Show the itemized details*
+```{r}
+format(solution, itemize = TRUE)
+```
+
+## Export/import the `solution` for revision (if needed)
+```{r eval=FALSE}
+library(readr)
+write_csv(solution, csvfile)
+#manually edit csvfile and load it back
+solution_revised <- read_csv(csvfile)
+```
+
+## Apply the fix
+
+```{r}
+cqc_params_fix(cqc_data, solution)
+```
+## Update QC report
+```{r}
+check_results <- cqc_params_check(cqc_data, reference, type = "channel")
+format(check_results)
+```
+
+## Drop redundant channel
+```{r}
+cqc_data <- cqc_params_drop_not_in_reference(cqc_data, check_results)
+```
+     
+## Refresh QC report and drop the samples that still can not be fixed
+```{r}
+check_results <- cqc_params_check(cqc_data, reference, type = "channel")
+format(check_results)
+cqc_data <- cqc_drop_samples(cqc_data, check_results)
+length(cqc_data)
+```
+
+## QC for marker
+```{r eval=FALSE}
+reference <- cqc_params_find_reference(cqc_data, type = "marker")
+check_results <- cqc_params_check(cqc_data, reference, type = "marker")
+format(check_results)
+```
+
+
+
