@@ -12,7 +12,7 @@ print.cqc_data <- function(x){
   cat(length(x), " samples \n")
 }
 
-cf_get_params <- function(cf, type = c("channel", "marker", "both")){
+cf_get_params <- function(cf, type = c("channel", "marker")){
   type <- match.arg(type)
   pd <- pData(parameters(cf))
   channels <- pd[["name"]]
@@ -20,27 +20,36 @@ cf_get_params <- function(cf, type = c("channel", "marker", "both")){
   if(type == "channel")
     params <- channels
   else if(type == "marker")
-    params <- markers[!is.na(markers)]
-  else
   {
-    stop("type = 'both' is not supported yet!")
-    markers[is.na(markers)] <- ""
     params <- paste(channels, markers, sep = ":")
+    params <- params[!is.na(markers)]
 
   }
   params
 }
 #' @export
-cqc_params_find_reference <- function(cqc_data, delimiter = "|", ...){
+cqc_params_find_reference <- function(cqc_data, type = c("channel", "marker"), delimiter = "|"){
   keys <- sapply(cqc_data, function(cf){
-    params <- cf_get_params(cf, ...)
+    params <- cf_get_params(cf, type = type)
     paste(sort(params), collapse = delimiter)
   })
   res <- table(keys)
   res <- names(which.max(res))
-  strsplit(res, split= delimiter, fixed = "TRUE")[[1]]
+  res <- strsplit(res, split= delimiter, fixed = "TRUE")[[1]]
+  class(res) <- c(paste("cqc_reference", type, sep = "_"), class(res))
+  res
 }
 
+#' @importFrom tidyr separate
+#' @export
+format.cqc_reference_channel <- function(x){
+  tibble(channel = x)
+}
+#' @importFrom tidyr separate
+#' @export
+format.cqc_reference_marker <- function(x){
+  tibble(reference = x) %>% separate(reference, c("channel", "marker"), sep = ":")
+}
 #' @importFrom dplyr bind_rows
 #' @export
 cqc_params_check <- function(cqc_data, reference_params, ...){

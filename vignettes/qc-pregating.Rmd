@@ -127,11 +127,20 @@ length(cqc_data)
 ```
 
 ## QC for marker
-```{r eval=FALSE}
+```{r}
+cf <- cqc_data[[1]]
+markernames(cf) <- 
+
+```
+
+```{r}
 reference <- cqc_params_find_reference(cqc_data, type = "marker")
+format(reference)
+```
+
+```{r}
 check_results <- cqc_params_check(cqc_data, reference, type = "marker")
 format(check_results)
 ```
-
 
 
