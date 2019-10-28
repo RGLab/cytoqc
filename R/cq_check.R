@@ -74,11 +74,16 @@ as.data.frame.cq_param_report <- function(x){
 #' @importFrom kableExtra kable_styling
 #' @export
 format.cq_param_report <- function(x){
-  kable(as.data.frame(x)) %>%
+  if(length(x) == 0)
+    x <- data.frame(FCS = "All passed")
+
+  x <- kable(as.data.frame(x)) %>%
     kable_styling("bordered", full_width = F, position = "left") %>%
       column_spec(1, bold = TRUE) %>%
         row_spec(0, background = "#9ebcda", color = "black")
-
+  if(length(x) == 0)
+    x <- x %>% row_spec(1, color = "green")
+  x
 }
 #' @param max.distance Maximum distance allowed for a match. See ?agrep
 #' @importFrom tibble tibble add_row

@@ -1,9 +1,8 @@
 ---
-title: "cytoqc -- A QC tool for openCyto"
-output:
-  github_document: 
-    keep_md: yes
+output: github_document
+always_allow_html: yes
 ---
+# cytoqc -- A QC tool for openCyto
 
 *cytoqc* performs pre-cleaning, pre-gating and post-gating QC checks.
 
@@ -23,9 +22,10 @@ library(cytoqc)
 ```{r include=FALSE}
 # prepare the test data
 data("GvHD")
+fs <- GvHD[8:28]#exclude samples that has different Time length
 data_dir <- tempfile()
 dir.create(data_dir)
-write.flowSet(GvHD, data_dir)
+write.flowSet(fs, data_dir)
 ```
 
 ## Load the FCS
