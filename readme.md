@@ -13,28 +13,26 @@ library(cytoqc)
 
 ``` r
 files <- list.files(data_dir, ".fcs", full.names = TRUE)
-cq_data <- cq_load_fcs(files)
-cq_data
+cqc_data <- cqc_load_fcs(files)
+cqc_data
 ```
 
     ## cytoqc data: 
     ## 21  samples
 
-## QC for channels
-
-### Determin the reference channels
+## Determine the reference
 
 ``` r
-reference <- cq_find_reference_params(cq_data, type = "channel")
+reference <- cqc_params_find_reference(cqc_data, type = "channel")
 paste(reference, collapse = ", ")
 ```
 
     ## [1] "FL1-H, FL2-A, FL2-H, FL3-H, FL4-H, FSC-H, SSC-H, Time"
 
-### QC check
+## QC check
 
 ``` r
-check_results <- cq_check_params(cq_data, reference, type = "channel")
+check_results <- cqc_params_check(cqc_data, reference, type = "channel")
 format(check_results)
 ```
 
@@ -52,13 +50,14 @@ FCS
 
 <th style="text-align:left;color: black !important;background-color: #9ebcda !important;">
 
-unknown
+Not in
+reference
 
 </th>
 
 <th style="text-align:left;color: black !important;background-color: #9ebcda !important;">
 
-missing
+Missing
 
 </th>
 
@@ -138,10 +137,10 @@ FSC-H,SSC-H
 
 </table>
 
-### Propose the fix
+## Recommend the fix
 
 ``` r
-solution <- cq_fix_param_solution(check_results) 
+solution <- cqc_params_propose_solution(check_results) 
 format(solution)
 ```
 
@@ -281,19 +280,25 @@ SSC1-H –\> SSC-H
 
 </table>
 
-### Apply the fix
-
-After reviewing the `solution` (revise it if needed), pass it to the
-`cq_fix_params`
+## Export/import the `solution` for revision (if needed)
 
 ``` r
-cq_fix_params(cq_data, solution)
+library(readr)
+write_csv(solution, csvfile)
+#manually edit csvfile and load it back
+solution_revised <- read_csv(csvfile)
 ```
 
-### Update QC report
+## Apply the fix
 
 ``` r
-check_results <- cq_check_params(cq_data, reference, type = "channel")
+cqc_params_fix(cqc_data, solution)
+```
+
+## Update QC report
+
+``` r
+check_results <- cqc_params_check(cqc_data, reference, type = "channel")
 format(check_results)
 ```
 
@@ -311,13 +316,14 @@ FCS
 
 <th style="text-align:left;color: black !important;background-color: #9ebcda !important;">
 
-unknown
+Not in
+reference
 
 </th>
 
 <th style="text-align:left;color: black !important;background-color: #9ebcda !important;">
 
-missing
+Missing
 
 </th>
 
@@ -371,16 +377,16 @@ channelA
 
 </table>
 
-### Drop redundant channel
+## Drop redundant channel
 
 ``` r
-cq_data <- cq_drop_redundant_params(cq_data, check_results)
+cqc_data <- cqc_params_drop_not_in_reference(cqc_data, check_results)
 ```
 
-### Refresh QC report and drop the samples that still can not be fixed
+## Refresh QC report and drop the samples that still can not be fixed
 
 ``` r
-check_results <- cq_check_params(cq_data, reference, type = "channel")
+check_results <- cqc_params_check(cqc_data, reference, type = "channel")
 format(check_results)
 ```
 
@@ -398,13 +404,14 @@ FCS
 
 <th style="text-align:left;color: black !important;background-color: #9ebcda !important;">
 
-unknown
+Not in
+reference
 
 </th>
 
 <th style="text-align:left;color: black !important;background-color: #9ebcda !important;">
 
-missing
+Missing
 
 </th>
 
@@ -439,16 +446,16 @@ Time
 </table>
 
 ``` r
-cq_data <- cq_drop_samples(cq_data, check_results)
-length(cq_data)
+cqc_data <- cqc_drop_samples(cqc_data, check_results)
+length(cqc_data)
 ```
 
     ## [1] 20
 
-### QC for marker
+## QC for marker
 
 ``` r
-reference <- cq_find_reference_params(cq_data, type = "marker")
-check_results <- cq_check_params(cq_data, reference, type = "marker")
+reference <- cqc_params_find_reference(cqc_data, type = "marker")
+check_results <- cqc_params_check(cqc_data, reference, type = "marker")
 format(check_results)
 ```

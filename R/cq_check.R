@@ -1,13 +1,13 @@
 #' @export
-cq_load_fcs <- function(files, is_h5 = TRUE, ...){
+cqc_load_fcs <- function(files, is_h5 = TRUE, ...){
   res <- sapply(files, function(file)load_cytoframe_from_fcs(file, is_h5 = is_h5, ...))
   names(res) <- basename(names(res))
-  attr(res, "class") <- "cq_data"
+  attr(res, "class") <- "cqc_data"
   res
 }
 
 #' @export
-print.cq_data <- function(x){
+print.cqc_data <- function(x){
   cat("cytoqc data: \n")
   cat(length(x), " samples \n")
 }
@@ -31,8 +31,8 @@ cf_get_params <- function(cf, type = c("channel", "marker", "both")){
   params
 }
 #' @export
-cq_find_reference_params <- function(cq_data, delimiter = "|", ...){
-  keys <- sapply(cq_data, function(cf){
+cqc_params_find_reference <- function(cqc_data, delimiter = "|", ...){
+  keys <- sapply(cqc_data, function(cf){
     params <- cf_get_params(cf, ...)
     paste(sort(params), collapse = delimiter)
   })
@@ -43,8 +43,8 @@ cq_find_reference_params <- function(cq_data, delimiter = "|", ...){
 
 #' @importFrom dplyr bind_rows
 #' @export
-cq_check_params <- function(cq_data, reference_params, ...){
-  res <- sapply(cq_data, function(cf){
+cqc_params_check <- function(cqc_data, reference_params, ...){
+  res <- sapply(cqc_data, function(cf){
                 params <- cf_get_params(cf, ...)
 
                 unknown <- setdiff(params, reference_params)
@@ -56,16 +56,16 @@ cq_check_params <- function(cq_data, reference_params, ...){
                     }, simplify = FALSE)
   res <- Filter(Negate(is.null), res)
 
-  attr(res, "class") <- "cq_param_report"
+  attr(res, "class") <- "cqc_param_report"
   res
 }
 #' @export
-as.data.frame.cq_param_report <- function(x){
+as.data.frame.cqc_param_report <- function(x){
   res <- sapply(x, function(i){
 
-      data.frame(unknown = paste(i[["unknown"]], collapse = ",")
-                 , missing = paste(i[["missing"]], collapse = ",")
-                 , stringsAsFactors = FALSE)
+      tibble("Not in reference" = paste(i[["unknown"]], collapse = ",")
+                 , "Missing" = paste(i[["missing"]], collapse = ",")
+                 )
 
   }, simplify = FALSE)
   bind_rows(res, .id = "FCS")
@@ -73,7 +73,7 @@ as.data.frame.cq_param_report <- function(x){
 #' @importFrom knitr kable
 #' @importFrom kableExtra kable_styling
 #' @export
-format.cq_param_report <- function(x){
+format.cqc_param_report <- function(x){
   if(length(x) == 0)
     x <- data.frame(FCS = "All passed")
 
@@ -88,7 +88,7 @@ format.cq_param_report <- function(x){
 #' @param max.distance Maximum distance allowed for a match. See ?agrep
 #' @importFrom tibble tibble add_row
 #' @export
-cq_fix_param_solution <- function(check_results, max.distance = 0.1){
+cqc_params_propose_solution <- function(check_results, max.distance = 0.1){
   res <- tibble(FCS = character(), from = character(), to = character())
   for(sn in names(check_results))
   {
@@ -130,12 +130,12 @@ cq_fix_param_solution <- function(check_results, max.distance = 0.1){
 
   }
 
-  attr(res, "class") <- c("cq_param_solution", attr(res, "class"))
+  attr(res, "class") <- c("cqc_param_solution", attr(res, "class"))
   res
 }
 
 #' @export
-print.cq_param_solution <- function(x){
+print.cqc_param_solution <- function(x){
   attr(x, "class") <- attr(x, "class")[-1]
   print(x)
 }
@@ -143,7 +143,7 @@ print.cq_param_solution <- function(x){
 #' @importFrom dplyr %>% select distinct
 #' @importFrom tidyr unite
 #' @export
-format.cq_param_solution <- function(x, itemize = FALSE){
+format.cqc_param_solution <- function(x, itemize = FALSE){
   if(!itemize)
     x <- x %>% select(-1) %>% distinct()
 
@@ -158,21 +158,21 @@ format.cq_param_solution <- function(x, itemize = FALSE){
   x
 }
 
-# summary.cq_param_solution <- function(x){
+# summary.cqc_param_solution <- function(x){
 #   distinct(x[,-1])
 # }
 #' @export
-cq_fix_params <- function(cq_data, solution){
+cqc_params_fix <- function(cqc_data, solution){
   invisible(apply(solution, 1, function(row){
                     sn <- row[["FCS"]]
-                    cf <- cq_data[[sn]]
+                    cf <- cqc_data[[sn]]
                     flowWorkspace:::setChannel(cf@pointer, row[["from"]], row[["to"]])
                 })
               )
 }
 
 #' @export
-cq_drop_redundant_params <- function(cq_data, check_results){
+cqc_params_drop_not_in_reference <- function(cqc_data, check_results){
   for(sn in names(check_results))
   {
     check_result <- check_results[[sn]]
@@ -180,17 +180,17 @@ cq_drop_redundant_params <- function(cq_data, check_results){
     missing <- check_result[["missing"]]
     if(length(unknown) > 0 && length(missing) == 0)
     {
-      cf <- cq_data[[sn]]
-      cq_data[[sn]] <- cf[, !colnames(cf) %in% unknown]
+      cf <- cqc_data[[sn]]
+      cqc_data[[sn]] <- cf[, !colnames(cf) %in% unknown]
     }
   }
-  cq_data
+  cqc_data
 }
 
 #' @export
-cq_drop_samples <- function(cq_data, check_results){
+cqc_drop_samples <- function(cqc_data, check_results){
 
-    cq_data[-match(names(check_results), names(cq_data))]
+    cqc_data[-match(names(check_results), names(cqc_data))]
 }
 #' QA processes of cellcount
 #'

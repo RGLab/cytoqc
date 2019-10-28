@@ -32,19 +32,19 @@ write.flowSet(fs, data_dir)
 
 ```{r}
 files <- list.files(data_dir, ".fcs", full.names = TRUE)
-cq_data <- cq_load_fcs(files)
-cq_data
+cqc_data <- cqc_load_fcs(files)
+cqc_data
 ```
 
 ```{r include=FALSE}
 #simulate channel discrepancy
 
 #case
-cf <- cq_data[[1]]
+cf <- cqc_data[[1]]
 colnames(cf)[1] <- "fsc-h"
 
 #missing
-cq_data[[1]] <- cf[,1:7]
+cqc_data[[1]] <- cf[,1:7]
 
 
 #redundant
@@ -54,40 +54,38 @@ new_col <- exprs(fr)[,8,drop=F]
 colnames(new_col) <- "channelA"
 fr <- cbind2(fr, new_col)
 write.FCS(fr, files[2])
-cq_data[[2]] <- load_cytoframe_from_fcs(thisfile, is_h5 = TRUE)
+cqc_data[[2]] <- load_cytoframe_from_fcs(thisfile, is_h5 = TRUE)
 
 #typo
-cf <- cq_data[[2]]
+cf <- cqc_data[[2]]
 colnames(cf)[2] <- "SSC1-H"
 
 #both case and typo
-cf <- cq_data[[3]]
+cf <- cqc_data[[3]]
 colnames(cf)[1:2] <- c("fsc-h", "SSC1-H")
 
 #order
-cf <- cq_data[[4]]
+cf <- cqc_data[[4]]
 cf_swap_colnames(cf, "FL1-H", "FL2-H")
 
 ```
-## QC for channels
-
-### Determin the reference channels
+## Determine the reference
 
 ```{r}
-reference <- cq_find_reference_params(cq_data, type = "channel")
+reference <- cqc_params_find_reference(cqc_data, type = "channel")
 paste(reference, collapse = ", ")
 ```
 
-### QC check
+## QC check
 ```{r}
-check_results <- cq_check_params(cq_data, reference, type = "channel")
+check_results <- cqc_params_check(cqc_data, reference, type = "channel")
 format(check_results)
 ```
 
 
-### Propose the fix 
+## Recommend the fix 
 ```{r}
-solution <- cq_fix_param_solution(check_results) 
+solution <- cqc_params_propose_solution(check_results) 
 format(solution)
 ```
 
@@ -96,35 +94,42 @@ format(solution)
 format(solution, itemize = TRUE)
 ```
 
-
-### Apply the fix
-After reviewing the `solution` (revise it if needed), pass it to the `cq_fix_params`
-```{r}
-cq_fix_params(cq_data, solution)
+## Export/import the `solution` for revision (if needed)
+```{r eval=FALSE}
+library(readr)
+write_csv(solution, csvfile)
+#manually edit csvfile and load it back
+solution_revised <- read_csv(csvfile)
 ```
-### Update QC report
+
+## Apply the fix
+
 ```{r}
-check_results <- cq_check_params(cq_data, reference, type = "channel")
+cqc_params_fix(cqc_data, solution)
+```
+## Update QC report
+```{r}
+check_results <- cqc_params_check(cqc_data, reference, type = "channel")
 format(check_results)
 ```
 
-### Drop redundant channel
+## Drop redundant channel
 ```{r}
-cq_data <- cq_drop_redundant_params(cq_data, check_results)
+cqc_data <- cqc_params_drop_not_in_reference(cqc_data, check_results)
 ```
      
-### Refresh QC report and drop the samples that still can not be fixed
+## Refresh QC report and drop the samples that still can not be fixed
 ```{r}
-check_results <- cq_check_params(cq_data, reference, type = "channel")
+check_results <- cqc_params_check(cqc_data, reference, type = "channel")
 format(check_results)
-cq_data <- cq_drop_samples(cq_data, check_results)
-length(cq_data)
+cqc_data <- cqc_drop_samples(cqc_data, check_results)
+length(cqc_data)
 ```
 
-### QC for marker
+## QC for marker
 ```{r eval=FALSE}
-reference <- cq_find_reference_params(cq_data, type = "marker")
-check_results <- cq_check_params(cq_data, reference, type = "marker")
+reference <- cqc_params_find_reference(cqc_data, type = "marker")
+check_results <- cqc_params_check(cqc_data, reference, type = "marker")
 format(check_results)
 ```
 
