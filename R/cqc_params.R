@@ -12,7 +12,7 @@ print.cqc_data <- function(x){
   cat(length(x), " samples \n")
 }
 
-cf_get_params <- function(cf, type = c("channel", "marker")){
+cf_get_params <- function(cf, type = c("channel", "marker"), delimiter = "|"){
   type <- match.arg(type)
   pd <- pData(parameters(cf))
   channels <- pd[["name"]]
@@ -21,40 +21,41 @@ cf_get_params <- function(cf, type = c("channel", "marker")){
     params <- channels
   else if(type == "marker")
   {
-    params <- paste(channels, markers, sep = ":")
+    params <- paste(channels, markers, sep = delimiter)
     params <- params[!is.na(markers)]
 
   }
   params
 }
+#' @importFrom tidyr separate
 #' @export
 cqc_params_find_reference <- function(cqc_data, type = c("channel", "marker"), delimiter = "|"){
+  sep <- paste0(delimiter, delimiter)#double delimiter for sep params and single delimiter for sep channel and marker
   keys <- sapply(cqc_data, function(cf){
-    params <- cf_get_params(cf, type = type)
-    paste(sort(params), collapse = delimiter)
+    params <- cf_get_params(cf, type = type, delimiter)
+    paste(sort(params), collapse = sep)
   })
   res <- table(keys)
   res <- names(which.max(res))
-  res <- strsplit(res, split= delimiter, fixed = "TRUE")[[1]]
-  class(res) <- c(paste("cqc_reference", type, sep = "_"), class(res))
+  res <- strsplit(res, split= sep, fixed = "TRUE")[[1]]
+  res <- tibble(channel = res)
+  if(type == "marker")
+    res <- separate(res, channel, c("channel", "marker"), sep = paste0("\\Q", delimiter, "\\E"))
+  class(res) <- c("cqc_reference", class(res))
   res
 }
 
-#' @importFrom tidyr separate
 #' @export
-format.cqc_reference_channel <- function(x){
-  tibble(channel = x)
-}
-#' @importFrom tidyr separate
-#' @export
-format.cqc_reference_marker <- function(x){
-  tibble(reference = x) %>% separate(reference, c("channel", "marker"), sep = ":")
+format.cqc_reference <- function(x){
+    kable(x) %>%
+      kable_styling("bordered", full_width = F, position = "left") %>%
+          row_spec(0, background = "gray", color = "black")
 }
 #' @importFrom dplyr bind_rows
 #' @export
-cqc_params_check <- function(cqc_data, reference_params, ...){
+cqc_params_check <- function(cqc_data, reference_params, type = c("channel", "marker"), delimiter ="|"){
   res <- sapply(cqc_data, function(cf){
-                params <- cf_get_params(cf, ...)
+                params <- cf_get_params(cf, type = type, delimiter)
 
                 unknown <- setdiff(params, reference_params)
                 missing <- setdiff(reference_params, params)
