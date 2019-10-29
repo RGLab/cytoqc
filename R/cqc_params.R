@@ -11,37 +11,51 @@ print.cqc_data <- function(x){
   cat("cytoqc data: \n")
   cat(length(x), " samples \n")
 }
+#' @importFrom tibble as.tibble
+#' @importFrom dplyr select rename
+cf_get_params_tbl <- function(cf){
+  pData(parameters(cf)) %>%
+    as.tibble() %>%
+      select(c("name", "desc")) %>%
+        rename(channel = name, marker = desc)
 
-cf_get_params <- function(cf, type = c("channel", "marker"), delimiter = "|"){
-  type <- match.arg(type)
-  pd <- pData(parameters(cf))
-  channels <- pd[["name"]]
-  markers <- pd[["desc"]]
-  if(type == "channel")
-    params <- channels
-  else if(type == "marker")
-  {
-    params <- paste(channels, markers, sep = delimiter)
-    params <- params[!is.na(markers)]
-
-  }
-  params
 }
-#' @importFrom tidyr separate
+
 #' @export
-cqc_params_find_reference <- function(cqc_data, type = c("channel", "marker"), delimiter = "|"){
+cqc_find_reference_channel <- function(cqc_data, ...){
+  cqc_find_params_reference(cqc_data, type = "channel", ...)
+}
+
+#' @export
+cqc_find_reference_marker <- function(cqc_data, ...){
+  cqc_find_params_reference(cqc_data, type = "marker", ...)
+}
+#' @importFrom dplyr filter arrange
+#' @importFrom tidyr separate
+cqc_find_params_reference <- function(cqc_data, type = c("channel", "marker"), delimiter = "|"){
   sep <- paste0(delimiter, delimiter)#double delimiter for sep params and single delimiter for sep channel and marker
   keys <- sapply(cqc_data, function(cf){
-    params <- cf_get_params(cf, type = type, delimiter)
-    paste(sort(params), collapse = sep)
+    params <- cf_get_params_tbl(cf) %>% arrange(channel)
+    if(type == "channel")
+      params <- params[["channel"]]
+    else
+    {
+      params <- filter(params, is.na(marker) == FALSE)
+
+      params <- params[["marker"]]
+
+    }
+    paste(params, collapse = sep)
   })
   res <- table(keys)
   res <- names(which.max(res))
   res <- strsplit(res, split= sep, fixed = "TRUE")[[1]]
-  res <- tibble(channel = res)
-  if(type == "marker")
-    res <- separate(res, channel, c("channel", "marker"), sep = paste0("\\Q", delimiter, "\\E"))
+  res <- tibble(reference = res)
+  # if(type == "marker")
+  #   res <- separate(res, channel, c("channel", "marker"), sep = paste0("\\Q", delimiter, "\\E"))
   class(res) <- c("cqc_reference", class(res))
+  class(res) <- c(paste("cqc_reference", type, sep = "_"), class(res))
+
   res
 }
 
@@ -51,14 +65,33 @@ format.cqc_reference <- function(x){
       kable_styling("bordered", full_width = F, position = "left") %>%
           row_spec(0, background = "gray", color = "black")
 }
-#' @importFrom dplyr bind_rows
-#' @export
-cqc_params_check <- function(cqc_data, reference_params, type = c("channel", "marker"), delimiter ="|"){
-  res <- sapply(cqc_data, function(cf){
-                params <- cf_get_params(cf, type = type, delimiter)
 
-                unknown <- setdiff(params, reference_params)
-                missing <- setdiff(reference_params, params)
+
+#' @export
+cqc_check <- function(x, ...)UseMethod("cqc_check")
+
+#' @export
+cqc_check.cqc_reference_channel <- function(x, ...){
+  res <- cqc_check_params(x, type = "channel", ...)
+  class(res) <- c("cqc_report_channel", class(res))
+  res
+}
+
+#' @export
+cqc_check.cqc_reference_marker <- function(x, ...){
+  res <- cqc_check_params(x, type = "marker", ...)
+  class(res) <- c("cqc_report_marker", class(res))
+  res
+}
+
+#' @importFrom dplyr bind_rows
+cqc_check_params <- function(reference_params, type, cqc_data, delimiter ="|"){
+  res <- sapply(cqc_data, function(cf){
+                params <- cf_get_params_tbl(cf)
+                chnl_data <- params[[type]]
+                chnl_ref <- reference_params[["reference"]]
+                unknown <- setdiff(chnl_data, chnl_ref)
+                missing <- setdiff(chnl_ref, chnl_data)
                 if(length(unknown) > 0 || length(missing) > 0)
                 {
                   list(unknown = unknown, missing = missing)
@@ -66,15 +99,15 @@ cqc_params_check <- function(cqc_data, reference_params, type = c("channel", "ma
                     }, simplify = FALSE)
   res <- Filter(Negate(is.null), res)
 
-  attr(res, "class") <- "cqc_param_report"
+  class(res) <- c("cqc_report_params", class(res))
   res
 }
 #' @export
-as.data.frame.cqc_param_report <- function(x){
+as.data.frame.cqc_report_params <- function(x){
   res <- sapply(x, function(i){
 
       tibble("Not in reference" = paste(i[["unknown"]], collapse = ",")
-                 , "Missing" = paste(i[["missing"]], collapse = ",")
+                 , "Missing channels" = paste(i[["missing"]], collapse = ",")
                  )
 
   }, simplify = FALSE)
@@ -83,7 +116,7 @@ as.data.frame.cqc_param_report <- function(x){
 #' @importFrom knitr kable
 #' @importFrom kableExtra kable_styling
 #' @export
-format.cqc_param_report <- function(x){
+format.cqc_report_params <- function(x){
   if(length(x) == 0)
     x <- data.frame(FCS = "All passed")
 
@@ -95,14 +128,32 @@ format.cqc_param_report <- function(x){
     x <- x %>% row_spec(1, color = "green")
   x
 }
+
+#' @export
+cqc_find_solution <- function(x, ...)UseMethod("cqc_find_solution")
+#' @export
+cqc_find_solution.cqc_report_channel <- function(x, ...){
+  res <- cqc_find_solution.cqc_report(x, ...)
+  attr(res, "class") <- c("cqc_solution_channel", attr(res, "class"))
+  res
+
+}
+#' @export
+cqc_find_solution.cqc_report_marker <- function(x, ...){
+  res <- cqc_find_solution.cqc_report(x, ...)
+  attr(res, "class") <- c("cqc_solution_marker", attr(res, "class"))
+  res
+
+}
+
 #' @param max.distance Maximum distance allowed for a match. See ?agrep
 #' @importFrom tibble tibble add_row
 #' @export
-cqc_params_propose_solution <- function(check_results, max.distance = 0.1){
+cqc_find_solution.cqc_report <- function(x, max.distance = 0.1){
   res <- tibble(FCS = character(), from = character(), to = character())
-  for(sn in names(check_results))
+  for(sn in names(x))
   {
-    check_result <- check_results[[sn]]
+    check_result <- x[[sn]]
     unknown <- check_result[["unknown"]]
     missing <- check_result[["missing"]]
 
@@ -122,38 +173,37 @@ cqc_params_propose_solution <- function(check_results, max.distance = 0.1){
         ridx = nrows
       cidx <- ceiling(idx / nrows)
       #get the pair
-      x <- unknown[ridx]
-      y <- missing[cidx]
+      from <- unknown[ridx]
+      to <- missing[cidx]
       #check if exceeds max.distance
       #agrep can be avoided if the formula of max.distance used by agrep is figured out
-      ind <- agrep(x, y, ignore.case = TRUE, max.distance = max.distance)
+      ind <- agrep(from, to, ignore.case = TRUE, max.distance = max.distance)
       if(length(ind) > 0)#
       {
         #pop the matched item
         unknown <- unknown[-ridx]
         missing <- missing[-cidx]
-        res <- add_row(res, FCS = sn, from = x, to = y)
+        res <- add_row(res, FCS = sn, from = from, to = to)
       }else
         break #otherwise stop the maatching process
 
     }
 
   }
-
-  attr(res, "class") <- c("cqc_param_solution", attr(res, "class"))
+  attr(res, "class") <- c("cqc_solution", attr(res, "class"))
   res
 }
 
 #' @export
-print.cqc_param_solution <- function(x){
-  attr(x, "class") <- attr(x, "class")[-1]
+print.cqc_solution <- function(x){
+  attr(x, "class") <- attr(x, "class")[-(1:2)]
   print(x)
 }
 #' @importFrom kableExtra collapse_rows
 #' @importFrom dplyr %>% select distinct
 #' @importFrom tidyr unite
 #' @export
-format.cqc_param_solution <- function(x, itemize = FALSE){
+format.cqc_solution <- function(x, itemize = FALSE){
   if(!itemize)
     x <- x %>% select(-1) %>% distinct()
 
@@ -168,12 +218,11 @@ format.cqc_param_solution <- function(x, itemize = FALSE){
   x
 }
 
-# summary.cqc_param_solution <- function(x){
-#   distinct(x[,-1])
-# }
 #' @export
-cqc_params_fix <- function(cqc_data, solution){
-  invisible(apply(solution, 1, function(row){
+cqc_fix <- function(x, ...)UseMethod("cqc_fix")
+#' @export
+cqc_fix.cqc_solution_channel <- function(x, cqc_data){
+  invisible(apply(x, 1, function(row){
                     sn <- row[["FCS"]]
                     cf <- cqc_data[[sn]]
                     flowWorkspace:::setChannel(cf@pointer, row[["from"]], row[["to"]])
@@ -182,7 +231,18 @@ cqc_params_fix <- function(cqc_data, solution){
 }
 
 #' @export
-cqc_params_drop_not_in_reference <- function(cqc_data, check_results){
+cqc_fix.cqc_solution_marker <- function(x, cqc_data){
+  invisible(apply(x, 1, function(row){
+    sn <- row[["FCS"]]
+    cf <- cqc_data[[sn]]
+    chnl <- cf_get_params_tbl(cf) %>% filter(marker == row[["from"]])[["channel"]]
+
+    flowWorkspace:::setMarker(cf@pointer, chnl, row[["to"]])
+  })
+  )
+}
+#' @export
+cqc_drop_channels_not_in_reference <- function(cqc_data, check_results){
   for(sn in names(check_results))
   {
     check_result <- check_results[[sn]]
