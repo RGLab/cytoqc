@@ -88,10 +88,13 @@ cqc_check.cqc_reference_marker <- function(x, ...){
 cqc_check_params <- function(reference_params, type, cqc_data, delimiter ="|"){
   res <- sapply(cqc_data, function(cf){
                 params <- cf_get_params_tbl(cf)
-                chnl_data <- params[[type]]
-                chnl_ref <- reference_params[["reference"]]
-                unknown <- setdiff(chnl_data, chnl_ref)
-                missing <- setdiff(chnl_ref, chnl_data)
+                if(type == "marker")
+                  params <- filter(params, is.na(marker) == FALSE)
+
+                data <- params[[type]]
+                ref <- reference_params[["reference"]]
+                unknown <- setdiff(data, ref)
+                missing <- setdiff(ref, data)
                 if(length(unknown) > 0 || length(missing) > 0)
                 {
                   list(unknown = unknown, missing = missing)
@@ -118,15 +121,15 @@ as.data.frame.cqc_report_params <- function(x){
 #' @export
 format.cqc_report_params <- function(x){
   if(length(x) == 0)
-    x <- data.frame(FCS = "All passed")
+    res <- kable(data.frame(FCS = "All passed"), col.names = NULL)%>% row_spec(1, color = "green")
+  else
+    res <- kable(as.data.frame(x)) %>%
+      row_spec(0, background = "#9ebcda", color = "black")
 
-  x <- kable(as.data.frame(x)) %>%
+  res <- res %>%
     kable_styling("bordered", full_width = F, position = "left") %>%
-      column_spec(1, bold = TRUE) %>%
-        row_spec(0, background = "#9ebcda", color = "black")
-  if(length(x) == 0)
-    x <- x %>% row_spec(1, color = "green")
-  x
+      column_spec(1, bold = TRUE)
+  res
 }
 
 #' @export
@@ -235,55 +238,114 @@ cqc_fix.cqc_solution_marker <- function(x, cqc_data){
   invisible(apply(x, 1, function(row){
     sn <- row[["FCS"]]
     cf <- cqc_data[[sn]]
-    chnl <- cf_get_params_tbl(cf) %>% filter(marker == row[["from"]])[["channel"]]
-
-    flowWorkspace:::setMarker(cf@pointer, chnl, row[["to"]])
+    cf_rename_marker(cf, row[["from"]], row[["to"]])
   })
   )
 }
+
 #' @export
-cqc_drop_channels_not_in_reference <- function(cqc_data, check_results){
-  for(sn in names(check_results))
+cqc_remove_not_in_reference <- function(x, ...)UseMethod("cqc_remove_not_in_reference")
+#' @export
+cqc_remove_not_in_reference.cqc_report_channel <- function(x, cqc_data){
+  for(sn in names(x))
   {
-    check_result <- check_results[[sn]]
+    check_result <- x[[sn]]
     unknown <- check_result[["unknown"]]
     missing <- check_result[["missing"]]
     if(length(unknown) > 0 && length(missing) == 0)
     {
       cf <- cqc_data[[sn]]
-      cqc_data[[sn]] <- cf[, !colnames(cf) %in% unknown]
+      j <- match(unknown, colnames(cf))
+      subset_cytoframe_by_cols(cf@pointer, j - 1)
+
     }
   }
-  cqc_data
 }
+#' @export
+cqc_remove_not_in_reference.cqc_report_marker <- function(x, cqc_data){
+  for(sn in names(x))
+  {
+    check_result <- x[[sn]]
+    unknown <- check_result[["unknown"]]
+    missing <- check_result[["missing"]]
+    if(length(unknown) > 0 && length(missing) == 0)
+    {
+      cf <- cqc_data[[sn]]
+      cf_rename_marker(cf, unknown, "")
 
+    }
+  }
+}
 #' @export
 cqc_drop_samples <- function(cqc_data, check_results){
 
     cqc_data[-match(names(check_results), names(cqc_data))]
 }
-#' QA processes of cellcount
-#'
-#' detect aberations in the number of events per sample.
-#' If there is a natural grouping among the samples, this can be
-#' specified using the \code{grouping} argument. In this case, the
-#' outlier detection will be performed within its respective group for a
-#' particular sample.
-#'
-#' @examples
-#' data(GvHD)
-#' fs <- GvHD[1:10]
-#' res <- fs_qc_cellcount(fs)
-#' @import flowCore flowWorkspace
-#' @return a s3 object that contains the sample names, cell count and outliers detected.
-#' This object can be printed or plotted by its dedicated s3 method.
-fs_qc_cellcount <- function(fs, grouping=NULL, func = qoutlier, ...){
 
-  if(!is.null(grouping))
-    if(!is.character(grouping) || ! grouping %in% colnames(pData(fs)))
-      stop("'grouping' must be a character indicating one of the ",
-           "phenotypic variables in 'fs'")
+#' @export
+#' @importFrom dplyr filter arrange pull mutate group_indices
+#' @importFrom tidyr separate
+cqc_group_by_panel <- function(cqc_data, delimiter = "|"){
+  sep <- paste0(delimiter, delimiter)#double delimiter for sep params and single delimiter for sep channel and marker
+  keys <- sapply(cqc_data, function(cf){
+              cf_get_params_tbl(cf) %>%
+                arrange(channel) %>%
+                  filter(is.na(marker) == FALSE) %>%
+                    unite(panel, channel, marker, sep = delimiter) %>%
+                      pull(panel) %>%
+                        paste(collapse = sep)
+  })
+  res <- tibble(FCS = names(keys), panel = keys)
 
-  keyword(fs, "$TOT")
+  res <- res %>% mutate(panel_id = group_indices(res, panel))
+
+  #
+  # res <- strsplit(res, split= sep, fixed = "TRUE")[[1]]
+  # res <- tibble(reference = res)
+  # if(type == "marker")
+  #   res <- separate(res, channel, c("channel", "marker"), sep = paste0("\\Q", delimiter, "\\E"))
+  class(res) <- c("cqc_group", class(res))
+  class(res) <- c("cqc_group_panel", class(res))
+  attr(res, "delimiter") <- delimiter
+  res
+}
+
+#' @export
+summary.cqc_group_panel <- function(object){
+  object %>% group_by(panel)
+}
+
+#' @importFrom tidyr separate_rows
+#' @importFrom dplyr distinct count
+cqc_get_panel_info <- function(x){
+  delimiter <- attr(x, "delimiter")
+  sep <- paste0(delimiter, delimiter)
+  x %>% count(panel_id, panel) %>%
+      rename(nFCS = n) %>%
+      separate_rows(panel, sep = paste0("\\Q", sep, "\\E")) %>%
+        separate(panel, c("channel", "marker"), sep = paste0("\\Q", delimiter, "\\E"))
+}
+
+#' @export
+format.cqc_group_panel <- function(x){
+
+  cqc_get_panel_info(x) %>%
+    kable() %>%
+     kable_styling("bordered", full_width = F, position = "left") %>%
+      collapse_rows(columns = c(1,4), "top")%>%
+        row_spec(0, background = "#e5f5e0", color = "black")
+}
+
+#' @importFrom dplyr group_split
+#' @export
+diff.cqc_group_panel <- function(x){
+  cqc_get_panel_info(x) %>%
+    select(panel_id, channel, marker) %>%
+      group_split(panel_id)
+}
+
+
+#' @export
+split.cqc_group_panel <- function(x, cqc_data){
 
 }

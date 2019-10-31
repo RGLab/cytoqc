@@ -127,20 +127,39 @@ length(cqc_data)
 ```
 
 ## QC for marker
-```{r}
+```{r include=FALSE}
+#simulate channel discrepancy
+
 cf <- cqc_data[[1]]
-markernames(cf) <- 
+cf_rename_marker(cf, "CD15 FITC", "cd15")
+cf_rename_marker(cf, "CD33 APC", "apc cd33")
+
+
+#redundant
+cf <- cqc_data[[2]]
+markernames(cf) <- c(`FL2-A` = "markerA")
 
 ```
 
+
 ```{r}
-reference <- cqc_params_find_reference(cqc_data, type = "marker")
+reference <- cqc_find_reference_marker(cqc_data)
 format(reference)
-```
-
-```{r}
-check_results <- cqc_params_check(cqc_data, reference, type = "marker")
+check_results <- cqc_check(reference, cqc_data)
 format(check_results)
+solution <- cqc_find_solution(check_results, max.distance = 0.4) 
+format(solution)
+cqc_fix(solution, cqc_data)
+check_results <- cqc_check(reference, cqc_data)
+format(check_results)
+cqc_remove_not_in_reference(check_results, cqc_data)
+format(cqc_check(reference, cqc_data))
 ```
 
+## QC for panel
+```{r}
+group <- cqc_group_by_panel(cqc_data)
+format(group)
+diff(group)
+```
 
