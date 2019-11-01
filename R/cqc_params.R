@@ -94,8 +94,10 @@ cqc_check_params <- function(reference_params, type, cqc_data, delimiter ="|"){
   class(res) <- c("cqc_report_params", class(res))
   res
 }
+
+#' @importFrom dplyr as_tibble
 #' @export
-as.data.frame.cqc_report_params <- function(x){
+as_tibble.cqc_report_params <- function(x){
   res <- sapply(x, function(i){
 
       tibble("Not in reference" = paste(i[["unknown"]], collapse = ",")
@@ -103,7 +105,8 @@ as.data.frame.cqc_report_params <- function(x){
                  )
 
   }, simplify = FALSE)
-  bind_rows(res, .id = "FCS")
+  res <- bind_rows(res, .id = "FCS")
+  res
 }
 
 #' @export
@@ -196,6 +199,7 @@ cqc_fix.cqc_solution_marker <- function(x, cqc_data){
 
 #' @export
 cqc_remove_not_in_reference <- function(x, ...)UseMethod("cqc_remove_not_in_reference")
+#' @importFrom flowWorkspace colnames
 #' @export
 cqc_remove_not_in_reference.cqc_report_channel <- function(x, cqc_data){
   for(sn in names(x))
@@ -206,7 +210,8 @@ cqc_remove_not_in_reference.cqc_report_channel <- function(x, cqc_data){
     if(length(unknown) > 0 && length(missing) == 0)
     {
       cf <- cqc_data[[sn]]
-      j <- match(unknown, colnames(cf))
+      cols <- flowWorkspace::colnames(cf)
+      j <- which(!cols %in% unknown)
       flowWorkspace:::subset_cytoframe_by_cols(cf@pointer, j - 1)
 
     }
@@ -290,7 +295,9 @@ diff.cqc_group_panel <- function(x){
   grps <- x %>%
             group_split(panel_id)
   commons <- grps %>% reduce(inner_join, by = c("channel", "marker"))
-  grps %>% map_dfr(anti_join, y = commons, by = c("channel", "marker"))
+  grps %>%
+    map_dfr(anti_join, y = commons, by = c("channel", "marker"))  %>%
+             `class<-`(value = class(x))
 }
 
 

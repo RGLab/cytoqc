@@ -14,7 +14,10 @@ knit_print.cqc_reference <- function(x, ...){
   knit_print
 
 }
-
+#' @export
+print.cqc_report_params <- function(x, ...){
+  print(as_tibble(x))
+}
 #' @importFrom knitr kable
 #' @importFrom kableExtra kable_styling
 #' @export
@@ -22,7 +25,7 @@ knit_print.cqc_report_params <- function(x, ...){
   if(length(x) == 0)
     res <- kable(data.frame(FCS = "All passed"), col.names = NULL)%>% row_spec(1, color = "green")
   else
-    res <- kable(as.data.frame(x)) %>%
+    res <- kable(as_tibble(x)) %>%
       row_spec(0, background = "#9ebcda", color = "black")
 
   res %>%
