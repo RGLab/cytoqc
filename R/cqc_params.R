@@ -6,11 +6,7 @@ cqc_load_fcs <- function(files, is_h5 = TRUE, ...){
   res
 }
 
-#' @export
-print.cqc_data <- function(x){
-  cat("cytoqc data: \n")
-  cat(length(x), " samples \n")
-}
+
 #' @importFrom tibble as.tibble
 #' @importFrom dplyr select rename
 cf_get_params_tbl <- function(cf){
@@ -57,13 +53,6 @@ cqc_find_params_reference <- function(cqc_data, type = c("channel", "marker"), d
   class(res) <- c(paste("cqc_reference", type, sep = "_"), class(res))
 
   res
-}
-
-#' @export
-format.cqc_reference <- function(x){
-    kable(x) %>%
-      kable_styling("bordered", full_width = F, position = "left") %>%
-          row_spec(0, background = "gray", color = "black")
 }
 
 
@@ -115,21 +104,6 @@ as.data.frame.cqc_report_params <- function(x){
 
   }, simplify = FALSE)
   bind_rows(res, .id = "FCS")
-}
-#' @importFrom knitr kable
-#' @importFrom kableExtra kable_styling
-#' @export
-format.cqc_report_params <- function(x){
-  if(length(x) == 0)
-    res <- kable(data.frame(FCS = "All passed"), col.names = NULL)%>% row_spec(1, color = "green")
-  else
-    res <- kable(as.data.frame(x)) %>%
-      row_spec(0, background = "#9ebcda", color = "black")
-
-  res <- res %>%
-    kable_styling("bordered", full_width = F, position = "left") %>%
-      column_spec(1, bold = TRUE)
-  res
 }
 
 #' @export
@@ -197,29 +171,6 @@ cqc_find_solution.cqc_report <- function(x, max.distance = 0.1){
   res
 }
 
-#' @export
-print.cqc_solution <- function(x){
-  attr(x, "class") <- attr(x, "class")[-(1:2)]
-  print(x)
-}
-#' @importFrom kableExtra collapse_rows
-#' @importFrom dplyr %>% select distinct
-#' @importFrom tidyr unite
-#' @export
-format.cqc_solution <- function(x, itemize = FALSE){
-  if(!itemize)
-    x <- x %>% select(-1) %>% distinct()
-
-  x <- x %>%
-        unite("Proposed change", from, to, sep = " --> ") %>%
-          kable() %>%
-            kable_styling("bordered", full_width = F, position = "left") %>%
-              collapse_rows(columns = 1, "top")%>%
-                row_spec(0, background = "#e5f5e0", color = "black")
-  if(itemize)
-    x <- x %>% column_spec(1, bold = TRUE)
-  x
-}
 
 #' @export
 cqc_fix <- function(x, ...)UseMethod("cqc_fix")
@@ -331,23 +282,13 @@ summary.cqc_group_panel <- function(object){
 #         separate(panel, c("channel", "marker"), sep = paste0("\\Q", delimiter, "\\E"))
 # }
 
-#' @export
-# format.cqc_group_panel <- function(x){
-#
-#   cqc_get_panel_info(x) %>%
-#     kable() %>%
-#      kable_styling("bordered", full_width = F, position = "left") %>%
-#       collapse_rows(columns = c(1,4), "top")%>%
-#         row_spec(0, background = "#e5f5e0", color = "black")
-# }
 
 #' @importFrom dplyr group_split inner_join anti_join
 #' @importFrom purrr reduce map map_dfr
 #' @export
 diff.cqc_group_panel <- function(x){
   grps <- x %>%
-            select(panel_id, channel, marker) %>%
-              group_split(panel_id)
+            group_split(panel_id)
   commons <- grps %>% reduce(inner_join, by = c("channel", "marker"))
   grps %>% map_dfr(anti_join, y = commons, by = c("channel", "marker"))
 }

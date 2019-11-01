@@ -7,8 +7,8 @@ always_allow_html: yes
 *cytoqc* performs pre-cleaning, pre-gating and post-gating QC checks.
 
 ```{r include=FALSE}
-knitr::opts_chunk$set(warning = FALSE, message = FALSE)
 library(knitr)
+knitr::opts_chunk$set(warning = FALSE, message = FALSE)
 library(kableExtra)
 ```
 
@@ -16,7 +16,8 @@ library(kableExtra)
 ```{r}
 library(flowCore)
 library(flowWorkspace)
-library(cytoqc)
+# library(cytoqc)
+devtools::load_all("../")
 ```
 
 ```{r include=FALSE}
@@ -73,25 +74,25 @@ cf_swap_colnames(cf, "FL1-H", "FL2-H")
 
 ```{r}
 reference <- cqc_find_reference_channel(cqc_data)
-format(reference)
+reference
 ```
 
 ## QC check
 ```{r}
 check_results <- cqc_check(reference, cqc_data)
-format(check_results)
+check_results
 ```
 
 
 ## Recommend the fix 
 ```{r}
 solution <- cqc_find_solution(check_results) 
-format(solution)
+solution
 ```
 
 *Show the itemized details*
 ```{r}
-format(solution, itemize = TRUE)
+knit_print(solution, itemize = TRUE)
 ```
 
 ## Export/import the `solution` for revision (if needed)
@@ -110,7 +111,7 @@ cqc_fix(solution, cqc_data)
 ## Update QC report
 ```{r}
 check_results <- cqc_check(reference, cqc_data)
-format(check_results)
+check_results
 ```
 
 ## Drop redundant channel
@@ -121,7 +122,7 @@ cqc_remove_not_in_reference(check_results, cqc_data)
 ## Refresh QC report and drop the samples that still can not be fixed
 ```{r}
 check_results <- cqc_check(reference, cqc_data)
-format(check_results)
+check_results
 cqc_data <- cqc_drop_samples(cqc_data, check_results)
 length(cqc_data)
 ```
@@ -144,22 +145,22 @@ markernames(cf) <- c(`FL2-A` = "markerA")
 
 ```{r}
 reference <- cqc_find_reference_marker(cqc_data)
-format(reference)
+reference
 check_results <- cqc_check(reference, cqc_data)
-format(check_results)
+check_results
 solution <- cqc_find_solution(check_results, max.distance = 0.4) 
-format(solution)
+solution
 cqc_fix(solution, cqc_data)
 check_results <- cqc_check(reference, cqc_data)
-format(check_results)
+check_results
 cqc_remove_not_in_reference(check_results, cqc_data)
-format(cqc_check(reference, cqc_data))
+cqc_check(reference, cqc_data)
 ```
 
 ## QC for panel
 ```{r}
 group <- cqc_group_by_panel(cqc_data)
-format(group)
+group
 diff(group)
 ```
 
