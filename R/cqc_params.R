@@ -256,7 +256,7 @@ cqc_remove_not_in_reference.cqc_report_channel <- function(x, cqc_data){
     {
       cf <- cqc_data[[sn]]
       j <- match(unknown, colnames(cf))
-      subset_cytoframe_by_cols(cf@pointer, j - 1)
+      flowWorkspace:::subset_cytoframe_by_cols(cf@pointer, j - 1)
 
     }
   }
@@ -283,8 +283,8 @@ cqc_drop_samples <- function(cqc_data, check_results){
 }
 
 #' @export
-#' @importFrom dplyr filter arrange pull mutate group_indices
-#' @importFrom tidyr separate
+#' @importFrom dplyr filter arrange pull mutate group_indices distinct count
+#' @importFrom tidyr separate separate_rows
 cqc_group_by_panel <- function(cqc_data, delimiter = "|"){
   sep <- paste0(delimiter, delimiter)#double delimiter for sep params and single delimiter for sep channel and marker
   keys <- sapply(cqc_data, function(cf){
@@ -297,7 +297,13 @@ cqc_group_by_panel <- function(cqc_data, delimiter = "|"){
   })
   res <- tibble(FCS = names(keys), panel = keys)
 
-  res <- res %>% mutate(panel_id = group_indices(res, panel))
+  res <- res %>%
+    mutate(panel_id = group_indices(res, panel)) %>%
+    count(panel_id, panel) %>%
+    rename(nFCS = n) %>%
+    separate_rows(panel, sep = paste0("\\Q", sep, "\\E")) %>%
+    separate(panel, c("channel", "marker"), sep = paste0("\\Q", delimiter, "\\E"))
+
 
   #
   # res <- strsplit(res, split= sep, fixed = "TRUE")[[1]]
@@ -306,7 +312,7 @@ cqc_group_by_panel <- function(cqc_data, delimiter = "|"){
   #   res <- separate(res, channel, c("channel", "marker"), sep = paste0("\\Q", delimiter, "\\E"))
   class(res) <- c("cqc_group", class(res))
   class(res) <- c("cqc_group_panel", class(res))
-  attr(res, "delimiter") <- delimiter
+  # attr(res, "delimiter") <- delimiter
   res
 }
 
@@ -315,33 +321,35 @@ summary.cqc_group_panel <- function(object){
   object %>% group_by(panel)
 }
 
-#' @importFrom tidyr separate_rows
-#' @importFrom dplyr distinct count
-cqc_get_panel_info <- function(x){
-  delimiter <- attr(x, "delimiter")
-  sep <- paste0(delimiter, delimiter)
-  x %>% count(panel_id, panel) %>%
-      rename(nFCS = n) %>%
-      separate_rows(panel, sep = paste0("\\Q", sep, "\\E")) %>%
-        separate(panel, c("channel", "marker"), sep = paste0("\\Q", delimiter, "\\E"))
-}
+
+# cqc_get_panel_info <- function(x){
+#   delimiter <- attr(x, "delimiter")
+#   sep <- paste0(delimiter, delimiter)
+#   x %>% count(panel_id, panel) %>%
+#       rename(nFCS = n) %>%
+#       separate_rows(panel, sep = paste0("\\Q", sep, "\\E")) %>%
+#         separate(panel, c("channel", "marker"), sep = paste0("\\Q", delimiter, "\\E"))
+# }
 
 #' @export
-format.cqc_group_panel <- function(x){
+# format.cqc_group_panel <- function(x){
+#
+#   cqc_get_panel_info(x) %>%
+#     kable() %>%
+#      kable_styling("bordered", full_width = F, position = "left") %>%
+#       collapse_rows(columns = c(1,4), "top")%>%
+#         row_spec(0, background = "#e5f5e0", color = "black")
+# }
 
-  cqc_get_panel_info(x) %>%
-    kable() %>%
-     kable_styling("bordered", full_width = F, position = "left") %>%
-      collapse_rows(columns = c(1,4), "top")%>%
-        row_spec(0, background = "#e5f5e0", color = "black")
-}
-
-#' @importFrom dplyr group_split
+#' @importFrom dplyr group_split inner_join anti_join
+#' @importFrom purrr reduce map map_dfr
 #' @export
 diff.cqc_group_panel <- function(x){
-  cqc_get_panel_info(x) %>%
-    select(panel_id, channel, marker) %>%
-      group_split(panel_id)
+  grps <- x %>%
+            select(panel_id, channel, marker) %>%
+              group_split(panel_id)
+  commons <- grps %>% reduce(inner_join, by = c("channel", "marker"))
+  grps %>% map_dfr(anti_join, y = commons, by = c("channel", "marker"))
 }
 
 

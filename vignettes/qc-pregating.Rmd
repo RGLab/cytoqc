@@ -115,7 +115,7 @@ format(check_results)
 
 ## Drop redundant channel
 ```{r}
-cqc_data <- cqc_drop_channels_not_in_reference(cqc_data, check_results)
+cqc_remove_not_in_reference(check_results, cqc_data)
 ```
      
 ## Refresh QC report and drop the samples that still can not be fixed
