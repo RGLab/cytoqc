@@ -9,7 +9,7 @@ print.cqc_data <- function(x){
 knit_print.cqc_reference <- function(x, ...){
   x %>%
   kable() %>%
-  kable_styling("bordered", full_width = F, position = "left") %>%
+  kable_styling("bordered", full_width = F, position = "left", font_size = 10) %>%
   row_spec(0, background = "gray", color = "black") %>%
   knit_print
 
@@ -29,7 +29,7 @@ knit_print.cqc_report_params <- function(x, ...){
       row_spec(0, background = "#9ebcda", color = "black")
 
   res %>%
-    kable_styling("bordered", full_width = F, position = "left") %>%
+    kable_styling("bordered", full_width = F, position = "left", font_size = 10) %>%
     column_spec(1, bold = TRUE) %>%
     knit_print
 
@@ -46,7 +46,7 @@ knit_print.cqc_solution <- function(x, itemize = FALSE, ...){
   x <- x %>%
     unite("Proposed change", from, to, sep = " --> ") %>%
     kable() %>%
-    kable_styling("bordered", full_width = F, position = "left") %>%
+    kable_styling(c("bordered", "condensed"), full_width = F, position = "left", font_size = 10) %>%
     collapse_rows(columns = 1, "top")%>%
     row_spec(0, background = "#e5f5e0", color = "black")
   if(itemize)
@@ -60,7 +60,7 @@ knit_print.cqc_group_panel_summary <- function(x, ...){
 
   x %>%
     kable() %>%
-     kable_styling("bordered", full_width = F, position = "left") %>%
+     kable_styling("bordered", full_width = F, position = "left", font_size = 10) %>%
       collapse_rows(columns = c(1,4), "top")%>%
         row_spec(0, background = "#e5f5e0", color = "black") %>%
     knit_print
