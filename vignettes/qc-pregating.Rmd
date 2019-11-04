@@ -171,9 +171,17 @@ data_list <- split(group, cqc_data)
 data_list
 ```
 
-## Coerce the cleaned data into `cytoset`
+## Save the cleaned data as FCS 
 ```{r}
-cs <- cytoset(data_list[[2]])
+cleaned <- data_list[[1]]
+out <- tempfile()
+write_fcs(cleaned, out)
+```
+
+
+## Or Coerce it directly into `cytoset` (zero-copying)
+```{r}
+cs <- cytoset(cleaned)
 cs
 ```
 

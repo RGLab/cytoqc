@@ -314,3 +314,20 @@ split.cqc_group_panel <- function(x, cqc_data){
     i
     })
 }
+
+#' @export
+write_fcs <- function(x, ...)UseMethod("write_fcs")
+#' @export
+write_fcs.cqc_data <- function(x, out, verbose = TRUE){
+  if(!dir.exists(out))
+    dir.create(out)
+  for(sn in names(x))
+  {
+    if(verbose)
+      message("writing ", sn)
+    # fr <- cytoframe_to_flowFrame(x[[sn]])
+    fr <- x[[sn]]
+    write.FCS(fr, filename = file.path(out, sn))
+  }
+
+}
