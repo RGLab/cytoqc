@@ -239,7 +239,7 @@ cqc_drop_samples <- function(cqc_data, check_results){
 }
 
 #' @export
-#' @importFrom dplyr filter arrange pull mutate group_indices distinct count
+#' @importFrom dplyr filter arrange pull mutate group_indices distinct count add_count
 #' @importFrom tidyr separate separate_rows
 cqc_group_by_panel <- function(cqc_data, delimiter = "|"){
   sep <- paste0(delimiter, delimiter)#double delimiter for sep params and single delimiter for sep channel and marker
@@ -252,10 +252,10 @@ cqc_group_by_panel <- function(cqc_data, delimiter = "|"){
                         paste(collapse = sep)
   })
   res <- tibble(FCS = names(keys), panel = keys)
-
+  gid <- group_indices(res, panel)
   res <- res %>%
-    mutate(panel_id = group_indices(res, panel)) %>%
-    count(panel_id, panel) %>%
+    mutate(panel_id = paste("panel", gid)) %>%
+    add_count(panel_id, panel) %>%
     rename(nFCS = n) %>%
     separate_rows(panel, sep = paste0("\\Q", sep, "\\E")) %>%
     separate(panel, c("channel", "marker"), sep = paste0("\\Q", delimiter, "\\E"))
@@ -274,7 +274,11 @@ cqc_group_by_panel <- function(cqc_data, delimiter = "|"){
 
 #' @export
 summary.cqc_group_panel <- function(object){
-  object %>% group_by(panel)
+ res <-  object %>%
+          select(-c(FCS)) %>%
+          distinct()
+ class(res) <- c("cqc_group_panel_summary", class(res))
+ res
 }
 
 
@@ -301,7 +305,12 @@ diff.cqc_group_panel <- function(x){
 }
 
 
+#' @importFrom purrr walk
 #' @export
 split.cqc_group_panel <- function(x, cqc_data){
-
+  vec <- x %>% select(c(FCS, panel_id)) %>% distinct() %>% pull(panel_id)
+  split(cqc_data, vec) %>% map(function(i){
+    class(i) <- c("cqc_data", class(i))
+    i
+    })
 }

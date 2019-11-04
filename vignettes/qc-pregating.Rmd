@@ -127,7 +127,7 @@ cqc_data <- cqc_drop_samples(cqc_data, check_results)
 length(cqc_data)
 ```
 
-## QC for marker
+## Similarly the same QC process can be applied for marker
 ```{r include=FALSE}
 #simulate channel discrepancy
 
@@ -157,10 +157,23 @@ cqc_remove_not_in_reference(check_results, cqc_data)
 cqc_check(reference, cqc_data)
 ```
 
-## QC for panel
+## QC for panel (i.e. channel + marker)
 ```{r}
 group <- cqc_group_by_panel(cqc_data)
-group
-diff(group)
+panels <- summary(group)
+panels
+diff(panels)
+```
+
+## Split the data set into separate groups based on their panel settings
+```{r}
+data_list <- split(group, cqc_data)
+data_list
+```
+
+## Coerce the cleaned data into `cytoset`
+```{r}
+cs <- cytoset(data_list[[2]])
+cs
 ```
 

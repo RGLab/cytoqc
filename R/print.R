@@ -56,7 +56,7 @@ knit_print.cqc_solution <- function(x, itemize = FALSE, ...){
 }
 
 #' @export
-knit_print.cqc_group_panel <- function(x, ...){
+knit_print.cqc_group_panel_summary <- function(x, ...){
 
   x %>%
     kable() %>%
