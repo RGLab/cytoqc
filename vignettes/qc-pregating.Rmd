@@ -23,7 +23,7 @@ devtools::load_all("../")
 ```{r include=FALSE}
 # prepare the test data
 data("GvHD")
-fs <- GvHD[8:28]#exclude samples that has different Time length
+fs <- GvHD
 data_dir <- tempfile()
 dir.create(data_dir)
 write.flowSet(fs, data_dir)
@@ -70,16 +70,19 @@ cf <- cqc_data[[4]]
 cf_swap_colnames(cf, "FL1-H", "FL2-H")
 
 ```
-## Determine the reference channel
 
+## QC check for channel
 ```{r}
-reference <- cqc_find_reference_channel(cqc_data)
-reference
+groups <- cqc_check(cqc_data, "channel")
+su <- summary(groups)
+diff(su)
 ```
 
-## QC check
+## Select the reference 
+
 ```{r}
-check_results <- cqc_check(reference, cqc_data)
+groups <- cqc_set_reference(groups, ref = 3)
+check_results <- cqc_check(groups, select = c(1, 4))
 check_results
 ```
 
@@ -106,23 +109,14 @@ solution_revised <- read_csv(csvfile)
 ## Apply the fix
 
 ```{r}
-cqc_fix(solution, cqc_data)
-```
-## Update QC report
-```{r}
-check_results <- cqc_check(reference, cqc_data)
-check_results
+cqc_fix(solution)
 ```
 
-## Drop redundant channel
-```{r}
-cqc_remove_not_in_reference(check_results, cqc_data)
-```
-     
 ## Refresh QC report and drop the samples that still can not be fixed
 ```{r}
-check_results <- cqc_check(reference, cqc_data)
-check_results
+groups <- cqc_check(cqc_data, "channel")
+summary(groups)
+
 cqc_data <- cqc_drop_samples(cqc_data, check_results)
 length(cqc_data)
 ```

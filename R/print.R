@@ -14,10 +14,13 @@ knit_print.cqc_reference <- function(x, ...){
   knit_print
 
 }
+
 #' @export
 print.cqc_report_params <- function(x, ...){
   print(as_tibble(x))
 }
+
+
 #' @importFrom knitr kable
 #' @importFrom kableExtra kable_styling
 #' @export
@@ -35,8 +38,8 @@ knit_print.cqc_report_params <- function(x, ...){
 
 }
 
-#' @importFrom kableExtra collapse_rows
-#' @importFrom dplyr %>% select distinct
+#' @importFrom kableExtra collapse_rows cell_spec
+#' @importFrom dplyr %>% select distinct mutate_if
 #' @importFrom tidyr unite
 #' @export
 knit_print.cqc_solution <- function(x, itemize = FALSE, ...){
@@ -44,7 +47,8 @@ knit_print.cqc_solution <- function(x, itemize = FALSE, ...){
     x <- x %>% select(-1) %>% distinct()
 
   x <- x %>%
-    unite("Proposed change", from, to, sep = " --> ") %>%
+    mutate("Proposed change" = ifelse(is.na(to), cell_spec(from, strikeout = TRUE), paste(from, to, sep = " --> "))) %>%
+    select(-c(from, to)) %>%
     kable() %>%
     kable_styling(c("bordered", "condensed"), full_width = F, position = "left", font_size = 10) %>%
     collapse_rows(columns = 1, "top")%>%
@@ -54,14 +58,20 @@ knit_print.cqc_solution <- function(x, itemize = FALSE, ...){
   knit_print(x)
 
 }
-
 #' @export
-knit_print.cqc_group_panel_summary <- function(x, ...){
-
-  x %>%
+print.cqc_group_summary <- function(x, collapse = TRUE, ...){
+  collapse_params(x)
+}
+#' @export
+knit_print.cqc_group_summary <- function(x, collapse = TRUE, ...){
+  cn <- colnames(x)
+  idx <- cn %in% c("group_id", "nFCS")
+  #reorder column to place groupid first and nFcs last
+  x %>% select(c(which(idx)[1], which(!idx), which(idx)[2])) %>%
+    arrange(desc(nFCS)) %>%
     kable() %>%
      kable_styling("bordered", full_width = F, position = "left", font_size = 10) %>%
-      collapse_rows(columns = c(1,4), "top")%>%
+      collapse_rows(columns = c(1, length(idx)), "top")%>%
         row_spec(0, background = "#e5f5e0", color = "black") %>%
     knit_print
 

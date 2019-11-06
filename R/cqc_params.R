@@ -16,97 +16,159 @@ cf_get_params_tbl <- function(cf){
         rename(channel = name, marker = desc)
 
 }
-
-#' @export
-cqc_find_reference_channel <- function(cqc_data, ...){
-  cqc_find_params_reference(cqc_data, type = "channel", ...)
-}
-
-#' @export
-cqc_find_reference_marker <- function(cqc_data, ...){
-  cqc_find_params_reference(cqc_data, type = "marker", ...)
-}
-#' @importFrom dplyr filter arrange
-#' @importFrom tidyr separate
-cqc_find_params_reference <- function(cqc_data, type = c("channel", "marker"), delimiter = "|"){
-  sep <- paste0(delimiter, delimiter)#double delimiter for sep params and single delimiter for sep channel and marker
-  keys <- sapply(cqc_data, function(cf){
-    params <- cf_get_params_tbl(cf) %>% arrange(channel)
-    if(type == "channel")
-      params <- params[["channel"]]
-    else
-    {
-      params <- filter(params, is.na(marker) == FALSE)
-
-      params <- params[["marker"]]
-
-    }
-    paste(params, collapse = sep)
-  })
-  res <- table(keys)
-  res <- names(which.max(res))
-  res <- strsplit(res, split= sep, fixed = "TRUE")[[1]]
-  res <- tibble(reference = res)
-  # if(type == "marker")
-  #   res <- separate(res, channel, c("channel", "marker"), sep = paste0("\\Q", delimiter, "\\E"))
-  class(res) <- c("cqc_reference", class(res))
-  class(res) <- c(paste("cqc_reference", type, sep = "_"), class(res))
-
-  res
-}
-
-
 #' @export
 cqc_check <- function(x, ...)UseMethod("cqc_check")
 
 #' @export
-cqc_check.cqc_reference_channel <- function(x, ...){
+#' @importFrom dplyr filter arrange pull mutate group_indices distinct count add_count
+#' @importFrom tidyr separate separate_rows
+cqc_check.cqc_data <- function(x, type = c("channel", "marker", "panel"), delimiter = "|"){
+  sep <- paste0(delimiter, delimiter)#double delimiter for sep params and single delimiter for sep channel and marker
+  keys <- sapply(x, function(cf){
+    key <- cf_get_params_tbl(cf) %>% arrange(channel)
+    if(type != "channel")
+      key <- filter(key, is.na(marker) == FALSE)
+    if(type == "panel")
+      key <- unite(key, panel, channel, marker, sep = delimiter)
+
+      key[[type]] %>%
+      paste(collapse = sep)
+  })
+  res <- tibble(FCS = names(keys), key = keys)
+  gid <- group_indices(res, key)
+  res <- res %>%
+    mutate(group_id = gid) %>%
+    add_count(group_id, key) %>%
+    rename(nFCS = n) %>%
+    separate_rows(key, sep = paste0("\\Q", sep, "\\E"))
+  if(type == "panel")
+    res <- separate(res, key, c("channel", "marker"), sep = paste0("\\Q", delimiter, "\\E"))
+  else
+    res <- rename(res, !!type := key)
+
+
+  #
+  # res <- strsplit(res, split= sep, fixed = "TRUE")[[1]]
+  # res <- tibble(reference = res)
+  # if(type == "marker")
+  #   res <- separate(res, channel, c("channel", "marker"), sep = paste0("\\Q", delimiter, "\\E"))
+  class(res) <- c("cqc_group", class(res))
+  class(res) <- c(paste0("cqc_group_", type), class(res))
+  attr(res, "data") <- x
+  res
+}
+
+#' @export
+summary.cqc_group <- function(object){
+  res <-  object %>%
+    select(-c(FCS)) %>%
+    distinct()
+  class(res) <- c("cqc_group_summary", class(res))
+  res
+}
+
+#' @export
+diff.cqc_group_channel <- function(x){
+
+  diff.cqc_group(x, c("channel"))
+}
+
+#' @export
+diff.cqc_group_marker <- function(x){
+
+  diff.cqc_group(x, c("marker"))
+}
+#' @export
+diff.cqc_group_panel <- function(x){
+
+  diff.cqc_group(x, c("channel", "marker"))
+}
+
+#' @importFrom dplyr group_split inner_join anti_join
+#' @importFrom purrr reduce map map_dfr
+#' @export
+diff.cqc_group <- function(x, vars){
+  grps <- x %>%
+    group_split(group_id)
+  commons <- grps %>% reduce(inner_join, by = vars)
+  grps %>%
+    map_dfr(anti_join, y = commons, by = vars)  %>%
+    `class<-`(value = class(x))
+}
+
+
+#' @importFrom purrr walk
+#' @export
+split.cqc_group_panel <- function(x, cqc_data){
+  vec <- x %>% select(c(FCS, panel_id)) %>% distinct() %>% pull(panel_id)
+  split(cqc_data, vec) %>% map(function(i){
+    class(i) <- c("cqc_data", class(i))
+    i
+  })
+}
+
+
+cqc_set_reference <- function(x, ref){
+
+  attr(x, "reference") <- ref
+  x
+}
+
+
+#' @export
+cqc_check.cqc_group_channel <- function(x, ...){
   res <- cqc_check_params(x, type = "channel", ...)
   class(res) <- c("cqc_report_channel", class(res))
   res
 }
 
 #' @export
-cqc_check.cqc_reference_marker <- function(x, ...){
+cqc_check.cqc_group_marker <- function(x, ...){
   res <- cqc_check_params(x, type = "marker", ...)
   class(res) <- c("cqc_report_marker", class(res))
   res
 }
 
-#' @importFrom dplyr bind_rows
-cqc_check_params <- function(reference_params, type, cqc_data, delimiter ="|"){
-  res <- sapply(cqc_data, function(cf){
-                params <- cf_get_params_tbl(cf)
-                if(type == "marker")
-                  params <- filter(params, is.na(marker) == FALSE)
+#' @importFrom dplyr bind_rows group_keys group_by
+#' @importFrom purrr set_names
+cqc_check_params <- function(x, select, type, delimiter ="|"){
+  sa <- summary(x)
+  ref <- sa %>% filter(group_id %in% attr(x, "ref")) %>% pull(type)
 
-                data <- params[[type]]
-                ref <- reference_params[["reference"]]
+  res <- sa %>%
+    filter(group_id%in%select) %>%
+    group_by(group_id)
+
+  res <- res %>% group_split() %>%
+    map(function(df){
+
+                data <- df[[type]]
                 unknown <- setdiff(data, ref)
                 missing <- setdiff(ref, data)
                 if(length(unknown) > 0 || length(missing) > 0)
                 {
                   list(unknown = unknown, missing = missing)
                 }
-                    }, simplify = FALSE)
-  res <- Filter(Negate(is.null), res)
+                    }
+            ) %>% set_names(group_keys(res)[["group_id"]])
 
   class(res) <- c("cqc_report_params", class(res))
+  attr(res, "groups") <- x
+
   res
 }
 
 #' @importFrom dplyr as_tibble
 #' @export
 as_tibble.cqc_report_params <- function(x){
-  res <- sapply(x, function(i){
+  map_dfr(x, function(i){
 
-      tibble("Not in reference" = paste(i[["unknown"]], collapse = ",")
-                 , "Missing channels" = paste(i[["missing"]], collapse = ",")
-                 )
+    tibble("Not in reference" = paste(i[["unknown"]], collapse = ",")
+           , "Missing channels" = paste(i[["missing"]], collapse = ",")
+    )
 
-  }, simplify = FALSE)
-  res <- bind_rows(res, .id = "FCS")
-  res
+  }, .id = "group_id")
+
 }
 
 #' @export
@@ -130,71 +192,92 @@ cqc_find_solution.cqc_report_marker <- function(x, ...){
 #' @importFrom tibble tibble add_row
 #' @export
 cqc_find_solution.cqc_report <- function(x, max.distance = 0.1){
-  res <- tibble(FCS = character(), from = character(), to = character())
-  for(sn in names(x))
+  res <- map_dfr(x, function(check_result)
   {
-    check_result <- x[[sn]]
     unknown <- check_result[["unknown"]]
     missing <- check_result[["missing"]]
-
+    df <- tibble(from = character(), to = character())
     #iteratively try to find the aproximate match between two vecs
-    while(length(unknown) >0 && length(missing) >0)
+    while(length(unknown) >0)
     {
-      #Levenshtein (edit) distance
-      dist_mat <- adist(unknown, missing, ignore.case = TRUE)
-      nrows <- nrow(dist_mat)
-      ncols <- ncol(dist_mat)
-      #pick the best match
-      idx <- which.min(dist_mat)
-      # browser()
-      #get x, y coordinates
-      ridx <- idx %% nrows
-      if(ridx==0)
-        ridx = nrows
-      cidx <- ceiling(idx / nrows)
-      #get the pair
-      from <- unknown[ridx]
-      to <- missing[cidx]
-      #check if exceeds max.distance
-      #agrep can be avoided if the formula of max.distance used by agrep is figured out
-      ind <- agrep(from, to, ignore.case = TRUE, max.distance = max.distance)
-      if(length(ind) > 0)#
+      if(length(missing) >0)
       {
-        #pop the matched item
-        unknown <- unknown[-ridx]
-        missing <- missing[-cidx]
-        res <- add_row(res, FCS = sn, from = from, to = to)
-      }else
-        break #otherwise stop the maatching process
-
+        #Levenshtein (edit) distance
+        dist_mat <- adist(unknown, missing, ignore.case = TRUE)
+        nrows <- nrow(dist_mat)
+        ncols <- ncol(dist_mat)
+        #pick the best match
+        idx <- which.min(dist_mat)
+        # browser()
+        #get x, y coordinates
+        ridx <- idx %% nrows
+        if(ridx==0)
+          ridx = nrows
+        cidx <- ceiling(idx / nrows)
+        #get the pair
+        from <- unknown[ridx]
+        to <- missing[cidx]
+        #check if exceeds max.distance
+        #agrep can be avoided if the formula of max.distance used by agrep is figured out
+        ind <- agrep(from, to, ignore.case = TRUE, max.distance = max.distance)
+        if(length(ind) > 0)#
+        {
+          #pop the matched item
+          unknown <- unknown[-ridx]
+          missing <- missing[-cidx]
+          df <- add_row(df, from = from, to = to)
+        }else
+          break #otherwise stop the maatching process
+      }else if(length(missing) == 0)#extra params
+      {
+        df <- add_row(df, from = unknown, to = NA)
+        unknown <- character()
+      }
     }
-
-  }
+    df
+  }, .id = "group_id") %>% mutate(group_id = as.integer(group_id))
   attr(res, "class") <- c("cqc_solution", attr(res, "class"))
+  attr(res, "group") <- attr(x, "group")
   res
 }
 
 
 #' @export
 cqc_fix <- function(x, ...)UseMethod("cqc_fix")
+
+#' @importFrom dplyr rowwise do
+cqc_fix.cqc_solution <- function(x, func){
+  group <- attr(x, "group")
+  cqc_data <- attr(group, "data")
+
+  invisible(group %>% inner_join(x, "group_id") %>%
+   select(FCS, from, to) %>% distinct() %>% rowwise() %>% do({
+      cf <- cqc_data[[.[["FCS"]]]]
+      if(is.na(.[["to"]]))
+      {
+        if(class(x) == "cqc_solution_channel")
+        {
+          cols <- flowWorkspace::colnames(cf)
+          j <- which(!cols %in% .[["from"]])
+          flowWorkspace:::subset_cytoframe_by_cols(cf@pointer, j - 1)
+        }else
+          stop("don't know how to proceed!")
+
+      }else
+        func(cf@pointer, .[["from"]], .[["to"]])
+      tibble()
+    }))
+
+}
 #' @export
-cqc_fix.cqc_solution_channel <- function(x, cqc_data){
-  invisible(apply(x, 1, function(row){
-                    sn <- row[["FCS"]]
-                    cf <- cqc_data[[sn]]
-                    flowWorkspace:::setChannel(cf@pointer, row[["from"]], row[["to"]])
-                })
-              )
+cqc_fix.cqc_solution_channel <- function(x){
+  cqc_fix.cqc_solution(x, flowWorkspace:::setChannel)
 }
 
 #' @export
-cqc_fix.cqc_solution_marker <- function(x, cqc_data){
-  invisible(apply(x, 1, function(row){
-    sn <- row[["FCS"]]
-    cf <- cqc_data[[sn]]
-    cf_rename_marker(cf, row[["from"]], row[["to"]])
-  })
-  )
+cqc_fix.cqc_solution_marker <- function(x){
+  cqc_fix.cqc_solution(x, cf_rename_marker)
+
 }
 
 #' @export
@@ -238,48 +321,7 @@ cqc_drop_samples <- function(cqc_data, check_results){
     cqc_data[-match(names(check_results), names(cqc_data))]
 }
 
-#' @export
-#' @importFrom dplyr filter arrange pull mutate group_indices distinct count add_count
-#' @importFrom tidyr separate separate_rows
-cqc_group_by_panel <- function(cqc_data, delimiter = "|"){
-  sep <- paste0(delimiter, delimiter)#double delimiter for sep params and single delimiter for sep channel and marker
-  keys <- sapply(cqc_data, function(cf){
-              cf_get_params_tbl(cf) %>%
-                arrange(channel) %>%
-                  filter(is.na(marker) == FALSE) %>%
-                    unite(panel, channel, marker, sep = delimiter) %>%
-                      pull(panel) %>%
-                        paste(collapse = sep)
-  })
-  res <- tibble(FCS = names(keys), panel = keys)
-  gid <- group_indices(res, panel)
-  res <- res %>%
-    mutate(panel_id = paste("panel", gid)) %>%
-    add_count(panel_id, panel) %>%
-    rename(nFCS = n) %>%
-    separate_rows(panel, sep = paste0("\\Q", sep, "\\E")) %>%
-    separate(panel, c("channel", "marker"), sep = paste0("\\Q", delimiter, "\\E"))
 
-
-  #
-  # res <- strsplit(res, split= sep, fixed = "TRUE")[[1]]
-  # res <- tibble(reference = res)
-  # if(type == "marker")
-  #   res <- separate(res, channel, c("channel", "marker"), sep = paste0("\\Q", delimiter, "\\E"))
-  class(res) <- c("cqc_group", class(res))
-  class(res) <- c("cqc_group_panel", class(res))
-  # attr(res, "delimiter") <- delimiter
-  res
-}
-
-#' @export
-summary.cqc_group_panel <- function(object){
- res <-  object %>%
-          select(-c(FCS)) %>%
-          distinct()
- class(res) <- c("cqc_group_panel_summary", class(res))
- res
-}
 
 
 # cqc_get_panel_info <- function(x){
@@ -290,30 +332,6 @@ summary.cqc_group_panel <- function(object){
 #       separate_rows(panel, sep = paste0("\\Q", sep, "\\E")) %>%
 #         separate(panel, c("channel", "marker"), sep = paste0("\\Q", delimiter, "\\E"))
 # }
-
-
-#' @importFrom dplyr group_split inner_join anti_join
-#' @importFrom purrr reduce map map_dfr
-#' @export
-diff.cqc_group_panel <- function(x){
-  grps <- x %>%
-            group_split(panel_id)
-  commons <- grps %>% reduce(inner_join, by = c("channel", "marker"))
-  grps %>%
-    map_dfr(anti_join, y = commons, by = c("channel", "marker"))  %>%
-             `class<-`(value = class(x))
-}
-
-
-#' @importFrom purrr walk
-#' @export
-split.cqc_group_panel <- function(x, cqc_data){
-  vec <- x %>% select(c(FCS, panel_id)) %>% distinct() %>% pull(panel_id)
-  split(cqc_data, vec) %>% map(function(i){
-    class(i) <- c("cqc_data", class(i))
-    i
-    })
-}
 
 #' @export
 write_fcs <- function(x, ...)UseMethod("write_fcs")
