@@ -36,3 +36,45 @@ cqc_find_params_reference <- function(cqc_data, type = c("channel", "marker"), d
   res
 }
 
+
+#' @export
+cqc_remove_not_in_reference <- function(x, ...)UseMethod("cqc_remove_not_in_reference")
+#' @importFrom flowWorkspace colnames
+#' @export
+cqc_remove_not_in_reference.cqc_report_channel <- function(x, cqc_data){
+  for(sn in names(x))
+  {
+    check_result <- x[[sn]]
+    unknown <- check_result[["unknown"]]
+    missing <- check_result[["missing"]]
+    if(length(unknown) > 0 && length(missing) == 0)
+    {
+      cf <- cqc_data[[sn]]
+      cols <- flowWorkspace::colnames(cf)
+      j <- which(!cols %in% unknown)
+      flowWorkspace:::subset_cytoframe_by_cols(cf@pointer, j - 1)
+
+    }
+  }
+}
+#' @export
+cqc_remove_not_in_reference.cqc_report_marker <- function(x, cqc_data){
+  for(sn in names(x))
+  {
+    check_result <- x[[sn]]
+    unknown <- check_result[["unknown"]]
+    missing <- check_result[["missing"]]
+    if(length(unknown) > 0 && length(missing) == 0)
+    {
+      cf <- cqc_data[[sn]]
+      cf_rename_marker(cf, unknown, "")
+
+    }
+  }
+}
+#' @export
+cqc_drop_samples <- function(cqc_data, check_results){
+
+  cqc_data[-match(names(check_results), names(cqc_data))]
+}
+

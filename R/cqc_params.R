@@ -99,8 +99,9 @@ diff.cqc_group <- function(x, vars){
 
 #' @importFrom purrr walk
 #' @export
-split.cqc_group_panel <- function(x, cqc_data){
-  vec <- x %>% select(c(FCS, panel_id)) %>% distinct() %>% pull(panel_id)
+split.cqc_group <- function(x){
+  cqc_data <- attr(x, "data")
+  vec <- x %>% select(c(FCS, group_id)) %>% distinct() %>% pull(group_id)
   split(cqc_data, vec) %>% map(function(i){
     class(i) <- c("cqc_data", class(i))
     i
@@ -114,7 +115,11 @@ cqc_set_reference <- function(x, ref){
   x
 }
 
-
+#' @export
+cqc_find_solution.cqc_group <- function(x, max.distance = 0.1, ...){
+  check_results <- cqc_check(groups, ...)
+  cqc_find_solution(check_results, max.distance = max.distance)
+}
 #' @export
 cqc_check.cqc_group_channel <- function(x, ...){
   res <- cqc_check_params(x, type = "channel", ...)
@@ -255,23 +260,26 @@ cqc_fix.cqc_solution <- function(x, func){
       cf <- cqc_data[[.[["FCS"]]]]
       if(is.na(.[["to"]]))
       {
-        if(class(x) == "cqc_solution_channel")
+        if(is(x, "cqc_solution_channel"))
         {
           cols <- flowWorkspace::colnames(cf)
           j <- which(!cols %in% .[["from"]])
           flowWorkspace:::subset_cytoframe_by_cols(cf@pointer, j - 1)
+        }else if(is(x, "cqc_solution_marker"))
+        {
+          cf_rename_marker(cf, .[["from"]], "")
         }else
           stop("don't know how to proceed!")
 
       }else
-        func(cf@pointer, .[["from"]], .[["to"]])
+        func(cf, .[["from"]], .[["to"]])
       tibble()
     }))
 
 }
 #' @export
 cqc_fix.cqc_solution_channel <- function(x){
-  cqc_fix.cqc_solution(x, flowWorkspace:::setChannel)
+  cqc_fix.cqc_solution(x, function(cf,..)flowWorkspace:::setChannel(cf@pointer, ...))
 }
 
 #' @export
@@ -279,48 +287,14 @@ cqc_fix.cqc_solution_marker <- function(x){
   cqc_fix.cqc_solution(x, cf_rename_marker)
 
 }
-
 #' @export
-cqc_remove_not_in_reference <- function(x, ...)UseMethod("cqc_remove_not_in_reference")
-#' @importFrom flowWorkspace colnames
-#' @export
-cqc_remove_not_in_reference.cqc_report_channel <- function(x, cqc_data){
-  for(sn in names(x))
-  {
-    check_result <- x[[sn]]
-    unknown <- check_result[["unknown"]]
-    missing <- check_result[["missing"]]
-    if(length(unknown) > 0 && length(missing) == 0)
-    {
-      cf <- cqc_data[[sn]]
-      cols <- flowWorkspace::colnames(cf)
-      j <- which(!cols %in% unknown)
-      flowWorkspace:::subset_cytoframe_by_cols(cf@pointer, j - 1)
-
-    }
-  }
+cqc_drop_groups <- function(cqc_groups, id){
+  cqc_data <- attr(cqc_groups, "data")
+  torm <- filter(cqc_groups, group_id == id) %>% pull(FCS) %>% unique()
+  cqc_data <- cqc_data[-match(torm, names(cqc_data))]
+  class(cqc_data) <- "cqc_data"
+  cqc_data
 }
-#' @export
-cqc_remove_not_in_reference.cqc_report_marker <- function(x, cqc_data){
-  for(sn in names(x))
-  {
-    check_result <- x[[sn]]
-    unknown <- check_result[["unknown"]]
-    missing <- check_result[["missing"]]
-    if(length(unknown) > 0 && length(missing) == 0)
-    {
-      cf <- cqc_data[[sn]]
-      cf_rename_marker(cf, unknown, "")
-
-    }
-  }
-}
-#' @export
-cqc_drop_samples <- function(cqc_data, check_results){
-
-    cqc_data[-match(names(check_results), names(cqc_data))]
-}
-
 
 
 

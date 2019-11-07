@@ -75,6 +75,7 @@ cf_swap_colnames(cf, "FL1-H", "FL2-H")
 ```{r}
 groups <- cqc_check(cqc_data, "channel")
 su <- summary(groups)
+su
 diff(su)
 ```
 
@@ -117,7 +118,7 @@ cqc_fix(solution)
 groups <- cqc_check(cqc_data, "channel")
 summary(groups)
 
-cqc_data <- cqc_drop_samples(cqc_data, check_results)
+cqc_data <- cqc_drop_groups(groups, 1)
 length(cqc_data)
 ```
 
@@ -138,17 +139,36 @@ markernames(cf) <- c(`FL2-A` = "markerA")
 
 
 ```{r}
-reference <- cqc_find_reference_marker(cqc_data)
-reference
-check_results <- cqc_check(reference, cqc_data)
-check_results
-solution <- cqc_find_solution(check_results, max.distance = 0.4) 
+#summarise marker groups
+groups <- cqc_check(cqc_data, "marker")
+su <- summary(groups)
+diff(su)
+```
+
+## pick reference and sample groups to fix
+```{r}
+
+groups <- cqc_set_reference(groups, ref = 1)
+solution <- cqc_find_solution(groups, select = 5, max.distance = 0.4) 
 solution
-cqc_fix(solution, cqc_data)
-check_results <- cqc_check(reference, cqc_data)
-check_results
-cqc_remove_not_in_reference(check_results, cqc_data)
-cqc_check(reference, cqc_data)
+cqc_fix(solution)
+
+groups <- cqc_set_reference(groups, ref = 2)
+solution <- cqc_find_solution(groups, select = c(4, 6), max.distance = 0.4) 
+solution
+cqc_fix(solution)
+```
+## update checks
+```{r}
+groups <- cqc_check(cqc_data, "marker")
+su <- summary(groups)
+diff(su)
+```
+
+## split by groups
+```{r}
+data_list <- split(groups)
+data_list
 ```
 
 ## QC for panel (i.e. channel + marker)

@@ -58,14 +58,32 @@ knit_print.cqc_solution <- function(x, itemize = FALSE, ...){
   knit_print(x)
 
 }
+#' @importFrom dplyr summarise
+collapse_params <- function(x,...){
+  type <- sub("cqc_group_", "", class(x)[2])
+  if(type != "panel")
+  {
+    type <- as.symbol(type)
+    x <- group_by(x, group_id, nFCS) %>%
+          summarise(!!type := paste(!!type, collapse = ", ")) %>%
+      arrange(desc(nFCS))
+
+    }
+  x
+}
 #' @export
 print.cqc_group_summary <- function(x, collapse = TRUE, ...){
-  collapse_params(x)
+  if(collapse)
+    x <- collapse_params(x)
+  print(x)
 }
 #' @export
 knit_print.cqc_group_summary <- function(x, collapse = TRUE, ...){
   cn <- colnames(x)
   idx <- cn %in% c("group_id", "nFCS")
+
+  if(collapse)
+    x <- collapse_params(x)
   #reorder column to place groupid first and nFcs last
   x %>% select(c(which(idx)[1], which(!idx), which(idx)[2])) %>%
     arrange(desc(nFCS)) %>%
