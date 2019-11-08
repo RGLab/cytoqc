@@ -25,13 +25,13 @@ cqc_check <- function(x, ...)UseMethod("cqc_check")
 cqc_check.cqc_data <- function(x, type = c("channel", "marker", "panel"), delimiter = "|"){
   sep <- paste0(delimiter, delimiter)#double delimiter for sep params and single delimiter for sep channel and marker
   keys <- sapply(x, function(cf){
-    key <- cf_get_params_tbl(cf) %>% arrange(channel)
+    key <- cf_get_params_tbl(cf) #%>% arrange(channel)
     if(type != "channel")
       key <- filter(key, is.na(marker) == FALSE)
     if(type == "panel")
       key <- unite(key, panel, channel, marker, sep = delimiter)
 
-      key[[type]] %>%
+      key[[type]] %>% sort() %>%
       paste(collapse = sep)
   })
   res <- tibble(FCS = names(keys), key = keys)
@@ -279,7 +279,7 @@ cqc_fix.cqc_solution <- function(x, func){
 }
 #' @export
 cqc_fix.cqc_solution_channel <- function(x){
-  cqc_fix.cqc_solution(x, function(cf,..)flowWorkspace:::setChannel(cf@pointer, ...))
+  cqc_fix.cqc_solution(x, function(cf,...)flowWorkspace:::setChannel(cf@pointer, ...))
 }
 
 #' @export
