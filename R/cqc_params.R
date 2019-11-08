@@ -138,7 +138,10 @@ cqc_check.cqc_group_marker <- function(x, ...){
 #' @importFrom purrr set_names
 cqc_check_params <- function(x, select, type, delimiter ="|"){
   sa <- summary(x)
-  ref <- sa %>% filter(group_id %in% attr(x, "ref")) %>% pull(type)
+  ref <- attr(x, "ref")
+  if(is.integer(ref))
+    ref <- sa %>% filter(group_id %in% ref) %>% pull(type)
+
 
   res <- sa %>%
     filter(group_id%in%select) %>%
@@ -222,18 +225,17 @@ cqc_find_solution.cqc_report <- function(x, max.distance = 0.1){
         #get the pair
         from <- unknown[ridx]
         to <- missing[cidx]
+        #pop the processed item
+        unknown <- unknown[-ridx]
+        missing <- missing[-cidx]
         #check if exceeds max.distance
         #agrep can be avoided if the formula of max.distance used by agrep is figured out
         ind <- agrep(from, to, ignore.case = TRUE, max.distance = max.distance)
         if(length(ind) > 0)#
-        {
-          #pop the matched item
-          unknown <- unknown[-ridx]
-          missing <- missing[-cidx]
           df <- add_row(df, from = from, to = to)
-        }else
-          break #otherwise stop the maatching process
-      }else if(length(missing) == 0)#extra params
+        else
+          next #otherwise stop the matching process
+      }else#extra params
       {
         df <- add_row(df, from = unknown, to = NA)
         unknown <- character()

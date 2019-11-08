@@ -1,0 +1,82 @@
+---
+output: github_document
+always_allow_html: yes
+---
+# cytoqc -- A QC tool for openCyto
+
+*cytoqc* performs pre-cleaning, pre-gating and post-gating QC checks.
+
+## The alternative workflow:
+
+1. Run `cqc_check` to see the summary
+2. Manually provide the standard parameter names and `cqc_find_solution` for selected groups
+3. `cqc_fix` based on the solution or `cqc_drop_groups` for unsolvable issues
+
+```{r include=FALSE}
+library(knitr)
+knitr::opts_chunk$set(warning = FALSE, message = FALSE)
+library(kableExtra)
+```
+
+
+```{r}
+library(flowCore)
+library(flowWorkspace)
+# library(cytoqc)
+devtools::load_all("../")
+```
+
+```{r include=FALSE}
+# prepare the test data
+data("GvHD")
+fs <- GvHD
+data_dir <- tempfile()
+dir.create(data_dir)
+write.flowSet(fs, data_dir)
+```
+
+## Load the FCS
+
+```{r}
+files <- list.files(data_dir, ".fcs", full.names = TRUE)
+cqc_data <- cqc_load_fcs(files)
+cqc_data
+```
+
+
+## QC for marker
+```{r include=FALSE}
+#simulate channel discrepancy
+
+cf <- cqc_data[[1]]
+cf_rename_marker(cf, "CD15 FITC", "cd15")
+cf_rename_marker(cf, "CD33 APC", "apc cd33")
+
+
+#redundant
+cf <- cqc_data[[2]]
+markernames(cf) <- c(`FL2-A` = "markerA")
+
+```
+
+
+```{r}
+#summarise marker groups
+groups <- cqc_check(cqc_data, "marker")
+su <- summary(groups)
+knit_print(su)
+```
+
+## Set references
+```{r}
+groups <- cqc_set_reference(groups, ref = c("cd15", "cd45", "cd14", "cd33"))
+solution <- cqc_find_solution(groups, select = 1:5, max.distance = 0.6) 
+solution
+cqc_fix(solution)
+```
+## update checks
+```{r}
+groups <- cqc_check(cqc_data, "marker")
+summary(groups)
+```
+
