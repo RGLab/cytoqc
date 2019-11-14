@@ -115,6 +115,55 @@ qoutlier <-function (x, alpha = 1.5,isUpper=TRUE,isLower=TRUE,plot=FALSE,...)
 	
 }
 
+#' @importFrom ggplot2 ggplot geom_point scale_color_identity geom_hline geom_jitter geom_boxplot aes
+qoutlier_plot <-function (counts, alpha = 1.5,isUpper=TRUE,isLower=TRUE, type = "scatter") 
+{
+  if (alpha < 0) 
+    stop("'alpha' must not be negative")
+  nna <- !is.na(counts$count)
+  n <- sum(nna)
+  stats <- stats::fivenum(counts$count, na.rm = TRUE)
+  iqr <- diff(stats[c(2, 4)])
+  if (alpha == 0) 
+    do.out <- FALSE
+  else {
+    if (!is.na(iqr)) {
+      negInd <-counts$count<(stats[2L] - alpha * iqr) 
+      posInd <-counts$count>(stats[4L] + alpha *iqr)
+    }
+    else return(!is.finite(counts$count))
+  }
+  
+  ##decide if detect positive or negtive outlier
+  posInd<-posInd&isUpper
+  negInd<-negInd&isLower
+  isOutlier<-posInd|negInd
+  
+  mu<-stats[3]
+  
+  counts$color <- rep("black",nrow(counts))
+  counts$color[isOutlier]<-"red"
+  
+  # Boxplot with outliers
+  if (type == "boxplot"){
+    g <- ggplot(counts, aes(x = pop, y = count)) +
+      
+          # Simple boxplot
+          # geom_boxplot(outlier.colour = "red") + 
+      
+          # Jitter points (including outliers) over box
+          geom_boxplot(outlier.size = -1) +
+          geom_jitter(aes(colour = color)) +
+          scale_color_identity()
+  } else if (type == "scatter") {
+    # Scatter by index
+    g <- counts %>% 
+          ggplot(aes(x = idx, y = count, colour = color)) +
+          geom_point() + 
+          scale_color_identity() +
+          geom_hline(yintercept = mu, color = "blue")
+  }
+}
 
 #' outlier.norm is based on normal distribution using Huber M-estimator of location with MAD scale 
 #' @rdname outlierFunctions

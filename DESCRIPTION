@@ -6,7 +6,7 @@ Author: Mike Jiang, Jake Wagner
 Maintainer: Mike Jiang <wjiang2@fhcrc.org>
 Description: Provides quality control and quality assessment tools for cytometry data. 
 Depends: R (>= 3.5.0)
-Imports: methods, BiocGenerics, flowCore, flowWorkspace (>= 4.0.0), dplyr, knitr, kableExtra
+Imports: methods, BiocGenerics, flowCore, flowWorkspace (>= 4.0.0), dplyr, knitr, kableExtra, ggplot2, ggcyto
 License: Artistic-2.0
 biocViews: ImmunoOncology, Infrastructure, FlowCytometry, CellBasedAssays
 Suggests:  knitr
