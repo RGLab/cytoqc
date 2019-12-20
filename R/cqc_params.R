@@ -9,6 +9,7 @@ cqc_load_fcs <- function(files, is_h5 = TRUE, ...){
 
 #' @importFrom tibble as.tibble
 #' @importFrom dplyr select rename
+#' @importFrom flowCore parameters
 cf_get_params_tbl <- function(cf){
   pData(parameters(cf)) %>%
     as.tibble() %>%
@@ -196,6 +197,7 @@ cqc_find_solution.cqc_report_marker <- function(x, ...){
 
 }
 
+#' @title cqc_find_solution
 #' @param max.distance Maximum distance allowed for a match. See ?agrep
 #' @importFrom tibble tibble add_row
 #' @export

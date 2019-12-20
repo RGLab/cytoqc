@@ -1,6 +1,12 @@
 ---
-output: github_document
+title: A QC tool for openCyto 2
+output: rmarkdown::html_vignette
 always_allow_html: yes
+vignette: >
+  %\VignetteIndexEntry{cytoqc2}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+
 ---
 # cytoqc -- A QC tool for openCyto
 
