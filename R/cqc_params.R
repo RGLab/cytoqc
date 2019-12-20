@@ -139,7 +139,7 @@ cqc_check.cqc_group_marker <- function(x, ...){
 cqc_check_params <- function(x, select, type, delimiter ="|"){
   sa <- summary(x)
   ref <- attr(x, "ref")
-  if(is.integer(ref))
+  if(is.numeric(ref))
     ref <- sa %>% filter(group_id %in% ref) %>% pull(type)
 
 
