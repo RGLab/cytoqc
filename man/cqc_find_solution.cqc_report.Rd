@@ -2,13 +2,21 @@
 % Please edit documentation in R/cqc_params.R
 \name{cqc_find_solution.cqc_report}
 \alias{cqc_find_solution.cqc_report}
-\title{cqc_find_solution}
+\title{Find solution to resolve the discrepancy discovered by cqc_check_params}
 \usage{
 \method{cqc_find_solution}{cqc_report}(x, max.distance = 0.1)
 }
 \arguments{
 \item{max.distance}{Maximum distance allowed for a match. See ?agrep}
 }
+\value{
+a table (with 'from' and 'to' columns) represents the itemized fix recommendation. When 'to' is 'NA', it means the entry is redundunt and can be removed
+}
 \description{
-cqc_find_solution
+It tries to find the aproximate match(based on 'agrep') between the target and reference as well as the extra redundunt items that can be removed.
+}
+\examples{
+\dontrun{
+solution <-  cqc_find_solution(groups, select = c(1, 4))
+}
 }

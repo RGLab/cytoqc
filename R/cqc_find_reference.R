@@ -1,3 +1,10 @@
+#----------------------------------
+# Functions to automatically discover the
+# reference from the data by the majority count
+# (to be deprecated)
+#-------------------------------------------
+
+
 #' @export
 cqc_find_reference_channel <- function(cqc_data, ...){
   cqc_find_params_reference(cqc_data, type = "channel", ...)
