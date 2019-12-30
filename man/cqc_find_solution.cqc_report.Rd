@@ -2,7 +2,7 @@
 % Please edit documentation in R/cqc_params.R
 \name{cqc_find_solution.cqc_report}
 \alias{cqc_find_solution.cqc_report}
-\title{Find solution to resolve the discrepancy discovered by cqc_check_params}
+\title{Find solution to resolve the discrepancy discovered by match_reference}
 \usage{
 \method{cqc_find_solution}{cqc_report}(x, max.distance = 0.1)
 }

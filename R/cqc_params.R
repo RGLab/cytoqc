@@ -178,28 +178,30 @@ cqc_set_reference <- function(x, ref){
   x
 }
 
+cqc_match_reference <- function(x, ...)UseMethod("cqc_match_reference")
+
 #' @export
 cqc_find_solution.cqc_group <- function(x, max.distance = 0.1, ...){
-  check_results <- cqc_check(groups, ...)
-  cqc_find_solution(check_results, max.distance = max.distance)
+  results <- cqc_match_reference(groups, ...)
+  cqc_find_solution(results, max.distance = max.distance)
 }
 #' @export
-cqc_check.cqc_group_channel <- function(x, ...){
-  res <- cqc_check_params(x, type = "channel", ...)
+cqc_match_reference.cqc_group_channel <- function(x, ...){
+  res <- match_reference(x, type = "channel", ...)
   class(res) <- c("cqc_report_channel", class(res))
   res
 }
 
 #' @export
-cqc_check.cqc_group_marker <- function(x, ...){
-  res <- cqc_check_params(x, type = "marker", ...)
+cqc_match_reference.cqc_group_marker <- function(x, ...){
+  res <- match_reference(x, type = "marker", ...)
   class(res) <- c("cqc_report_marker", class(res))
   res
 }
 
 #' @export
-cqc_check.cqc_group_keyword <- function(x, ...){
-  res <- cqc_check_params(x, type = "keyword", ...)
+cqc_match_reference.cqc_group_keyword <- function(x, ...){
+  res <- match_reference(x, type = "keyword", ...)
   class(res) <- c("cqc_report_keyword", class(res))
   res
 }
@@ -214,7 +216,7 @@ cqc_check.cqc_group_keyword <- function(x, ...){
 #' @importFrom dplyr bind_rows group_keys group_by
 #' @importFrom purrr set_names
 #' @noRd
-cqc_check_params <- function(x, select, type, delimiter ="|"){
+match_reference <- function(x, select, type, delimiter ="|"){
   sa <- summary(x)
   ref <- attr(x, "ref")
   if(is.numeric(ref))
@@ -281,7 +283,7 @@ cqc_find_solution.cqc_report_keyword <- function(x, ...){
   res
 
 }
-#' Find solution to resolve the discrepancy discovered by cqc_check_params
+#' Find solution to resolve the discrepancy discovered by match_reference
 #'
 #' It tries to find the aproximate match(based on 'agrep') between the target and reference as well as the extra redundunt items that can be removed.
 #'
