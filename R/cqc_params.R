@@ -45,16 +45,22 @@ cqc_check <- function(x, ...)UseMethod("cqc_check")
 #' @export
 #' @importFrom dplyr filter arrange pull mutate group_indices distinct count add_count
 #' @importFrom tidyr separate separate_rows
-cqc_check.cqc_data <- function(x, type = c("channel", "marker", "panel"), delimiter = "|"){
+cqc_check.cqc_data <- function(x, type = c("channel", "marker", "panel", "keyword"), delimiter = "|"){
   sep <- paste0(delimiter, delimiter)#double delimiter for sep params and single delimiter for sep channel and marker
   keys <- sapply(x, function(cf){
-    key <- cf_get_params_tbl(cf) #%>% arrange(channel)
-    if(type != "channel")
-      key <- filter(key, is.na(marker) == FALSE)
-    if(type == "panel")
-      key <- unite(key, panel, channel, marker, sep = delimiter)
+    if(type == "keyword")
+    {
+      key <- names(keyword(cf, compact = TRUE))
+    }else{
+      key <- cf_get_params_tbl(cf) #%>% arrange(channel)
+      if(type != "channel")
+        key <- filter(key, is.na(marker) == FALSE)
+      if(type == "panel")
+        key <- unite(key, panel, channel, marker, sep = delimiter)
+      key <- key[[type]]
+    }
 
-      key[[type]] %>% sort() %>%
+      key %>% sort() %>%
       paste(collapse = sep)
   })
   res <- tibble(FCS = names(keys), key = keys)
@@ -98,6 +104,12 @@ summary.cqc_group <- function(object){
     distinct()
   class(res) <- c("cqc_group_summary", class(res))
   res
+}
+
+#' @export
+diff.cqc_group_keyword <- function(x){
+
+  diff.cqc_group(x, c("keyword"))
 }
 
 #' @export
@@ -185,6 +197,13 @@ cqc_check.cqc_group_marker <- function(x, ...){
   res
 }
 
+#' @export
+cqc_check.cqc_group_keyword <- function(x, ...){
+  res <- cqc_check_params(x, type = "keyword", ...)
+  class(res) <- c("cqc_report_keyword", class(res))
+  res
+}
+
 #' find the the difference between the reference and target group
 #'
 #' Only used internally.
@@ -255,7 +274,13 @@ cqc_find_solution.cqc_report_marker <- function(x, ...){
   res
 
 }
+#' @export
+cqc_find_solution.cqc_report_keyword <- function(x, ...){
+  res <- cqc_find_solution.cqc_report(x, ...)
+  attr(res, "class") <- c("cqc_solution_keyword", attr(res, "class"))
+  res
 
+}
 #' Find solution to resolve the discrepancy discovered by cqc_check_params
 #'
 #' It tries to find the aproximate match(based on 'agrep') between the target and reference as well as the extra redundunt items that can be removed.

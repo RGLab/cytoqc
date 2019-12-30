@@ -10,7 +10,7 @@ Imports:
     methods,
     BiocGenerics,
     flowCore,
-    flowWorkspace (>= 3.35.6),
+    flowWorkspace (>= 3.35.8),
     dplyr,
     kableExtra,
     ggplot2,

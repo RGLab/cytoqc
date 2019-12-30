@@ -1,0 +1,218 @@
+---
+title: A QC tool for openCyto
+output: rmarkdown::html_vignette
+always_allow_html: yes
+vignette: >
+  %\VignetteIndexEntry{cytoqc}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+# cytoqc -- A QC tool for openCyto
+
+*cytoqc* performs pre-cleaning, pre-gating and post-gating QC checks.
+
+## The basic workflow:
+
+1. Run `cqc_check` to see the summary
+2. `cqc_set_reference` and `cqc_find_solution` for selected groups
+3. `cqc_fix` based on the solution or `cqc_drop_groups` for unsolvable issues
+4. Iterate 1~3 steps until data is cleaned
+5. `split` the data into multiple sets for multi-panel cases
+
+```{r include=FALSE}
+library(knitr)
+knitr::opts_chunk$set(warning = FALSE, message = FALSE)
+library(kableExtra)
+```
+
+
+```{r}
+library(flowCore)
+library(flowWorkspace)
+# library(cytoqc)
+devtools::load_all("../")
+```
+
+```{r include=FALSE}
+# prepare the test data
+data("GvHD")
+fs <- GvHD
+data_dir <- tempfile()
+dir.create(data_dir)
+write.flowSet(fs, data_dir)
+```
+
+## Load the FCS
+
+```{r}
+files <- list.files(data_dir, ".fcs", full.names = TRUE)
+cqc_data <- cqc_load_fcs(files)
+cqc_data
+```
+
+```{r include=FALSE}
+#simulate channel discrepancy
+
+#case
+cf <- cqc_data[[1]]
+keyword(cf, compact = TRUE)
+
+#missing
+cqc_data[[1]] <- cf[,1:7]
+
+
+#redundant
+thisfile <- files[2]
+fr <- read.FCS(thisfile)
+new_col <- exprs(fr)[,8,drop=F]
+colnames(new_col) <- "channelA"
+fr <- cbind2(fr, new_col)
+write.FCS(fr, files[2])
+cqc_data[[2]] <- load_cytoframe_from_fcs(thisfile, is_h5 = TRUE)
+
+#typo
+cf <- cqc_data[[2]]
+colnames(cf)[2] <- "SSC1-H"
+
+#both case and typo
+cf <- cqc_data[[3]]
+colnames(cf)[1:2] <- c("fsc-h", "SSC1-H")
+
+#order
+cf <- cqc_data[[4]]
+cf_swap_colnames(cf, "FL1-H", "FL2-H")
+
+```
+
+## QC check for channel
+```{r}
+groups <- cqc_check(cqc_data, "keyword")
+su <- summary(groups)
+su
+diff(su)
+```
+
+## Select the reference 
+
+```{r}
+groups <- cqc_set_reference(groups, ref = 1)
+```
+
+
+## Recommend the fix for the selected groups 
+```{r}
+solution <-  cqc_find_solution(groups, select = c(2,3))
+solution
+```
+
+*Show the itemized details*
+```{r}
+knit_print(solution, itemize = TRUE)
+```
+
+## Export/import the `solution` for revision (if needed)
+```{r eval=FALSE}
+library(readr)
+write_csv(solution, csvfile)
+#manually edit csvfile and load it back
+solution_revised <- read_csv(csvfile)
+```
+
+## Apply the fix
+
+```{r}
+cqc_fix(solution)
+```
+
+## Refresh QC report 
+```{r}
+groups <- cqc_check(cqc_data, "channel")
+summary(groups)
+```
+
+## Drop groups that can not be fixed
+```{r}
+cqc_data <- cqc_drop_groups(groups, 1)
+length(cqc_data)
+```
+
+## QC for marker
+```{r include=FALSE}
+#simulate channel discrepancy
+
+cf <- cqc_data[[1]]
+cf_rename_marker(cf, "CD15 FITC", "cd15")
+cf_rename_marker(cf, "CD33 APC", "apc cd33")
+
+
+#redundant
+cf <- cqc_data[[2]]
+markernames(cf) <- c(`FL2-A` = "markerA")
+
+```
+
+
+```{r}
+#summarise marker groups
+groups <- cqc_check(cqc_data, "marker")
+su <- summary(groups)
+diff(su)
+```
+
+## Pick references and groups to fix
+```{r}
+groups <- cqc_set_reference(groups, ref = 3)
+solution <- cqc_find_solution(groups, select = 1, max.distance = 0.4) 
+solution
+cqc_fix(solution)
+
+groups <- cqc_set_reference(groups, ref = 4)
+solution <- cqc_find_solution(groups, select = 2, max.distance = 0.4) 
+solution
+cqc_fix(solution)
+```
+## update checks
+```{r}
+groups <- cqc_check(cqc_data, "marker")
+su <- summary(groups)
+diff(su)
+```
+
+## split by groups
+```{r}
+data_list <- split(groups)
+data_list
+```
+
+## QC for panel 
+```{r}
+# first data set is already clean
+summary(cqc_check(data_list[[1]], "panel"))
+```
+
+
+## Save the cleaned data as FCS 
+```{r}
+cleaned <- data_list[[1]]
+```
+
+
+```{r eval=F}
+out <- tempfile()
+write_fcs(cleaned, out)
+```
+
+
+## Or Coerce it directly into `cytoset` (zero-copying)
+```{r}
+cs <- cytoset(cleaned)
+cs
+```
+
+## Further split the data by panel
+```{r}
+grps <- cqc_check(data_list[[2]], "panel")
+diff(summary(grps))
+split(grps)
+```
+

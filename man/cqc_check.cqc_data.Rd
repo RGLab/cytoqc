@@ -4,7 +4,11 @@
 \alias{cqc_check.cqc_data}
 \title{QC check}
 \usage{
-\method{cqc_check}{cqc_data}(x, type = c("channel", "marker", "panel"), delimiter = "|")
+\method{cqc_check}{cqc_data}(
+  x,
+  type = c("channel", "marker", "panel", "keyword"),
+  delimiter = "|"
+)
 }
 \arguments{
 \item{x}{cqc_data}
