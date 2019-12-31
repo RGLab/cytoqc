@@ -51,36 +51,45 @@ cqc_data
 ```
 
 ```{r include=FALSE}
+#clean up keywordnames
+for(cf in cqc_data)
+{
+  kw <- keyword(cf)
+  kn <- names(kw)
+  kn <- gsub("^\\&[0-9]+", "", kn)
+  names(kw) <- kn
+  keyword(cf) <- kw
+  
+}
 #simulate channel discrepancy
 
 #case
 cf <- cqc_data[[1]]
-keyword(cf, compact = TRUE)
+kw <- keyword(cf)
+kn <- names(kw)
+names(keyword(cf))[match("Patient ID", kn)] <- "patient id"
 
 #missing
-cqc_data[[1]] <- cf[,1:7]
+cf <- cqc_data[[2]]
+kw <- keyword(cf)
+kn <- names(kw)
+keyword(cf) <- kw[-match("Patient ID", kn)]
 
 
 #redundant
-thisfile <- files[2]
-fr <- read.FCS(thisfile)
-new_col <- exprs(fr)[,8,drop=F]
-colnames(new_col) <- "channelA"
-fr <- cbind2(fr, new_col)
-write.FCS(fr, files[2])
-cqc_data[[2]] <- load_cytoframe_from_fcs(thisfile, is_h5 = TRUE)
+cf <- cqc_data[[3]]
+kw <- keyword(cf)
+kw[["new_kw"]] <- "test"
+keyword(cf) <- kw
+
 
 #typo
-cf <- cqc_data[[2]]
-colnames(cf)[2] <- "SSC1-H"
-
-#both case and typo
-cf <- cqc_data[[3]]
-colnames(cf)[1:2] <- c("fsc-h", "SSC1-H")
-
-#order
 cf <- cqc_data[[4]]
-cf_swap_colnames(cf, "FL1-H", "FL2-H")
+kw <- keyword(cf)
+kn <- names(kw)
+names(keyword(cf))[match("Patient ID", kn)] <- "patien id"
+
+
 
 ```
 
@@ -88,34 +97,28 @@ cf_swap_colnames(cf, "FL1-H", "FL2-H")
 ```{r}
 groups <- cqc_check(cqc_data, "keyword")
 su <- summary(groups)
-su
-diff(su)
+knit_print(su)
+# knit_print(diff(su))
 ```
 
 ## Select the reference 
 
 ```{r}
-groups <- cqc_set_reference(groups, ref = 1)
+groups <- cqc_set_reference(groups, ref = 4)
 ```
 
 
 ## Recommend the fix for the selected groups 
 ```{r}
-solution <-  cqc_find_solution(groups, select = c(2,3))
+# res <- cqc_match_reference(groups, select = c(1,2,3,6))
+# res
+solution <-  cqc_find_solution(groups, select = c(1,2,3,6))
 solution
 ```
 
 *Show the itemized details*
 ```{r}
 knit_print(solution, itemize = TRUE)
-```
-
-## Export/import the `solution` for revision (if needed)
-```{r eval=FALSE}
-library(readr)
-write_csv(solution, csvfile)
-#manually edit csvfile and load it back
-solution_revised <- read_csv(csvfile)
 ```
 
 ## Apply the fix

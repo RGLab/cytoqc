@@ -181,28 +181,23 @@ cqc_set_reference <- function(x, ref){
 cqc_match_reference <- function(x, ...)UseMethod("cqc_match_reference")
 
 #' @export
-cqc_find_solution.cqc_group <- function(x, max.distance = 0.1, ...){
-  results <- cqc_match_reference(groups, ...)
-  cqc_find_solution(results, max.distance = max.distance)
-}
-#' @export
 cqc_match_reference.cqc_group_channel <- function(x, ...){
   res <- match_reference(x, type = "channel", ...)
-  class(res) <- c("cqc_report_channel", class(res))
+  class(res) <- c("cqc_match_result_channel", class(res))
   res
 }
 
 #' @export
 cqc_match_reference.cqc_group_marker <- function(x, ...){
   res <- match_reference(x, type = "marker", ...)
-  class(res) <- c("cqc_report_marker", class(res))
+  class(res) <- c("cqc_match_result_marker", class(res))
   res
 }
 
 #' @export
 cqc_match_reference.cqc_group_keyword <- function(x, ...){
   res <- match_reference(x, type = "keyword", ...)
-  class(res) <- c("cqc_report_keyword", class(res))
+  class(res) <- c("cqc_match_result_keyword", class(res))
   res
 }
 
@@ -240,7 +235,7 @@ match_reference <- function(x, select, type, delimiter ="|"){
                     }
             ) %>% set_names(group_keys(res)[["group_id"]])
 
-  class(res) <- c("cqc_report_params", class(res))
+  class(res) <- c("cqc_match_result", class(res))
   attr(res, "groups") <- x
 
   res
@@ -249,7 +244,7 @@ match_reference <- function(x, select, type, delimiter ="|"){
 
 #' @importFrom dplyr as_tibble
 #' @export
-as_tibble.cqc_report_params <- function(x){
+as_tibble.cqc_match_result <- function(x){
   map_dfr(x, function(i){
 
     tibble("Not in reference" = paste(i[["unknown"]], collapse = ",")
@@ -263,22 +258,28 @@ as_tibble.cqc_report_params <- function(x){
 #' @export
 cqc_find_solution <- function(x, ...)UseMethod("cqc_find_solution")
 #' @export
-cqc_find_solution.cqc_report_channel <- function(x, ...){
-  res <- cqc_find_solution.cqc_report(x, ...)
+cqc_find_solution.cqc_group <- function(x, max.distance = 0.1, ...){
+  match_result <- cqc_match_reference(groups, ...)
+  cqc_find_solution(match_result, max.distance = max.distance)
+}
+
+#' @export
+cqc_find_solution.cqc_match_result_channel <- function(x, ...){
+  res <- cqc_find_solution.cqc_match_result(x, ...)
   attr(res, "class") <- c("cqc_solution_channel", attr(res, "class"))
   res
 
 }
 #' @export
-cqc_find_solution.cqc_report_marker <- function(x, ...){
-  res <- cqc_find_solution.cqc_report(x, ...)
+cqc_find_solution.cqc_match_result_marker <- function(x, ...){
+  res <- cqc_find_solution.cqc_match_result(x, ...)
   attr(res, "class") <- c("cqc_solution_marker", attr(res, "class"))
   res
 
 }
 #' @export
-cqc_find_solution.cqc_report_keyword <- function(x, ...){
-  res <- cqc_find_solution.cqc_report(x, ...)
+cqc_find_solution.cqc_match_result_keyword <- function(x, ...){
+  res <- cqc_find_solution.cqc_match_result(x, ...)
   attr(res, "class") <- c("cqc_solution_keyword", attr(res, "class"))
   res
 
@@ -295,7 +296,7 @@ cqc_find_solution.cqc_report_keyword <- function(x, ...){
 #' @param max.distance Maximum distance allowed for a match. See ?agrep
 #' @importFrom tibble tibble add_row
 #' @export
-cqc_find_solution.cqc_report <- function(x, max.distance = 0.1){
+cqc_find_solution.cqc_match_result <- function(x, max.distance = 0.1){
   res <- map_dfr(x, function(check_result)
   {
     unknown <- check_result[["unknown"]]
