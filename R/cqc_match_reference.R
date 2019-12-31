@@ -35,7 +35,6 @@ cqc_match_reference.cqc_group_keyword <- function(x, ...){
 #' @noRd
 match_reference <- function(x, ref, select, type, delimiter ="|"){
   sa <- summary(x)
-  ref <- attr(x, "ref")
   if(is.numeric(ref))
     ref <- sa %>% filter(group_id %in% ref) %>% pull(type)
 

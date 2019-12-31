@@ -7,7 +7,7 @@
 \method{summary}{cqc_group}(object)
 }
 \arguments{
-\item{object}{qc table returned by 'cqc_check'}
+\item{object}{qc table returned by 'cqc_group'}
 }
 \description{
 It summarise the sample-wise qc report into group overview report for reference selection and further QC action.

@@ -95,7 +95,7 @@ names(keyword(cf))[match("Patient ID", kn)] <- "patien id"
 
 ## QC check for channel
 ```{r}
-groups <- cqc_check(cqc_data, "keyword")
+groups <- cqc_group(cqc_data, "keyword")
 su <- summary(groups)
 knit_print(su)
 # knit_print(diff(su))
