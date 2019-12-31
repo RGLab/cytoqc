@@ -27,9 +27,7 @@ cqc_fix.cqc_solution <- function(x, func){
                     cf_rename_marker(cf, .[["from"]], "")
                   }else if(is(x, "cqc_solution_keyword"))
                   {
-                    kw <- keyword(cf)
-                    kn <- names(kw)
-                    keyword(cf) <- kw[-match(.[["from"]], kn)]
+                    cf_keyword_delete(cf, .[["from"]])
 
                   }else
                     stop("don't know how to proceed!")
@@ -42,12 +40,7 @@ cqc_fix.cqc_solution <- function(x, func){
 }
 #' @export
 cqc_fix.cqc_solution_keyword <- function(x){
-  cqc_fix.cqc_solution(x, function(cf, from, to){
-    kw <- keyword(cf)
-    kn <- names(kw)
-    names(keyword(cf))[match(from, kn)] <- to
-
-  })
+  cqc_fix.cqc_solution(x, cf_keyword_rename)
 }
 #' @export
 cqc_fix.cqc_solution_channel <- function(x){
@@ -58,19 +51,6 @@ cqc_fix.cqc_solution_channel <- function(x){
 cqc_fix.cqc_solution_marker <- function(x){
   cqc_fix.cqc_solution(x, cf_rename_marker)
 
-}
-
-#' Helper function to remove the outlier groups that can't be fixed
-#'
-#' @param cqc_groups the object returned by 'cqc_check'
-#' @param id the group id to be dropped from the dataset
-#' @export
-cqc_drop_groups <- function(cqc_groups, id){
-  cqc_data <- attr(cqc_groups, "data")
-  torm <- filter(cqc_groups, group_id == id) %>% pull(FCS) %>% unique()
-  cqc_data <- cqc_data[-match(torm, names(cqc_data))]
-  class(cqc_data) <- "cqc_data"
-  cqc_data
 }
 
 

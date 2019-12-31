@@ -65,29 +65,23 @@ for(cf in cqc_data)
 
 #case
 cf <- cqc_data[[1]]
-kw <- keyword(cf)
-kn <- names(kw)
-names(keyword(cf))[match("Patient ID", kn)] <- "patient id"
+cf_keyword_rename(cf, "Patient ID",  "patient id")
 
 #missing
 cf <- cqc_data[[2]]
-kw <- keyword(cf)
-kn <- names(kw)
-keyword(cf) <- kw[-match("Patient ID", kn)]
+cf_keyword_delete(cf, "Patient ID")
 
 
 #redundant
-cf <- cqc_data[[3]]
-kw <- keyword(cf)
-kw[["new_kw"]] <- "test"
-keyword(cf) <- kw
+cf <- cqc_data[[1]]
+cf_keyword_insert(cf, "new_kw", "test")
 
 
 #typo
-cf <- cqc_data[[4]]
+cf <- cqc_data[[3]]
 kw <- keyword(cf)
 kn <- names(kw)
-names(keyword(cf))[match("Patient ID", kn)] <- "patien id"
+cf_keyword_rename(cf, "Patient ID",  "PatientId")
 
 
 
@@ -103,7 +97,7 @@ knit_print(su)
 
 ## Match against reference and report the discrepancy
 ```{r}
-match_result <- cqc_match_reference(groups, ref = 4, select = c(1,2,3,6))
+match_result <- cqc_match_reference(groups, ref = 2, select = c(1,4,3,5))
 match_result
 ```
 
@@ -122,37 +116,52 @@ cqc_fix(solution)
 
 ## Drop group that has missing keyword
 ```{r}
-cqc_data <- cqc_drop_groups(groups, 6)
+groups <- cqc_drop_groups(groups, 5)
 ```
 
 
-## Continue QC on the rest groups
+## Compare the content of the two keywords
 ```{r}
-res <- cqc_match_reference(groups, ref = 4, select = 5)
-res
+sub_data_ref <- cqc_get_data(groups, id = 2)
+unique(sapply(sub_data_ref, keyword, keyword = "Patient ID"))
+
+sub_data <- cqc_get_data(groups, id = 4)
+unique(sapply(sub_data, keyword, keyword = "pt name"))
+
 ```
 
-## Check the values of the keyword to see if they mean the same 
+##  standarize the name if they are the same semantically
 ```{r}
-sub_data <- cqc_get_data(groups, select = 5)
-```
+invisible(lapply(sub_data, cf_keyword_rename, "pt name", "Patient ID"))
 
-## Drop groups that can not be fixed
-```{r}
-cqc_data <- cqc_drop_groups(groups, 1)
-length(cqc_data)
 ```
 
 ## Refresh QC report 
 ```{r}
-groups <- cqc_check(cqc_data, "keyword")
+cqc_data <- cqc_get_data(groups)
+groups <- cqc_group(cqc_data, "keyword")
 knit_print(summary(groups))
 ```
 
-## Further split the data by panel
+## Continue QC on the rest groups
 ```{r}
-grps <- cqc_check(data_list[[2]], "panel")
-diff(summary(grps))
-split(grps)
+res <- cqc_match_reference(groups, ref = 2, select = 1)
+res
 ```
+
+## split into two groups
+```{r}
+grps <- split(groups)
+grps
+```
+
+## or drop these keywords if they are not critical
+```{r}
+solution <- cqc_find_solution(res)
+solution
+cqc_fix(solution)
+knit_print(summary(cqc_group(cqc_data, "keyword")))
+
+```
+
 

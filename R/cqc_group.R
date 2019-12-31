@@ -157,6 +157,35 @@ split.cqc_group <- function(x){
   })
 }
 
+#' Helper function to remove the outlier groups that can't be fixed
+#'
+#' @param groups the object returned by 'cqc_groups'
+#' @param id the group id to be dropped from the dataset
+#' @export
+cqc_drop_groups <- function(groups, id){
+  cqc_data <- attr(groups, "data")
+  torm <- filter(groups, group_id == id) %>% pull(FCS) %>% unique()
+  cqc_data <- cqc_data[-match(torm, names(cqc_data))]
+  class(cqc_data) <- "cqc_data"
+  groups <- filter(groups, group_id != id)
+  attr(groups, "data") <- cqc_data
+  groups
+}
+
+#' Helper function to extract the data from 'cqc_groups' object
+#'
+#' @param groups the object returned by 'cqc_groups'
+#' @param id the group id to be selected from the dataset, default is NULL, meaning all data
+#' @export
+cqc_get_data <- function(groups, id = NULL){
+  cqc_data <- attr(groups, "data")
+  if(!is.null(id))
+  {
+    sel <- filter(groups, group_id == id) %>% pull(FCS) %>% unique()
+    cqc_data <- cqc_data[sel]
+  }
+  cqc_data
+}
 #' set reference
 #'
 #' It is the step prior to the further qc solution finding step.

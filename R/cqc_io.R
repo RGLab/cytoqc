@@ -1,5 +1,6 @@
 #' Load FCS files
 #' load fcs into 'cqc_data' object which is a list of cytoframes
+#' @import flowWorkspace
 #' @export
 cqc_load_fcs <- function(files, is_h5 = TRUE, ...){
   res <- sapply(files, function(file)load_cytoframe_from_fcs(file, is_h5 = is_h5, ...))
