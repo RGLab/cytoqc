@@ -129,7 +129,7 @@ cqc_fix(solution)
 
 ## Refresh QC report 
 ```{r}
-groups <- cqc_check(cqc_data, "channel")
+groups <- cqc_check(cqc_data, "keyword")
 summary(groups)
 ```
 
@@ -139,78 +139,6 @@ cqc_data <- cqc_drop_groups(groups, 1)
 length(cqc_data)
 ```
 
-## QC for marker
-```{r include=FALSE}
-#simulate channel discrepancy
-
-cf <- cqc_data[[1]]
-cf_rename_marker(cf, "CD15 FITC", "cd15")
-cf_rename_marker(cf, "CD33 APC", "apc cd33")
-
-
-#redundant
-cf <- cqc_data[[2]]
-markernames(cf) <- c(`FL2-A` = "markerA")
-
-```
-
-
-```{r}
-#summarise marker groups
-groups <- cqc_check(cqc_data, "marker")
-su <- summary(groups)
-diff(su)
-```
-
-## Pick references and groups to fix
-```{r}
-groups <- cqc_set_reference(groups, ref = 3)
-solution <- cqc_find_solution(groups, select = 1, max.distance = 0.4) 
-solution
-cqc_fix(solution)
-
-groups <- cqc_set_reference(groups, ref = 4)
-solution <- cqc_find_solution(groups, select = 2, max.distance = 0.4) 
-solution
-cqc_fix(solution)
-```
-## update checks
-```{r}
-groups <- cqc_check(cqc_data, "marker")
-su <- summary(groups)
-diff(su)
-```
-
-## split by groups
-```{r}
-data_list <- split(groups)
-data_list
-```
-
-## QC for panel 
-```{r}
-# first data set is already clean
-summary(cqc_check(data_list[[1]], "panel"))
-```
-
-
-## Save the cleaned data as FCS 
-```{r}
-cleaned <- data_list[[1]]
-```
-
-
-```{r eval=F}
-out <- tempfile()
-write_fcs(cleaned, out)
-```
-
-
-## Or Coerce it directly into `cytoset` (zero-copying)
-```{r}
-cs <- cytoset(cleaned)
-cs
-```
 
 ## Further split the data by panel
 ```{r}

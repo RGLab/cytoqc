@@ -25,6 +25,12 @@ cqc_fix.cqc_solution <- function(x, func){
                   }else if(is(x, "cqc_solution_marker"))
                   {
                     cf_rename_marker(cf, .[["from"]], "")
+                  }else if(is(x, "cqc_solution_keyword"))
+                  {
+                    kw <- keyword(cf)
+                    kn <- names(kw)
+                    keyword(cf) <- kw[-match(.[["from"]], kn)]
+
                   }else
                     stop("don't know how to proceed!")
 
@@ -33,6 +39,15 @@ cqc_fix.cqc_solution <- function(x, func){
                 tibble()
               }))
 
+}
+#' @export
+cqc_fix.cqc_solution_keyword <- function(x){
+  cqc_fix.cqc_solution(x, function(cf, from, to){
+    kw <- keyword(cf)
+    kn <- names(kw)
+    names(keyword(cf))[match(from, kn)] <- to
+
+  })
 }
 #' @export
 cqc_fix.cqc_solution_channel <- function(x){
