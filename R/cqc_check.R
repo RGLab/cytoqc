@@ -165,7 +165,7 @@ split.cqc_group <- function(x){
 #' @param ref specifies the reference, which can be either an integer group id or a characte vector giving the actual values of the reference
 #' @return the original cqc report with the reference info attached
 cqc_set_reference <- function(x, ref){
-
+  .Defunct("cqc_match_reference")
   attr(x, "reference") <- ref
   x
 }

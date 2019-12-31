@@ -27,12 +27,13 @@ cqc_match_reference.cqc_group_keyword <- function(x, ...){
 #' Only used internally.
 #'
 #' @param x cqc report returned by set_reference call
+#' @param ref specifies the reference, which can be either an integer group id or a characte vector giving the actual values of the reference
 #' @param select the group ids selected for processing
 #' @param type the qc type (either "channle", "marker")
 #' @importFrom dplyr bind_rows group_keys group_by
 #' @importFrom purrr set_names
 #' @noRd
-match_reference <- function(x, select, type, delimiter ="|"){
+match_reference <- function(x, ref, select, type, delimiter ="|"){
   sa <- summary(x)
   ref <- attr(x, "ref")
   if(is.numeric(ref))
