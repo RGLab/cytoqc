@@ -7,17 +7,8 @@ vignette: >
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
-# cytoqc -- A QC tool for openCyto
+# cytoqc -- qc for keywords
 
-*cytoqc* performs pre-cleaning, pre-gating and post-gating QC checks.
-
-## The basic workflow:
-
-1. Run `cqc_check` to see the summary
-2. `cqc_set_reference` and `cqc_find_solution` for selected groups
-3. `cqc_fix` based on the solution or `cqc_drop_groups` for unsolvable issues
-4. Iterate 1~3 steps until data is cleaned
-5. `split` the data into multiple sets for multi-panel cases
 
 ```{r include=FALSE}
 library(knitr)
@@ -87,12 +78,11 @@ cf_keyword_rename(cf, "Patient ID",  "PatientId")
 
 ```
 
-## QC check for channel
+## Group by keywords
 ```{r}
 groups <- cqc_group(cqc_data, "keyword")
 su <- summary(groups)
 knit_print(su)
-# knit_print(diff(su))
 ```
 
 ## Match against reference and report the discrepancy
@@ -105,7 +95,7 @@ match_result
 ```{r}
 
 solution <-  cqc_find_solution(match_result)
-knit_print(solution)
+solution
 ```
 
 ## Apply the fix
@@ -114,13 +104,13 @@ knit_print(solution)
 cqc_fix(solution)
 ```
 
-## Drop group that has missing keyword
+## Drop the group that has missing keyword
 ```{r}
 groups <- cqc_drop_groups(groups, 5)
 ```
 
 
-## Compare the content of the two keywords
+## Inspect the content of the two keywords that are likely to be semantically the same
 ```{r}
 sub_data_ref <- cqc_get_data(groups, id = 2)
 unique(sapply(sub_data_ref, keyword, keyword = "Patient ID"))
@@ -130,7 +120,7 @@ unique(sapply(sub_data, keyword, keyword = "pt name"))
 
 ```
 
-##  standarize the name if they are the same semantically
+##  Consolidate the two keywords if they are considered to be the same
 ```{r}
 invisible(lapply(sub_data, cf_keyword_rename, "pt name", "Patient ID"))
 
@@ -143,13 +133,13 @@ groups <- cqc_group(cqc_data, "keyword")
 knit_print(summary(groups))
 ```
 
-## Continue QC on the rest groups
+## Check the difference
 ```{r}
 res <- cqc_match_reference(groups, ref = 2, select = 1)
 res
 ```
 
-## split into two groups
+## split into two groups if they can't be merged
 ```{r}
 grps <- split(groups)
 grps

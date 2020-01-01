@@ -14,7 +14,7 @@ vignette: >
 
 ## The alternative workflow:
 
-1. Run `cqc_check` to see the summary
+1. Run `cqc_group` to see the summary
 2. Manually provide the standard parameter names and `cqc_find_solution` for selected groups
 3. `cqc_fix` based on the solution or `cqc_drop_groups` for unsolvable issues
 
@@ -68,21 +68,21 @@ markernames(cf) <- c(`FL2-A` = "markerA")
 
 ```{r}
 #summarise marker groups
-groups <- cqc_check(cqc_data, "marker")
+groups <- cqc_group(cqc_data, "marker")
 su <- summary(groups)
 knit_print(su)
 ```
 
-## Set references
+## Match against the references
 ```{r}
-groups <- cqc_set_reference(groups, ref = c("cd15", "cd45", "cd14", "cd33"))
-solution <- cqc_find_solution(groups, select = 1:5, max.distance = 0.6) 
+res <- cqc_match_reference(groups, ref = c("cd15", "cd45", "cd14", "cd33"), select = 1:5)
+solution <- cqc_find_solution(res, max.distance = 0.6) 
 solution
 cqc_fix(solution)
 ```
 ## update checks
 ```{r}
-groups <- cqc_check(cqc_data, "marker")
+groups <- cqc_group(cqc_data, "marker")
 summary(groups)
 ```
 

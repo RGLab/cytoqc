@@ -13,8 +13,8 @@ vignette: >
 
 ## The basic workflow:
 
-1. Run `cqc_check` to see the summary
-2. `cqc_set_reference` and `cqc_find_solution` for selected groups
+1. Run `cqc_group` to see the summary
+2. `cqc_match_reference` and `cqc_find_solution` for selected groups
 3. `cqc_fix` based on the solution or `cqc_drop_groups` for unsolvable issues
 4. Iterate 1~3 steps until data is cleaned
 5. `split` the data into multiple sets for multi-panel cases
@@ -86,22 +86,24 @@ cf_swap_colnames(cf, "FL1-H", "FL2-H")
 
 ## QC check for channel
 ```{r}
-groups <- cqc_check(cqc_data, "channel")
+groups <- cqc_group(cqc_data, "channel")
 su <- summary(groups)
 su
 diff(su)
 ```
 
-## Select the reference 
+## Match against the reference to find discrepancy
+
 
 ```{r}
-groups <- cqc_set_reference(groups, ref = 3)
+match_result <-  cqc_match_reference(groups, ref = 3, select = c(1, 4))
+match_result
 ```
 
+## Recommend the solution  
 
-## Recommend the fix for the selected groups 
 ```{r}
-solution <-  cqc_find_solution(groups, select = c(1, 4))
+solution <- cqc_find_solution(match_result)
 solution
 ```
 
@@ -117,22 +119,23 @@ write_csv(solution, csvfile)
 #manually edit csvfile and load it back
 solution_revised <- read_csv(csvfile)
 ```
-
 ## Apply the fix
-
 ```{r}
 cqc_fix(solution)
+
 ```
+
 
 ## Refresh QC report 
 ```{r}
-groups <- cqc_check(cqc_data, "channel")
+groups <- cqc_group(cqc_data, "channel")
 summary(groups)
 ```
 
 ## Drop groups that can not be fixed
 ```{r}
-cqc_data <- cqc_drop_groups(groups, 1)
+groups <- cqc_drop_groups(groups, 1)
+cqc_data <- cqc_get_data(groups)
 length(cqc_data)
 ```
 
@@ -154,26 +157,24 @@ markernames(cf) <- c(`FL2-A` = "markerA")
 
 ```{r}
 #summarise marker groups
-groups <- cqc_check(cqc_data, "marker")
+groups <- cqc_group(cqc_data, "marker")
 su <- summary(groups)
 diff(su)
 ```
 
 ## Pick references and groups to fix
 ```{r}
-groups <- cqc_set_reference(groups, ref = 3)
-solution <- cqc_find_solution(groups, select = 1, max.distance = 0.4) 
+solution <- cqc_find_solution(groups, ref = 3, select = 1, max.distance = 0.4) 
 solution
 cqc_fix(solution)
 
-groups <- cqc_set_reference(groups, ref = 4)
-solution <- cqc_find_solution(groups, select = 2, max.distance = 0.4) 
+solution <- cqc_find_solution(groups, ref = 4, select = 2, max.distance = 0.4) 
 solution
 cqc_fix(solution)
 ```
 ## update checks
 ```{r}
-groups <- cqc_check(cqc_data, "marker")
+groups <- cqc_group(cqc_data, "marker")
 su <- summary(groups)
 diff(su)
 ```
@@ -187,7 +188,7 @@ data_list
 ## QC for panel 
 ```{r}
 # first data set is already clean
-summary(cqc_check(data_list[[1]], "panel"))
+summary(cqc_group(data_list[[1]], "panel"))
 ```
 
 
@@ -211,7 +212,7 @@ cs
 
 ## Further split the data by panel
 ```{r}
-grps <- cqc_check(data_list[[2]], "panel")
+grps <- cqc_group(data_list[[2]], "panel")
 diff(summary(grps))
 split(grps)
 ```
