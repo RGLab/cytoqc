@@ -1,5 +1,5 @@
 #' @export
-print.cqc_data <- function(x){
+print.cqc_cf_list <- function(x){
   cat("cytoqc data: \n")
   cat(length(x), " samples \n")
 }

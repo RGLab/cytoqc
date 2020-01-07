@@ -9,7 +9,7 @@ Depends: R (>= 3.5.0)
 Imports: 
     methods,
     BiocGenerics,
-    flowCore,
+    flowCore (>= 1.53.6),
     flowWorkspace (>= 3.35.8),
     dplyr,
     kableExtra,

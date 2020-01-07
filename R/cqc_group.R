@@ -19,6 +19,8 @@ cf_get_params_tbl <- function(cf){
 #' @export
 cqc_group <- function(x, ...)UseMethod("cqc_group")
 
+cqc_group.cqc_gs_list <- function(x, ...){
+}
 #' QC check
 #'
 #' This is the first step of the entire qc workflow.
@@ -27,17 +29,17 @@ cqc_group <- function(x, ...)UseMethod("cqc_group")
 #' This provides a sample-wise data table for the further summary report.
 #'
 #' @return a tibble with 4 columns: FCS, qc type (e.g. channel), group_id and nFCS (i.e. group count)
-#' @param x cqc_data
+#' @param x cqc_cf_list
 #' @param type specify the qc type, can be "channel", "marker" or "panel"
 #' @param delimiter a special character used to separate channel and marker
 #' @examples
 #' \dontrun{
-#' groups <- cqc_group(cqc_data, "channel")
+#' groups <- cqc_group(cqc_cf_list, "channel")
 #' }
 #' @export
 #' @importFrom dplyr filter arrange pull mutate group_indices distinct count add_count
 #' @importFrom tidyr separate separate_rows
-cqc_group.cqc_data <- function(x, type = c("channel", "marker", "panel", "keyword"), delimiter = "|"){
+cqc_group.cqc_cf_list <- function(x, type = c("channel", "marker", "panel", "keyword"), delimiter = "|"){
   sep <- paste0(delimiter, delimiter)#double delimiter for sep params and single delimiter for sep channel and marker
   keys <- sapply(x, function(cf){
     if(type == "keyword")
@@ -149,10 +151,10 @@ diff.cqc_group <- function(x, vars){
 #' @importFrom purrr walk
 #' @export
 split.cqc_group <- function(x){
-  cqc_data <- attr(x, "data")
+  cqc_cf_list <- attr(x, "data")
   vec <- x %>% select(c(FCS, group_id)) %>% distinct() %>% pull(group_id)
-  split(cqc_data, vec) %>% map(function(i){
-    class(i) <- c("cqc_data", class(i))
+  split(cqc_cf_list, vec) %>% map(function(i){
+    class(i) <- c("cqc_cf_list", class(i))
     i
   })
 }
@@ -163,12 +165,12 @@ split.cqc_group <- function(x){
 #' @param id the group id to be dropped from the dataset
 #' @export
 cqc_drop_groups <- function(groups, id){
-  cqc_data <- attr(groups, "data")
+  cqc_cf_list <- attr(groups, "data")
   torm <- filter(groups, group_id == id) %>% pull(FCS) %>% unique()
-  cqc_data <- cqc_data[-match(torm, names(cqc_data))]
-  class(cqc_data) <- "cqc_data"
+  cqc_cf_list <- cqc_cf_list[-match(torm, names(cqc_cf_list))]
+  class(cqc_cf_list) <- "cqc_cf_list"
   groups <- filter(groups, group_id != id)
-  attr(groups, "data") <- cqc_data
+  attr(groups, "data") <- cqc_cf_list
   groups
 }
 
@@ -178,13 +180,13 @@ cqc_drop_groups <- function(groups, id){
 #' @param id the group id to be selected from the dataset, default is NULL, meaning all data
 #' @export
 cqc_get_data <- function(groups, id = NULL){
-  cqc_data <- attr(groups, "data")
+  cqc_cf_list <- attr(groups, "data")
   if(!is.null(id))
   {
     sel <- filter(groups, group_id == id) %>% pull(FCS) %>% unique()
-    cqc_data <- cqc_data[sel]
+    cqc_cf_list <- cqc_cf_list[sel]
   }
-  cqc_data
+  cqc_cf_list
 }
 #' set reference
 #'

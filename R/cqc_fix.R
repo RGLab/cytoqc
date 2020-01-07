@@ -10,11 +10,11 @@ cqc_fix <- function(x, ...)UseMethod("cqc_fix")
 #' @importFrom dplyr rowwise do
 cqc_fix.cqc_solution <- function(x, func){
   group <- attr(x, "group")
-  cqc_data <- attr(group, "data")
+  cqc_cf_list <- attr(group, "data")
 
   invisible(group %>% inner_join(x, "group_id") %>%
               select(FCS, from, to) %>% distinct() %>% rowwise() %>% do({
-                cf <- cqc_data[[.[["FCS"]]]]
+                cf <- cqc_cf_list[[.[["FCS"]]]]
                 if(is.na(.[["to"]]))
                 {
                   if(is(x, "cqc_solution_channel"))
