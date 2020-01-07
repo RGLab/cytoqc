@@ -26,7 +26,7 @@ print.cqc_match_result <- function(x, ...){
 #' @export
 knit_print.cqc_match_result <- function(x, ...){
   if(length(x) == 0)
-    res <- kable(data.frame(FCS = "All passed"), col.names = NULL)%>% row_spec(1, color = "green")
+    res <- kable(data.frame(object = "All passed"), col.names = NULL)%>% row_spec(1, color = "green")
   else
     res <- kable(as_tibble(x)) %>%
       row_spec(0, background = "#9ebcda", color = "black")
@@ -65,9 +65,9 @@ collapse_params <- function(x,...){
   if(type != "panel")
   {
     type <- as.symbol(type)
-    x <- group_by(x, group_id, nFCS) %>%
+    x <- group_by(x, group_id, nObject) %>%
           summarise(!!type := paste(!!type, collapse = ", ")) %>%
-      arrange(desc(nFCS))
+      arrange(desc(nObject))
     class(x) <- class_names
   }
 
@@ -92,10 +92,10 @@ knit_print.cqc_group_summary <- function(x, collapse = TRUE, ...){
 
   collaspse_idx <- match("group_id", colnames(x))
   if(is(x, "cqc_group_panel"))
-    collaspse_idx <- c(collaspse_idx, match("nFCS", colnames(x)))
+    collaspse_idx <- c(collaspse_idx, match("nObject", colnames(x)))
 
   x %>%
-    arrange(desc(nFCS)) %>%
+    arrange(desc(nObject)) %>%
     kable() %>%
      kable_styling("bordered", full_width = F, position = "left", font_size = 12) %>%
       collapse_rows(columns = collaspse_idx, "top")%>%

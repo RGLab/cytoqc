@@ -20,6 +20,13 @@ cf_get_params_tbl <- function(cf){
 cqc_group <- function(x, ...)UseMethod("cqc_group")
 
 cqc_group.cqc_gs_list <- function(x, ...){
+  cflist <- sapply(x, function(gs)get_cytoframe_from_cs(gs_pop_get_data(gs), 1))
+  cflist <- cqc_cf_list(cflist)
+  res <- cqc_group(cflist, ...)
+  class(res) <- c("cqc_group_gs", class(res))
+
+  attr(res, "data") <- x
+  res
 }
 #' QC check
 #'
@@ -28,7 +35,7 @@ cqc_group.cqc_gs_list <- function(x, ...){
 #' and compare/group them across samples.
 #' This provides a sample-wise data table for the further summary report.
 #'
-#' @return a tibble with 4 columns: FCS, qc type (e.g. channel), group_id and nFCS (i.e. group count)
+#' @return a tibble with 4 columns: object, qc type (e.g. channel), group_id and nobject (i.e. group count)
 #' @param x cqc_cf_list
 #' @param type specify the qc type, can be "channel", "marker" or "panel"
 #' @param delimiter a special character used to separate channel and marker
@@ -57,12 +64,12 @@ cqc_group.cqc_cf_list <- function(x, type = c("channel", "marker", "panel", "key
       key %>% sort() %>%
       paste(collapse = sep)
   })
-  res <- tibble(FCS = names(keys), key = keys)
+  res <- tibble(object = names(keys), key = keys)
   gid <- group_indices(res, key)
   res <- res %>%
     mutate(group_id = gid) %>%
     add_count(group_id, key) %>%
-    rename(nFCS = n) %>%
+    rename(nObject = n) %>%
     separate_rows(key, sep = paste0("\\Q", sep, "\\E"))
   if(type == "panel")
     res <- separate(res, key, c("channel", "marker"), sep = paste0("\\Q", delimiter, "\\E"))
@@ -94,7 +101,7 @@ cqc_group.cqc_cf_list <- function(x, type = c("channel", "marker", "panel", "key
 #' @export
 summary.cqc_group <- function(object){
   res <-  object %>%
-    select(-c(FCS)) %>%
+    select(-c(object)) %>%
     distinct()
   class(res) <- c("cqc_group_summary", class(res))
   res
@@ -152,7 +159,7 @@ diff.cqc_group <- function(x, vars){
 #' @export
 split.cqc_group <- function(x){
   cqc_cf_list <- attr(x, "data")
-  vec <- x %>% select(c(FCS, group_id)) %>% distinct() %>% pull(group_id)
+  vec <- x %>% select(c(object, group_id)) %>% distinct() %>% pull(group_id)
   split(cqc_cf_list, vec) %>% map(function(i){
     class(i) <- c("cqc_cf_list", class(i))
     i
@@ -166,7 +173,7 @@ split.cqc_group <- function(x){
 #' @export
 cqc_drop_groups <- function(groups, id){
   cqc_cf_list <- attr(groups, "data")
-  torm <- filter(groups, group_id == id) %>% pull(FCS) %>% unique()
+  torm <- filter(groups, group_id == id) %>% pull(object) %>% unique()
   cqc_cf_list <- cqc_cf_list[-match(torm, names(cqc_cf_list))]
   class(cqc_cf_list) <- "cqc_cf_list"
   groups <- filter(groups, group_id != id)
@@ -183,7 +190,7 @@ cqc_get_data <- function(groups, id = NULL){
   cqc_cf_list <- attr(groups, "data")
   if(!is.null(id))
   {
-    sel <- filter(groups, group_id == id) %>% pull(FCS) %>% unique()
+    sel <- filter(groups, group_id == id) %>% pull(object) %>% unique()
     cqc_cf_list <- cqc_cf_list[sel]
   }
   cqc_cf_list

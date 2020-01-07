@@ -13,8 +13,8 @@ cqc_fix.cqc_solution <- function(x, func){
   cqc_cf_list <- attr(group, "data")
 
   invisible(group %>% inner_join(x, "group_id") %>%
-              select(FCS, from, to) %>% distinct() %>% rowwise() %>% do({
-                cf <- cqc_cf_list[[.[["FCS"]]]]
+              select(object, from, to) %>% distinct() %>% rowwise() %>% do({
+                cf <- cqc_cf_list[[.[["object"]]]]
                 if(is.na(.[["to"]]))
                 {
                   if(is(x, "cqc_solution_channel"))
@@ -59,7 +59,7 @@ cqc_fix.cqc_solution_marker <- function(x){
 #   delimiter <- attr(x, "delimiter")
 #   sep <- paste0(delimiter, delimiter)
 #   x %>% count(panel_id, panel) %>%
-#       rename(nFCS = n) %>%
+#       rename(nobject = n) %>%
 #       separate_rows(panel, sep = paste0("\\Q", sep, "\\E")) %>%
 #         separate(panel, c("channel", "marker"), sep = paste0("\\Q", delimiter, "\\E"))
 # }
