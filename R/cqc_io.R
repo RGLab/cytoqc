@@ -60,6 +60,7 @@ cqc_gs_list <- function(x){
 
   if(!is.list(x))
     stop("x must be a list!")
+  # browser()
   names(x) <- lapply(x, function(gs){
                 if(!is(gs, "GatingSet"))
                   stop("Each element in x must be a GatingSet!")

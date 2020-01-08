@@ -19,6 +19,7 @@ cf_get_params_tbl <- function(cf){
 #' @export
 cqc_group <- function(x, ...)UseMethod("cqc_group")
 
+#' @export
 cqc_group.cqc_gs_list <- function(x, ...){
   cflist <- sapply(x, function(gs)get_cytoframe_from_cs(gs_pop_get_data(gs), 1))
   cflist <- cqc_cf_list(cflist)
@@ -158,10 +159,11 @@ diff.cqc_group <- function(x, vars){
 #' @importFrom purrr walk
 #' @export
 split.cqc_group <- function(x){
-  cqc_cf_list <- attr(x, "data")
+  cqc_data <- attr(x, "data")
+  data_type <- class(cqc_data)
   vec <- x %>% select(c(object, group_id)) %>% distinct() %>% pull(group_id)
-  split(cqc_cf_list, vec) %>% map(function(i){
-    class(i) <- c("cqc_cf_list", class(i))
+  split(cqc_data, vec) %>% map(function(i){
+    class(i) <- c(data_type, class(i))
     i
   })
 }
@@ -172,12 +174,13 @@ split.cqc_group <- function(x){
 #' @param id the group id to be dropped from the dataset
 #' @export
 cqc_drop_groups <- function(groups, id){
-  cqc_cf_list <- attr(groups, "data")
+  cqc_data <- attr(groups, "data")
+  data_type <- class(cqc_data)
   torm <- filter(groups, group_id == id) %>% pull(object) %>% unique()
-  cqc_cf_list <- cqc_cf_list[-match(torm, names(cqc_cf_list))]
-  class(cqc_cf_list) <- "cqc_cf_list"
+  cqc_data <- cqc_data[-match(torm, names(cqc_data))]
+  class(cqc_data) <- data_type
   groups <- filter(groups, group_id != id)
-  attr(groups, "data") <- cqc_cf_list
+  attr(groups, "data") <- cqc_data
   groups
 }
 
@@ -187,13 +190,13 @@ cqc_drop_groups <- function(groups, id){
 #' @param id the group id to be selected from the dataset, default is NULL, meaning all data
 #' @export
 cqc_get_data <- function(groups, id = NULL){
-  cqc_cf_list <- attr(groups, "data")
+  cqc_data <- attr(groups, "data")
   if(!is.null(id))
   {
     sel <- filter(groups, group_id == id) %>% pull(object) %>% unique()
-    cqc_cf_list <- cqc_cf_list[sel]
+    cqc_data <- cqc_data[sel]
   }
-  cqc_cf_list
+  cqc_data
 }
 #' set reference
 #'

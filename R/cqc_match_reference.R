@@ -33,15 +33,14 @@ cqc_match_reference.cqc_group_keyword <- function(x, ...){
 #' @importFrom dplyr bind_rows group_keys group_by
 #' @importFrom purrr set_names
 #' @noRd
-match_reference <- function(x, ref, select, type, delimiter ="|"){
-  sa <- summary(x)
+match_reference <- function(x, ref, select = NULL, type, delimiter ="|"){
+  res <- summary(x)
   if(is.numeric(ref))
-    ref <- sa %>% filter(group_id %in% ref) %>% pull(type)
+    ref <- res %>% filter(group_id %in% ref) %>% pull(type)
 
-
-  res <- sa %>%
-    filter(group_id%in%select) %>%
-    group_by(group_id)
+  if(!is.null(select))
+    res <- filter(res, group_id%in%select)
+  res <- group_by(res, group_id)
 
   res <- res %>% group_split() %>%
     map(function(df){

@@ -3,11 +3,11 @@
 \name{cqc_load_fcs}
 \alias{cqc_load_fcs}
 \title{Load FCS files
-load fcs into 'cqc_data' object which is a list of cytoframes}
+load fcs into 'cqc_cf_list' object which is a list of cytoframes}
 \usage{
 cqc_load_fcs(files, is_h5 = TRUE, ...)
 }
 \description{
 Load FCS files
-load fcs into 'cqc_data' object which is a list of cytoframes
+load fcs into 'cqc_cf_list' object which is a list of cytoframes
 }
