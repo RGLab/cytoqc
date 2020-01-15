@@ -22,7 +22,9 @@ Imports:
     tibble,
     tidyr,
     stats,
-    graphics
+    graphics,
+    Rgraphviz,
+    graph
 License: Artistic-2.0
 biocViews: Infrastructure, FlowCytometry, CellBasedAssays
 Suggests: 

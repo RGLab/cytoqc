@@ -7,6 +7,7 @@
 \method{cqc_group}{cqc_cf_list}(
   x,
   type = c("channel", "marker", "panel", "keyword"),
+  keys = NULL,
   delimiter = "|",
   ...
 )
@@ -15,6 +16,8 @@
 \item{x}{cqc_cf_list}
 
 \item{type}{specify the qc type, can be "channel", "marker" or "panel"}
+
+\item{keys}{The vector to supply the keys to be grouped on. default is NULL, which is extracted automatically from the flow data}
 
 \item{delimiter}{a special character used to separate channel and marker}
 

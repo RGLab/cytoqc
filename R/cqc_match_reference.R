@@ -21,7 +21,12 @@ cqc_match_reference.cqc_group_keyword <- function(x, ...){
   class(res) <- c("cqc_match_result_keyword", class(res))
   res
 }
-
+#' @export
+cqc_match_reference.cqc_group_gate <- function(x, ...){
+  res <- match_reference(x, type = "gate", ...)
+  class(res) <- c("cqc_match_result_gate", class(res))
+  res
+}
 #' find the the difference between the reference and target group
 #'
 #' Only used internally.

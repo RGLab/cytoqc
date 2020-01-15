@@ -28,6 +28,13 @@ cqc_find_solution.cqc_match_result_keyword <- function(x, ...){
   res
 
 }
+#' @export
+cqc_find_solution.cqc_match_result_gate <- function(x, ...){
+  res <- cqc_find_solution.cqc_match_result(x, ...)
+  attr(res, "class") <- c("cqc_solution_gate", attr(res, "class"))
+  res
+
+}
 #' Find solution to resolve the discrepancy discovered by match_reference
 #'
 #' It tries to find the aproximate match(based on 'agrep') between the target and reference as well as the extra redundunt items that can be removed.
@@ -39,7 +46,7 @@ cqc_find_solution.cqc_match_result_keyword <- function(x, ...){
 #' }
 #' @param x A CQC object of some kind. See vignettes.
 #' @param max.distance Maximum distance allowed for a match. See ?agrep
-#' @param ... additional arguments not for the user. 
+#' @param ... additional arguments not for the user.
 #' @importFrom tibble tibble add_row
 #' @importFrom utils adist
 #' @export

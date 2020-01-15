@@ -69,6 +69,8 @@ gs_pop_add(gs5, gs_pop_get_gate(gs, "CD4/CCR7+ 45RA+")[[1]], parent = "CD4")
 gs_pop_add(gs5, gs_pop_get_gate(gs, "CD4/CCR7+ 45RA-")[[1]], parent = "CD4")
 sampleNames(gs5) <- "5.fcs"
 
+#gate name typo
+gs_pop_set_name(gs5, "CD3+", "cd3")
 
 #simulate channel discrepancy
 
@@ -98,9 +100,32 @@ gs_update_channels(gs4, map = data.frame(old = c("R660-A")
 
 ```
 
-## QC check for channel
+## QC Check gates
 ```{r}
 cqc_data <- cqc_gs_list(list(gs1,gs2,gs3,gs4,gs5))
+
+#group by gates
+groups <- cqc_group(cqc_data, "gate")
+su <- summary(groups)
+knit_print(su)
+knit_print(diff(su))
+
+#vis the difference
+plot_diff(groups)
+
+# match reference
+match_result <- cqc_match_reference(groups, ref = 3, select = c(1,2,4))
+match_result
+
+solution <- cqc_find_solution(match_result)
+solution
+
+cqc_fix(solution)
+
+summary(cqc_group(cqc_data, "gate"))
+```
+## QC check for channel
+```{r}
 groups <- cqc_group(cqc_data, "channel")
 su <- summary(groups)
 su
@@ -181,6 +206,7 @@ groups <- cqc_group(cqc_data, "marker")
 summary(groups)
 
 ```
+
 
 
 

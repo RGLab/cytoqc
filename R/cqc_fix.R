@@ -53,18 +53,21 @@ cqc_delete.GatingSet <- function(x, value, type){
     # deleting channel is done through subsetting, thus only affect the view not the original data
     #    get_cytoframe_from_cs is getting a new view  of cf thus can't be updated inplace
     cols <- flowWorkspace::colnames(x)
-    j <- which(!cols %in% value)  
+    j <- which(!cols %in% value)
     cs <- cs[, j]
     gs_cyto_data(x) <- cs# thus need to assign it back to gs to take effect
+  }else if(type == "gate")
+  {
+    gs_pop_set_visibility(x, value, FALSE)
   }else{
 
     lapply(cs, function(cf){
-      cqc_delete(cf, value, type) 
+      cqc_delete(cf, value, type)
     })
 
   }
-  
-  
+
+
 
 }
 #' @export
@@ -92,7 +95,10 @@ cqc_update.GatingSet <- function(x, from, to, type,...){
                                            , new = to
                                             )
                         )
-  else
+  else if(type == "gate")
+  {
+    gs_pop_set_name(x, from, to)
+  }else
   {
    cs <-  gs_cyto_data(x)
    lapply(cs, cqc_update, from, to, type)#cs point to the original data, no need to assigning it back
