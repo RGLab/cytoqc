@@ -24,7 +24,7 @@ cqc_group.cqc_gs_list <- function(x, ...){
   cflist <- sapply(x, function(gs)get_cytoframe_from_cs(gs_pop_get_data(gs), 1))
   cflist <- cqc_cf_list(cflist)
   res <- cqc_group(cflist, ...)
-  class(res) <- c("cqc_group_gs", class(res))
+  # class(res) <- c("cqc_group_gs", class(res))
 
   attr(res, "data") <- x
   res

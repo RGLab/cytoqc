@@ -1,4 +1,4 @@
-
+#' @export
 cqc_match_reference <- function(x, ...)UseMethod("cqc_match_reference")
 
 #' @export

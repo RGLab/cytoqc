@@ -49,7 +49,7 @@ knit_print.cqc_solution <- function(x, itemize = FALSE, ...){
   x <- x %>%
     mutate("Proposed change" = ifelse(is.na(to), cell_spec(from, strikeout = TRUE), paste(from, to, sep = " --> "))) %>%
     select(-c(from, to)) %>%
-    kable(escape = F) %>%
+    kable(escape = T) %>%
     kable_styling(c("bordered", "condensed"), full_width = F, position = "left", font_size = 12) %>%
     collapse_rows(columns = 1, "top")%>%
     row_spec(0, background = "#e5f5e0", color = "black")
@@ -86,20 +86,24 @@ collapse_params <- function(x,...){
 #' @export
 knit_print.cqc_group_summary <- function(x, collapse = TRUE, ...){
 
-
+  n <- nrow(x)
   if(collapse)
     x <- collapse_params(x)
 
   collaspse_idx <- match("group_id", colnames(x))
   if(is(x, "cqc_group_panel"))
     collaspse_idx <- c(collaspse_idx, match("nObject", colnames(x)))
-
-  x %>%
+  
+  x <- x %>%
     arrange(desc(nObject)) %>%
     kable() %>%
-     kable_styling("bordered", full_width = F, position = "left", font_size = 12) %>%
-      collapse_rows(columns = collaspse_idx, "top")%>%
-        row_spec(0, background = "#e5f5e0", color = "black") %>%
-    knit_print
+     kable_styling("bordered", full_width = F, position = "left", font_size = 12) 
+  # browser()  
+  if(n > 0)
+    x = x %>%
+        collapse_rows(columns = collaspse_idx, "top")%>%
+          row_spec(0, background = "#e5f5e0", color = "black") 
+  
+  knit_print(x)
 
 }

@@ -8,6 +8,7 @@ cqc_fix <- function(x, ...)UseMethod("cqc_fix")
 #' @param x the cqc_solution returned by 'find_solution' calls
 #'
 #' @importFrom dplyr rowwise do
+#' @export
 cqc_fix.cqc_solution <- function(x, func){
   group <- attr(x, "group")
   cqc_data <- attr(group, "data")
@@ -25,9 +26,9 @@ cqc_fix.cqc_solution <- function(x, func){
               }))
 
 }
-
+#' @export
 cqc_delete <- function(x, ...)UseMethod("cqc_delete")
-
+#' @export
 cqc_delete.cytoframe <- function(x, value, type){
   if(type == "channel")
   {
@@ -44,16 +45,16 @@ cqc_delete.cytoframe <- function(x, value, type){
   }else
     stop("don't know how to proceed!")
 }
-
+#' @export
 cqc_delete.GatingSet <- function(x, ...){
   cs <- gs_cyto_data(x)#cs is a new view
   lapply(cs, cqc_delete, ...) # deleting channel is done through subsetting, thus only affect the view not the original data
   gs_cyto_data(x) <- cs# thus need to assign it back to gs to take effect
 
 }
-
+#' @export
 cqc_update <- function(x, ...)UseMethod("cqc_update")
-
+#' @export
 cqc_update.cytoframe <- function(x, from, to, type){
   if(type == "channel")
   {
@@ -69,7 +70,7 @@ cqc_update.cytoframe <- function(x, from, to, type){
     stop("don't know how to proceed!")
 
 }
-
+#' @export
 cqc_update.GatingSet <- function(x, from, to, type){
   if(type == "channel")
     gs_update_channels(x, map = data.frame(old = from

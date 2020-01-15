@@ -120,7 +120,7 @@ match_result
 
 ```{r}
 solution <- cqc_find_solution(match_result)
-solution
+knit_print(solution)
 ```
 
 ## Apply the fix
@@ -179,14 +179,14 @@ cqc_fix(solution)
 ## update checks
 ```{r}
 groups <- cqc_group(cqc_data, "marker")
-su <- summary(groups)
-diff(su)
+summary(groups)
+
 ```
 
 
 
-## Or Coerce it directly into `GatingSetList` (zero-copying)
-```{r}
+## Coerce it directly into `GatingSetList` (zero-copying)
+```{r eval=FALSE}
 gslist <- GatingSetList(cqc_data)
 gslist
 ```
