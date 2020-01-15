@@ -133,12 +133,12 @@ cqc_fix(solution)
 ## Refresh QC report 
 ```{r}
 groups <- cqc_group(cqc_data, "channel")
-summary(groups)
+knit_print(summary(groups))
 ```
 
 ## Drop groups that can not be fixed
 ```{r}
-groups <- cqc_drop_groups(groups, 1)
+groups <- cqc_drop_groups(groups, 2)
 cqc_data <- cqc_get_data(groups)
 length(cqc_data)
 ```

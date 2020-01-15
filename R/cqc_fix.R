@@ -46,10 +46,25 @@ cqc_delete.cytoframe <- function(x, value, type){
     stop("don't know how to proceed!")
 }
 #' @export
-cqc_delete.GatingSet <- function(x, ...){
+cqc_delete.GatingSet <- function(x, value, type){
   cs <- gs_cyto_data(x)#cs is a new view
-  lapply(cs, cqc_delete, ...) # deleting channel is done through subsetting, thus only affect the view not the original data
-  gs_cyto_data(x) <- cs# thus need to assign it back to gs to take effect
+  if(type == "channel")
+  {
+    # deleting channel is done through subsetting, thus only affect the view not the original data
+    #    get_cytoframe_from_cs is getting a new view  of cf thus can't be updated inplace
+    cols <- flowWorkspace::colnames(x)
+    j <- which(!cols %in% value)  
+    cs <- cs[, j]
+    gs_cyto_data(x) <- cs# thus need to assign it back to gs to take effect
+  }else{
+
+    lapply(cs, function(cf){
+      cqc_delete(cf, value, type) 
+    })
+
+  }
+  
+  
 
 }
 #' @export
