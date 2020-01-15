@@ -22,7 +22,7 @@ cqc_match_reference.cqc_group_keyword <- function(x, ...) {
   res
 }
 #' @export
-cqc_match_reference.cqc_group_gate <- function(x, ...){
+cqc_match_reference.cqc_group_gate <- function(x, ...) {
   res <- match_reference(x, type = "gate", ...)
   class(res) <- c("cqc_match_result_gate", class(res))
   res

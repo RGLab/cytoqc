@@ -19,20 +19,19 @@ cf_get_params_tbl <- function(cf) {
 cqc_group <- function(x, ...) UseMethod("cqc_group")
 
 #' @export
-cqc_group.cqc_gs_list <- function(x, type = c("channel", "marker", "panel", "keyword", "gate"), delimiter = "|", ...){
-  cflist <- sapply(x, function(gs)get_cytoframe_from_cs(gs_pop_get_data(gs), 1))#TODO:qc within gs to ensure all data are consistent
+cqc_group.cqc_gs_list <- function(x, type = c("channel", "marker", "panel", "keyword", "gate"), delimiter = "|", ...) {
+  cflist <- sapply(x, function(gs) get_cytoframe_from_cs(gs_pop_get_data(gs), 1)) # TODO:qc within gs to ensure all data are consistent
   cflist <- cqc_cf_list(cflist)
-  if(type == "gate")
-  {
+  if (type == "gate") {
     sep <- paste0(delimiter, delimiter)
-    keys <- sapply(x, function(gs){
+    keys <- sapply(x, function(gs) {
       key <- gs_get_pop_paths(gs, path = "auto")
 
-      key %>% sort() %>%
+      key %>%
+        sort() %>%
         paste(collapse = sep)
     })
-
-  }else{
+  } else {
     keys <- NULL
   }
   res <- cqc_group(cflist, type, keys, delimiter, ...)
@@ -61,24 +60,25 @@ cqc_group.cqc_gs_list <- function(x, type = c("channel", "marker", "panel", "key
 #' @export
 #' @importFrom dplyr filter arrange pull mutate group_indices distinct count add_count
 #' @importFrom tidyr separate separate_rows
-cqc_group.cqc_cf_list <- function(x, type = c("channel", "marker", "panel", "keyword"), keys = NULL, delimiter = "|", ...){
-  sep <- paste0(delimiter, delimiter)#double delimiter for sep params and single delimiter for sep channel and marker
-  if(is.null(keys))
-  {
-    keys <- sapply(x, function(cf){
-      if(type == "keyword")
-      {
+cqc_group.cqc_cf_list <- function(x, type = c("channel", "marker", "panel", "keyword"), keys = NULL, delimiter = "|", ...) {
+  sep <- paste0(delimiter, delimiter) # double delimiter for sep params and single delimiter for sep channel and marker
+  if (is.null(keys)) {
+    keys <- sapply(x, function(cf) {
+      if (type == "keyword") {
         key <- names(keyword(cf, compact = TRUE))
-      }else{
-        key <- cf_get_params_tbl(cf) #%>% arrange(channel)
-        if(type != "channel")
+      } else {
+        key <- cf_get_params_tbl(cf) # %>% arrange(channel)
+        if (type != "channel") {
           key <- filter(key, is.na(marker) == FALSE)
-        if(type == "panel")
+        }
+        if (type == "panel") {
           key <- unite(key, panel, channel, marker, sep = delimiter)
+        }
         key <- key[[type]]
       }
 
-        key %>% sort() %>%
+      key %>%
+        sort() %>%
         paste(collapse = sep)
     })
   }
@@ -128,13 +128,11 @@ summary.cqc_group <- function(object, ...) {
 }
 
 #' @export
-diff.cqc_group_gate <- function(x,...){
-
+diff.cqc_group_gate <- function(x, ...) {
   diff.cqc_group(x, c("gate"))
 }
 #' @export
-diff.cqc_group_keyword <- function(x,...){
-
+diff.cqc_group_keyword <- function(x, ...) {
   diff.cqc_group(x, c("keyword"))
 }
 
@@ -198,19 +196,20 @@ split.cqc_group <- function(x, f, drop = FALSE, ...) {
 #' @param groups \code{cqc_group_gate} grouping resulte from \link{cqc_group}.
 #' @export
 #' @import Rgraphviz graph
-plot_diff <- function(groups){
+plot_diff <- function(groups) {
   grps <- split(groups)
   df <- diff(summary(groups))
 
   nGrps <- length(grps)
   # par(mfrow = c(1,nGrps))
 
-  for(grpid in names(grps))
+  for (grpid in names(grps))
   {
     message("processing group: ", grpid)
     gs <- grps[[grpid]][[1]]
-   if(!is(gs,"GatingSet"))
+    if (!is(gs, "GatingSet")) {
       stop("Expecting a GatingSet!")
+    }
     gh <- gs[[1]]
 
     g <- flowWorkspace:::.getGraph(gh)
@@ -220,92 +219,94 @@ plot_diff <- function(groups){
     message("hide/tag the common nodes ...")
     node.path2 <- gs_get_pop_paths(gh, showHidden = TRUE, path = 3)
     thisNodeSet <- gs_get_pop_paths(gs, path = "auto")
-    commonNodes <- setdiff(thisNodeSet,nodes.uncommon)
+    commonNodes <- setdiff(thisNodeSet, nodes.uncommon)
 
-    for(node in commonNodes)
+    for (node in commonNodes)
     {
       nodeID <- flowWorkspace:::.getNodeInd(gh, node) - 1
 
       node.label <- paste0("N_", nodeID)
       nodeData(g, node.label, attr = "common") <- TRUE
       children <- gs_pop_get_children(gs, node, path = "auto")
-      #keep the direct parent of uncommon node
-      if(!any(children%in%nodes.uncommon)||node=="root")
+      # keep the direct parent of uncommon node
+      if (!any(children %in% nodes.uncommon) || node == "root") {
         nodeData(g, node.label, attr = "hidden") <- "1"
-      else
-      {
-        nodeData(g, node.label, attr = "label") <- node.path2[nodeID+1]
+      } else {
+        nodeData(g, node.label, attr = "label") <- node.path2[nodeID + 1]
       }
     }
 
 
-    #filter out hidden node
-    nodes.hidden <- nodeData(g,attr="hidden")
-    for(i in 1:length(nodes.hidden))
+    # filter out hidden node
+    nodes.hidden <- nodeData(g, attr = "hidden")
+    for (i in 1:length(nodes.hidden))
     {
-      if(as.logical(as.integer(nodes.hidden[[i]]))){
-
+      if (as.logical(as.integer(nodes.hidden[[i]]))) {
         nodeID <- names(nodes.hidden[i])
 
         g <- removeNode(nodeID, g)
       }
-
     }
     message("Rendering the substree ...")
-    graphAttr <- list(rankdir="LR",page=c(8.5,11))
+    graphAttr <- list(rankdir = "LR", page = c(8.5, 11))
     nAttrs <- list()
     nodes <- nodes(g)
-    if(length(nodes) == 0)
-    {
+    if (length(nodes) == 0) {
       g <- addNode("Root", g)
       g <- addNode("Common nodes", g)
       g <- addEdge("Root", "Common nodes", g)
       nodes <- nodes(g)
       nLabel <- nodes
       names(nLabel) <- nodes
-      plot(g
-           , nodeAttrs = list(label = nLabel)
-           ,attrs = list(graph = graphAttr
-                         ,node = list(fixedsize = FALSE
-                                      , fillcolor = "gray"
-                                      , shape = "rectangle"
-                         )
-                         # ,edge = list(col = "transparent")
-           )
-           , main = paste0("Group ", grpid))
+      plot(g,
+        nodeAttrs = list(label = nLabel),
+        attrs = list(
+          graph = graphAttr,
+          node = list(
+            fixedsize = FALSE,
+            fillcolor = "gray",
+            shape = "rectangle"
+          )
+          # ,edge = list(col = "transparent")
+        ),
+        main = paste0("Group ", grpid)
+      )
       # plot.new()
       next
     }
 
-    common.flags <- nodeData(g,attr="common")
-    nAttrs$label <- unlist(nodeData(g,attr="label"))
-    nAttrs$fillcolor <- sapply(common.flags
-                               ,function(iscommon)
-                               {
-                                 ifelse(iscommon,"gray","red")
-                               })
-    nAttrs$lty <- sapply(common.flags
-                         ,function(iscommon)
-                         {
-                           ifelse(!iscommon,"dotted","solid")
-                         })
+    common.flags <- nodeData(g, attr = "common")
+    nAttrs$label <- unlist(nodeData(g, attr = "label"))
+    nAttrs$fillcolor <- sapply(
+      common.flags,
+      function(iscommon) {
+        ifelse(iscommon, "gray", "red")
+      }
+    )
+    nAttrs$lty <- sapply(
+      common.flags,
+      function(iscommon) {
+        ifelse(!iscommon, "dotted", "solid")
+      }
+    )
 
-    #pass plot parameters to node attributes (some of parameters won't work via passing to layoutGraph directly)
-    nAttrs[["fixedsize"]] <- sapply(common.flags, function(i)FALSE)
-    nAttrs[["shape"]] <- sapply(common.flags
-                                ,function(iscommon)
-                                {
-                                  ifelse(iscommon,"rectangle","ellipse")
-                                })
+    # pass plot parameters to node attributes (some of parameters won't work via passing to layoutGraph directly)
+    nAttrs[["fixedsize"]] <- sapply(common.flags, function(i) FALSE)
+    nAttrs[["shape"]] <- sapply(
+      common.flags,
+      function(iscommon) {
+        ifelse(iscommon, "rectangle", "ellipse")
+      }
+    )
     # params <- list(...)
     # for(pname in names(params))
     #   nAttrs[[pname]] <- sapply(nodes, function(i)params[[pname]])
     nodeRenderInfo(g) <- nAttrs
 
-    plot(g,nodeAttrs = nAttrs,attrs=list(graph=graphAttr)
-         , main = paste0("Group ", grpid)
+    plot(g,
+      nodeAttrs = nAttrs, attrs = list(graph = graphAttr),
+      main = paste0("Group ", grpid)
     )
-
   }
 }
 

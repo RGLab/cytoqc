@@ -49,17 +49,14 @@ cqc_delete.GatingSet <- function(x, value, type, ...) {
     cols <- flowWorkspace::colnames(x)
     j <- which(!cols %in% value)
     cs <- cs[, j]
-    gs_cyto_data(x) <- cs# thus need to assign it back to gs to take effect
-  }else if(type == "gate")
-  {
+    gs_cyto_data(x) <- cs # thus need to assign it back to gs to take effect
+  } else if (type == "gate") {
     gs_pop_set_visibility(x, value, FALSE)
-  }else{
-
-    lapply(cs, function(cf){
+  } else {
+    lapply(cs, function(cf) {
       cqc_delete(cf, value, type)
     })
   }
-
 }
 #' @export
 cqc_update <- function(x, ...) UseMethod("cqc_update")
@@ -76,19 +73,16 @@ cqc_update.cytoframe <- function(x, from, to, type, ...) {
   }
 }
 #' @export
-cqc_update.GatingSet <- function(x, from, to, type,...){
-  if(type == "channel")
-    gs_update_channels(x, map = data.frame(old = from
-                                           , new = to
-                                            )
-                        )
-  else if(type == "gate")
-  {
+cqc_update.GatingSet <- function(x, from, to, type, ...) {
+  if (type == "channel") {
+    gs_update_channels(x, map = data.frame(
+      old = from,
+      new = to
+    ))
+  } else if (type == "gate") {
     gs_pop_set_name(x, from, to)
-  }else
-  {
-   cs <-  gs_cyto_data(x)
-   lapply(cs, cqc_update, from, to, type)#cs point to the original data, no need to assigning it back
-
+  } else {
+    cs <- gs_cyto_data(x)
+    lapply(cs, cqc_update, from, to, type) # cs point to the original data, no need to assigning it back
   }
 }

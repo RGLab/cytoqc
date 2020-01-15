@@ -26,11 +26,10 @@ cqc_find_solution.cqc_match_result_keyword <- function(x, ...) {
   res
 }
 #' @export
-cqc_find_solution.cqc_match_result_gate <- function(x, ...){
+cqc_find_solution.cqc_match_result_gate <- function(x, ...) {
   res <- cqc_find_solution.cqc_match_result(x, ...)
   attr(res, "class") <- c("cqc_solution_gate", attr(res, "class"))
   res
-
 }
 #' Find solution to resolve the discrepancy discovered by match_reference
 #'
