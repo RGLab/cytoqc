@@ -22,6 +22,6 @@ It tries to find the aproximate match(based on 'agrep') between the target and r
 }
 \examples{
 \dontrun{
-solution <-  cqc_find_solution(groups, select = c(1, 4))
+solution <- cqc_find_solution(groups, select = c(1, 4))
 }
 }
