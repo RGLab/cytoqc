@@ -3,11 +3,16 @@
 \name{cqc_load_fcs}
 \alias{cqc_load_fcs}
 \title{Load FCS files
-load fcs into 'cqc_cf_list' object which is a list of cytoframes}
+load fcs into 'cqc_cf_list' object which is a list of cytoframes.
+This is the method to construct the core data object for cytoQC.}
 \usage{
 cqc_load_fcs(files, is_h5 = TRUE, ...)
 }
+\arguments{
+\item{is_h5}{\code{logical} should the cytoframe be constructed as an h5 disk-backed structure. Default \code{TRUE}.}
+}
 \description{
 Load FCS files
-load fcs into 'cqc_cf_list' object which is a list of cytoframes
+load fcs into 'cqc_cf_list' object which is a list of cytoframes.
+This is the method to construct the core data object for cytoQC.
 }

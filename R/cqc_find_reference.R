@@ -48,7 +48,7 @@ cqc_find_params_reference <- function(cqc_cf_list, type = c("channel", "marker")
 cqc_remove_not_in_reference <- function(x, ...)UseMethod("cqc_remove_not_in_reference")
 #' @importFrom flowWorkspace colnames
 #' @export
-cqc_remove_not_in_reference.cqc_report_channel <- function(x, cqc_cf_list){
+cqc_remove_not_in_reference.cqc_report_channel <- function(x, cqc_cf_list,...){
   for(sn in names(x))
   {
     check_result <- x[[sn]]
@@ -65,7 +65,7 @@ cqc_remove_not_in_reference.cqc_report_channel <- function(x, cqc_cf_list){
   }
 }
 #' @export
-cqc_remove_not_in_reference.cqc_report_marker <- function(x, cqc_cf_list){
+cqc_remove_not_in_reference.cqc_report_marker <- function(x, cqc_cf_list,...){
   for(sn in names(x))
   {
     check_result <- x[[sn]]

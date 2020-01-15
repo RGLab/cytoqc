@@ -67,7 +67,7 @@ Distribution based outlier detection functions.
 These different outlier detection functions are used together with qaCheck method to perform outlier checks.
 }
 \seealso{
-\code{\link{qaCheck}},\code{\link[QUALIFIER:qaReport]{qaReport}}
+\code{\link[QUALIFIER:qaCheck]{qaCheck}},\code{\link[QUALIFIER:qaReport]{qaReport}}
 }
 \author{
 Mike Jiang,Greg Finak

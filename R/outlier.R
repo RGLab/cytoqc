@@ -21,11 +21,13 @@
 #'@author Mike Jiang,Greg Finak
 #'
 #'Maintainer: Mike Jiang <wjiang2@@fhcrc.org>
-#'@seealso \code{\link{qaCheck}},\code{\link[QUALIFIER:qaReport]{qaReport}}
+#'@seealso \code{\link[QUALIFIER:qaCheck]{qaCheck}},\code{\link[QUALIFIER:qaReport]{qaReport}}
 #'@keywords functions
-#' @rdname outlierFunctions
-#' @export
-#' @aliases rlm outlierFunctions
+#'@importFrom graphics abline
+#'@importFrom stats dbeta dt mad median optim pbeta pnorm pt
+#'@rdname outlierFunctions
+#'@export
+#'@aliases rlm outlierFunctions
 proportion.outliers.robust<-function (x, alpha = 0.01,isUpper=TRUE,isLower=TRUE)
 {
 	outliers<-rep(FALSE,length(x))

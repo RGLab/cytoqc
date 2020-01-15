@@ -3,7 +3,7 @@ title: A QC tool for openCyto 2
 output: rmarkdown::html_vignette
 always_allow_html: yes
 vignette: >
-  %\VignetteIndexEntry{cytoqc2}
+  %\VignetteIndexEntry{cytoqc=pregating-alt}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 
@@ -28,8 +28,7 @@ library(kableExtra)
 ```{r}
 library(flowCore)
 library(flowWorkspace)
-# library(cytoqc)
-devtools::load_all("../")
+library(cytoqc)
 ```
 
 ```{r include=FALSE}

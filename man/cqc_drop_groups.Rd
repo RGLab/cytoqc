@@ -2,7 +2,7 @@
 % Please edit documentation in R/cqc_group.R
 \name{cqc_drop_groups}
 \alias{cqc_drop_groups}
-\title{Helper function to remove the outlier groups that can't be fixed}
+\title{Remove outlier groups from the result of 'cqc_group'.}
 \usage{
 cqc_drop_groups(groups, id)
 }
@@ -12,5 +12,5 @@ cqc_drop_groups(groups, id)
 \item{id}{the group id to be dropped from the dataset}
 }
 \description{
-Helper function to remove the outlier groups that can't be fixed
+Remove outlier groups from the result of 'cqc_group'.
 }

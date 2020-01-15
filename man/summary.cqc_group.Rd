@@ -2,12 +2,14 @@
 % Please edit documentation in R/cqc_group.R
 \name{summary.cqc_group}
 \alias{summary.cqc_group}
-\title{Provide the summary view of the qc report}
+\title{Provide the summary view of the cqc_group report.}
 \usage{
-\method{summary}{cqc_group}(object)
+\method{summary}{cqc_group}(object, ...)
 }
 \arguments{
 \item{object}{qc table returned by 'cqc_group'}
+
+\item{...}{Additional arguments not for the user. Ignore.}
 }
 \description{
 It summarise the sample-wise qc report into group overview report for reference selection and further QC action.

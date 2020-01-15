@@ -10,5 +10,5 @@ cqc_cf_list(x)
 \item{x}{a list of 'cytoframe' objects}
 }
 \description{
-For the methods dispatching purpose
+This is the core data object for CytoQC.
 }

@@ -2,15 +2,17 @@
 % Please edit documentation in R/cqc_io.R
 \name{write_fcs.cqc_cf_list}
 \alias{write_fcs.cqc_cf_list}
-\title{The helper function to write the cleaned cqc_cf_list back to fcs}
+\title{Write out tidied flow data (cqc_cf_list) back to fcs}
 \usage{
-\method{write_fcs}{cqc_cf_list}(x, out, verbose = TRUE)
+\method{write_fcs}{cqc_cf_list}(x, out, verbose = TRUE, ...)
 }
 \arguments{
 \item{x}{cqc_cf_list}
 
 \item{out}{the output directory that the FCS will be written}
+
+\item{...}{additional arguments.}
 }
 \description{
-The helper function to write the cleaned cqc_cf_list back to fcs
+Write out tidied flow data (cqc_cf_list) back to fcs
 }

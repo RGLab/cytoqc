@@ -2,7 +2,7 @@
 % Please edit documentation in R/cqc_group.R
 \name{cqc_get_data}
 \alias{cqc_get_data}
-\title{Helper function to extract the data from 'cqc_groups' object}
+\title{Extract the data from the result of a 'cqc_groups' call.}
 \usage{
 cqc_get_data(groups, id = NULL)
 }
@@ -12,5 +12,5 @@ cqc_get_data(groups, id = NULL)
 \item{id}{the group id to be selected from the dataset, default is NULL, meaning all data}
 }
 \description{
-Helper function to extract the data from 'cqc_groups' object
+Extract the data from the result of a 'cqc_groups' call.
 }

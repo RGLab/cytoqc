@@ -2,9 +2,9 @@
 % Please edit documentation in R/cqc_group.R
 \name{split.cqc_group}
 \alias{split.cqc_group}
-\title{Split the samples into groups}
+\title{Split the result of 'cqc_group' into groups}
 \usage{
-\method{split}{cqc_group}(x)
+\method{split}{cqc_group}(x, f, drop = FALSE, ...)
 }
 \description{
 It is used to split samples into separate groups when they can't be reconciled into the sampe group.

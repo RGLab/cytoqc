@@ -6,10 +6,10 @@ cqc_fix <- function(x, ...)UseMethod("cqc_fix")
 #'
 #' Peform the actual fixing action (i.e update or delete)
 #' @param x the cqc_solution returned by 'find_solution' calls
-#'
+#' @param ... addiitional arguments not for the user.
 #' @importFrom dplyr rowwise do
 #' @export
-cqc_fix.cqc_solution <- function(x, func){
+cqc_fix.cqc_solution <- function(x,...){
   group <- attr(x, "group")
   cqc_data <- attr(group, "data")
   type <- sub("cqc_solution_", "", class(x)[[1]])
@@ -29,7 +29,7 @@ cqc_fix.cqc_solution <- function(x, func){
 #' @export
 cqc_delete <- function(x, ...)UseMethod("cqc_delete")
 #' @export
-cqc_delete.cytoframe <- function(x, value, type){
+cqc_delete.cytoframe <- function(x, value, type, ...){
   if(type == "channel")
   {
     cols <- flowWorkspace::colnames(x)
@@ -55,7 +55,7 @@ cqc_delete.GatingSet <- function(x, ...){
 #' @export
 cqc_update <- function(x, ...)UseMethod("cqc_update")
 #' @export
-cqc_update.cytoframe <- function(x, from, to, type){
+cqc_update.cytoframe <- function(x, from, to, type,...){
   if(type == "channel")
   {
     flowWorkspace:::setChannel(x@pointer, from, to)
@@ -71,7 +71,7 @@ cqc_update.cytoframe <- function(x, from, to, type){
 
 }
 #' @export
-cqc_update.GatingSet <- function(x, from, to, type){
+cqc_update.GatingSet <- function(x, from, to, type,...){
   if(type == "channel")
     gs_update_channels(x, map = data.frame(old = from
                                            , new = to

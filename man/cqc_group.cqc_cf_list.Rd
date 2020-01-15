@@ -2,12 +2,13 @@
 % Please edit documentation in R/cqc_group.R
 \name{cqc_group.cqc_cf_list}
 \alias{cqc_group.cqc_cf_list}
-\title{QC check}
+\title{Perform a QC check on flow data.}
 \usage{
 \method{cqc_group}{cqc_cf_list}(
   x,
   type = c("channel", "marker", "panel", "keyword"),
-  delimiter = "|"
+  delimiter = "|",
+  ...
 )
 }
 \arguments{
@@ -16,6 +17,8 @@
 \item{type}{specify the qc type, can be "channel", "marker" or "panel"}
 
 \item{delimiter}{a special character used to separate channel and marker}
+
+\item{...}{additional arguments.}
 }
 \value{
 a tibble with 4 columns: object, qc type (e.g. channel), group_id and nobject (i.e. group count)

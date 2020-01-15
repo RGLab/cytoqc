@@ -31,16 +31,19 @@ cqc_find_solution.cqc_match_result_keyword <- function(x, ...){
 #' Find solution to resolve the discrepancy discovered by match_reference
 #'
 #' It tries to find the aproximate match(based on 'agrep') between the target and reference as well as the extra redundunt items that can be removed.
-#'
+#' @name cqc_find_solution
 #' @return a table (with 'from' and 'to' columns) represents the itemized fix recommendation. When 'to' is 'NA', it means the entry is redundunt and can be removed
 #' @examples
 #' \dontrun{
 #' solution <-  cqc_find_solution(groups, select = c(1, 4))
 #' }
+#' @param x A CQC object of some kind. See vignettes.
 #' @param max.distance Maximum distance allowed for a match. See ?agrep
+#' @param ... additional arguments not for the user. 
 #' @importFrom tibble tibble add_row
+#' @importFrom utils adist
 #' @export
-cqc_find_solution.cqc_match_result <- function(x, max.distance = 0.1){
+cqc_find_solution.cqc_match_result <- function(x, max.distance = 0.1,...){
   res <- map_dfr(x, function(check_result)
   {
     unknown <- check_result[["unknown"]]

@@ -1,6 +1,9 @@
 #' Load FCS files
-#' load fcs into 'cqc_cf_list' object which is a list of cytoframes
+#' load fcs into 'cqc_cf_list' object which is a list of cytoframes.
+#' This is the method to construct the core data object for cytoQC.
+#' @param is_h5 \code{logical} should the cytoframe be constructed as an h5 disk-backed structure. Default \code{TRUE}.
 #' @import flowWorkspace
+#' @importFrom methods is
 #' @export
 cqc_load_fcs <- function(files, is_h5 = TRUE, ...){
   res <- sapply(files, function(file)load_cytoframe_from_fcs(file, is_h5 = is_h5, ...))
@@ -10,7 +13,7 @@ cqc_load_fcs <- function(files, is_h5 = TRUE, ...){
 
 #' Construct a 'cqc_cf_list' object from a list of 'cytoframe' objects
 #'
-#' For the methods dispatching purpose
+#' This is the core data object for CytoQC.
 #'
 #' @param x a list of 'cytoframe' objects
 #' @export
@@ -32,11 +35,13 @@ cqc_cf_list <- function(x){
 #' @export
 write_fcs <- function(x, ...)UseMethod("write_fcs")
 
-#' The helper function to write the cleaned cqc_cf_list back to fcs
+#' Write out tidied flow data (cqc_cf_list) back to fcs
 #' @param x cqc_cf_list
+#' @param ... additional arguments.
 #' @param out the output directory that the FCS will be written
+#' @importFrom flowCore write.FCS
 #' @export
-write_fcs.cqc_cf_list <- function(x, out, verbose = TRUE){
+write_fcs.cqc_cf_list <- function(x, out, verbose = TRUE,...){
   if(!dir.exists(out))
     dir.create(out)
   for(sn in names(x))

@@ -2,7 +2,7 @@
 % Please edit documentation in R/cqc_group.R
 \name{cqc_set_reference}
 \alias{cqc_set_reference}
-\title{set reference}
+\title{Set a reference sample for further QC.}
 \usage{
 cqc_set_reference(x, ref)
 }
@@ -15,5 +15,5 @@ cqc_set_reference(x, ref)
 the original cqc report with the reference info attached
 }
 \description{
-It is the step prior to the further qc solution finding step.
+This is the first step prior to finding a QC solution for a data set.
 }

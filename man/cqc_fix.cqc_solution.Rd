@@ -4,10 +4,12 @@
 \alias{cqc_fix.cqc_solution}
 \title{Apply the cqc_solution}
 \usage{
-\method{cqc_fix}{cqc_solution}(x, func)
+\method{cqc_fix}{cqc_solution}(x, ...)
 }
 \arguments{
 \item{x}{the cqc_solution returned by 'find_solution' calls}
+
+\item{...}{addiitional arguments not for the user.}
 }
 \description{
 Peform the actual fixing action (i.e update or delete)
