@@ -8,20 +8,19 @@
 #' @importFrom dplyr select rename
 #' @importFrom flowCore parameters
 #' @noRd
-cf_get_params_tbl <- function(cf){
+cf_get_params_tbl <- function(cf) {
   pData(parameters(cf)) %>%
     as.tibble() %>%
-      select(c("name", "desc")) %>%
-        rename(channel = name, marker = desc)
-
+    select(c("name", "desc")) %>%
+    rename(channel = name, marker = desc)
 }
 
 #' @export
-cqc_group <- function(x, ...)UseMethod("cqc_group")
+cqc_group <- function(x, ...) UseMethod("cqc_group")
 
 #' @export
-cqc_group.cqc_gs_list <- function(x, ...){
-  cflist <- sapply(x, function(gs)get_cytoframe_from_cs(gs_pop_get_data(gs), 1))
+cqc_group.cqc_gs_list <- function(x, ...) {
+  cflist <- sapply(x, function(gs) get_cytoframe_from_cs(gs_pop_get_data(gs), 1))
   cflist <- cqc_cf_list(cflist)
   res <- cqc_group(cflist, ...)
   # class(res) <- c("cqc_group_gs", class(res))
@@ -48,22 +47,24 @@ cqc_group.cqc_gs_list <- function(x, ...){
 #' @export
 #' @importFrom dplyr filter arrange pull mutate group_indices distinct count add_count
 #' @importFrom tidyr separate separate_rows
-cqc_group.cqc_cf_list <- function(x, type = c("channel", "marker", "panel", "keyword"), delimiter = "|",...){
-  sep <- paste0(delimiter, delimiter)#double delimiter for sep params and single delimiter for sep channel and marker
-  keys <- sapply(x, function(cf){
-    if(type == "keyword")
-    {
+cqc_group.cqc_cf_list <- function(x, type = c("channel", "marker", "panel", "keyword"), delimiter = "|", ...) {
+  sep <- paste0(delimiter, delimiter) # double delimiter for sep params and single delimiter for sep channel and marker
+  keys <- sapply(x, function(cf) {
+    if (type == "keyword") {
       key <- names(keyword(cf, compact = TRUE))
-    }else{
-      key <- cf_get_params_tbl(cf) #%>% arrange(channel)
-      if(type != "channel")
+    } else {
+      key <- cf_get_params_tbl(cf) # %>% arrange(channel)
+      if (type != "channel") {
         key <- filter(key, is.na(marker) == FALSE)
-      if(type == "panel")
+      }
+      if (type == "panel") {
         key <- unite(key, panel, channel, marker, sep = delimiter)
+      }
       key <- key[[type]]
     }
 
-      key %>% sort() %>%
+    key %>%
+      sort() %>%
       paste(collapse = sep)
   })
   res <- tibble(object = names(keys), key = keys)
@@ -73,10 +74,11 @@ cqc_group.cqc_cf_list <- function(x, type = c("channel", "marker", "panel", "key
     add_count(group_id, key) %>%
     rename(nObject = n) %>%
     separate_rows(key, sep = paste0("\\Q", sep, "\\E"))
-  if(type == "panel")
+  if (type == "panel") {
     res <- separate(res, key, c("channel", "marker"), sep = paste0("\\Q", delimiter, "\\E"))
-  else
+  } else {
     res <- rename(res, !!type := key)
+  }
 
 
   #
@@ -99,11 +101,10 @@ cqc_group.cqc_cf_list <- function(x, type = c("channel", "marker", "panel", "key
 #' @examples
 #' \dontrun{
 #' su <- summary(groups)
-#'
 #' }
 #' @export
-summary.cqc_group <- function(object,...){
-  res <-  object %>%
+summary.cqc_group <- function(object, ...) {
+  res <- object %>%
     select(-c(object)) %>%
     distinct()
   class(res) <- c("cqc_group_summary", class(res))
@@ -111,25 +112,21 @@ summary.cqc_group <- function(object,...){
 }
 
 #' @export
-diff.cqc_group_keyword <- function(x,...){
-
+diff.cqc_group_keyword <- function(x, ...) {
   diff.cqc_group(x, c("keyword"))
 }
 
 #' @export
-diff.cqc_group_channel <- function(x,...){
-
+diff.cqc_group_channel <- function(x, ...) {
   diff.cqc_group(x, c("channel"))
 }
 
 #' @export
-diff.cqc_group_marker <- function(x,...){
-
+diff.cqc_group_marker <- function(x, ...) {
   diff.cqc_group(x, c("marker"))
 }
 #' @export
-diff.cqc_group_panel <- function(x,...){
-
+diff.cqc_group_panel <- function(x, ...) {
   diff.cqc_group(x, c("channel", "marker"))
 }
 
@@ -142,17 +139,16 @@ diff.cqc_group_panel <- function(x,...){
 #' \dontrun{
 #' su <- summary(groups)
 #' diff(su)
-#'
 #' }
 #' @importFrom dplyr group_split inner_join anti_join
 #' @importFrom purrr reduce map map_dfr
 #' @export
-diff.cqc_group <- function(x, vars, ...){
+diff.cqc_group <- function(x, vars, ...) {
   grps <- x %>%
     group_split(group_id)
   commons <- grps %>% reduce(inner_join, by = vars)
   grps %>%
-    map_dfr(anti_join, y = commons, by = vars)  %>%
+    map_dfr(anti_join, y = commons, by = vars) %>%
     `class<-`(value = class(x))
 }
 
@@ -162,11 +158,14 @@ diff.cqc_group <- function(x, vars, ...){
 #'
 #' @importFrom purrr walk
 #' @export
-split.cqc_group <- function(x, f,drop=FALSE,...){
+split.cqc_group <- function(x, f, drop = FALSE, ...) {
   cqc_data <- attr(x, "data")
   data_type <- class(cqc_data)
-  vec <- x %>% select(c(object, group_id)) %>% distinct() %>% pull(group_id)
-  split(cqc_data, vec) %>% map(function(i){
+  vec <- x %>%
+    select(c(object, group_id)) %>%
+    distinct() %>%
+    pull(group_id)
+  split(cqc_data, vec) %>% map(function(i) {
     class(i) <- c(data_type, class(i))
     i
   })
@@ -177,10 +176,12 @@ split.cqc_group <- function(x, f,drop=FALSE,...){
 #' @param groups the object returned by 'cqc_groups'
 #' @param id the group id to be dropped from the dataset
 #' @export
-cqc_drop_groups <- function(groups, id){
+cqc_drop_groups <- function(groups, id) {
   cqc_data <- attr(groups, "data")
   data_type <- class(cqc_data)
-  torm <- filter(groups, group_id == id) %>% pull(object) %>% unique()
+  torm <- filter(groups, group_id == id) %>%
+    pull(object) %>%
+    unique()
   cqc_data <- cqc_data[-match(torm, names(cqc_data))]
   class(cqc_data) <- data_type
   groups <- filter(groups, group_id != id)
@@ -193,11 +194,12 @@ cqc_drop_groups <- function(groups, id){
 #' @param groups the object returned by 'cqc_groups'
 #' @param id the group id to be selected from the dataset, default is NULL, meaning all data
 #' @export
-cqc_get_data <- function(groups, id = NULL){
+cqc_get_data <- function(groups, id = NULL) {
   cqc_data <- attr(groups, "data")
-  if(!is.null(id))
-  {
-    sel <- filter(groups, group_id == id) %>% pull(object) %>% unique()
+  if (!is.null(id)) {
+    sel <- filter(groups, group_id == id) %>%
+      pull(object) %>%
+      unique()
     cqc_data <- cqc_data[sel]
   }
   cqc_data
@@ -209,7 +211,7 @@ cqc_get_data <- function(groups, id = NULL){
 #' @param x cqc report generated by 'cqc_group'
 #' @param ref specifies the reference, which can be either an integer group id or a characte vector giving the actual values of the reference
 #' @return the original cqc report with the reference info attached
-cqc_set_reference <- function(x, ref){
+cqc_set_reference <- function(x, ref) {
   .Defunct("cqc_match_reference")
   attr(x, "reference") <- ref
   x

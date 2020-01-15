@@ -17,6 +17,5 @@ It summarise the sample-wise qc report into group overview report for reference 
 \examples{
 \dontrun{
 su <- summary(groups)
-
 }
 }

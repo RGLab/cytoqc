@@ -20,6 +20,5 @@ Display the differences among QC groups
 \dontrun{
 su <- summary(groups)
 diff(su)
-
 }
 }

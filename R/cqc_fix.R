@@ -1,6 +1,6 @@
 
 #' @export
-cqc_fix <- function(x, ...)UseMethod("cqc_fix")
+cqc_fix <- function(x, ...) UseMethod("cqc_fix")
 
 #' Apply the cqc_solution
 #'
@@ -9,93 +9,76 @@ cqc_fix <- function(x, ...)UseMethod("cqc_fix")
 #' @param ... addiitional arguments not for the user.
 #' @importFrom dplyr rowwise do
 #' @export
-cqc_fix.cqc_solution <- function(x,...){
+cqc_fix.cqc_solution <- function(x, ...) {
   group <- attr(x, "group")
   cqc_data <- attr(group, "data")
   type <- sub("cqc_solution_", "", class(x)[[1]])
   invisible(group %>% inner_join(x, "group_id") %>%
-              select(object, from, to) %>% distinct() %>% rowwise() %>% do({
-                obj <- cqc_data[[.[["object"]]]]
-                if(is.na(.[["to"]]))
-                {
-                  cqc_delete(obj, .[["from"]], type)
-
-                }else
-                  cqc_update(obj, .[["from"]], .[["to"]], type)
-                tibble()
-              }))
-
+    select(object, from, to) %>% distinct() %>% rowwise() %>% do({
+      obj <- cqc_data[[.[["object"]]]]
+      if (is.na(.[["to"]])) {
+        cqc_delete(obj, .[["from"]], type)
+      } else {
+        cqc_update(obj, .[["from"]], .[["to"]], type)
+      }
+      tibble()
+    }))
 }
 #' @export
-cqc_delete <- function(x, ...)UseMethod("cqc_delete")
+cqc_delete <- function(x, ...) UseMethod("cqc_delete")
 #' @export
-cqc_delete.cytoframe <- function(x, value, type, ...){
-  if(type == "channel")
-  {
+cqc_delete.cytoframe <- function(x, value, type, ...) {
+  if (type == "channel") {
     cols <- flowWorkspace::colnames(x)
     j <- which(!cols %in% value)
     flowWorkspace:::subset_cytoframe_by_cols(x@pointer, j - 1)
-  }else if(type == "marker")
-  {
+  } else if (type == "marker") {
     cf_rename_marker(x, value, "")
-  }else if(type == "keyword")
-  {
+  } else if (type == "keyword") {
     cf_keyword_delete(x, value)
-
-  }else
+  } else {
     stop("don't know how to proceed!")
+  }
 }
 #' @export
-cqc_delete.GatingSet <- function(x, value, type){
-  cs <- gs_cyto_data(x)#cs is a new view
-  if(type == "channel")
-  {
+cqc_delete.GatingSet <- function(x, value, type, ...) {
+  cs <- gs_cyto_data(x) # cs is a new view
+  if (type == "channel") {
     # deleting channel is done through subsetting, thus only affect the view not the original data
     #    get_cytoframe_from_cs is getting a new view  of cf thus can't be updated inplace
     cols <- flowWorkspace::colnames(x)
-    j <- which(!cols %in% value)  
+    j <- which(!cols %in% value)
     cs <- cs[, j]
-    gs_cyto_data(x) <- cs# thus need to assign it back to gs to take effect
-  }else{
-
-    lapply(cs, function(cf){
-      cqc_delete(cf, value, type) 
+    gs_cyto_data(x) <- cs # thus need to assign it back to gs to take effect
+  } else {
+    lapply(cs, function(cf) {
+      cqc_delete(cf, value, type)
     })
-
   }
-  
-  
-
 }
 #' @export
-cqc_update <- function(x, ...)UseMethod("cqc_update")
+cqc_update <- function(x, ...) UseMethod("cqc_update")
 #' @export
-cqc_update.cytoframe <- function(x, from, to, type,...){
-  if(type == "channel")
-  {
+cqc_update.cytoframe <- function(x, from, to, type, ...) {
+  if (type == "channel") {
     flowWorkspace:::setChannel(x@pointer, from, to)
-  }else if(type == "marker")
-  {
+  } else if (type == "marker") {
     cf_rename_marker(x, from, to)
-  }else if(type == "keyword")
-  {
+  } else if (type == "keyword") {
     cf_keyword_rename(x, from, to)
-
-  }else
+  } else {
     stop("don't know how to proceed!")
-
+  }
 }
 #' @export
-cqc_update.GatingSet <- function(x, from, to, type,...){
-  if(type == "channel")
-    gs_update_channels(x, map = data.frame(old = from
-                                           , new = to
-                                            )
-                        )
-  else
-  {
-   cs <-  gs_cyto_data(x)
-   lapply(cs, cqc_update, from, to, type)#cs point to the original data, no need to assigning it back
-
+cqc_update.GatingSet <- function(x, from, to, type, ...) {
+  if (type == "channel") {
+    gs_update_channels(x, map = data.frame(
+      old = from,
+      new = to
+    ))
+  } else {
+    cs <- gs_cyto_data(x)
+    lapply(cs, cqc_update, from, to, type) # cs point to the original data, no need to assigning it back
   }
 }
