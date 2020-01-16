@@ -37,6 +37,7 @@ knit_print.cqc_match_result <- function(x, ...) {
     knit_print()
 }
 
+#' @importFrom htmltools htmlEscape
 #' @importFrom kableExtra collapse_rows cell_spec column_spec
 #' @importFrom dplyr %>% select distinct mutate_if
 #' @importFrom tidyr unite
@@ -48,10 +49,10 @@ knit_print.cqc_solution <- function(x, itemize = FALSE, ...) {
       distinct()
   }
 
-  x <- x %>%
+  x <- x %>% mutate(from = htmlEscape(from), to = htmlEscape(to)) %>%
     mutate("Proposed change" = ifelse(is.na(to), cell_spec(from, strikeout = TRUE), paste(from, to, sep = " --> "))) %>%
     select(-c(from, to)) %>%
-    kable(escape = T) %>%
+    kable(escape = F) %>%
     kable_styling(c("bordered", "condensed"), full_width = F, position = "left", font_size = 12) %>%
     collapse_rows(columns = 1, "top") %>%
     row_spec(0, background = "#e5f5e0", color = "black")
