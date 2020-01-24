@@ -19,7 +19,7 @@ cqc_find_reference_marker <- function(cqc_cf_list, ...) {
 cqc_find_params_reference <- function(cqc_cf_list, type = c("channel", "marker"), delimiter = "|") {
   sep <- paste0(delimiter, delimiter) # double delimiter for sep params and single delimiter for sep channel and marker
   keys <- sapply(cqc_cf_list, function(cf) {
-    params <- cf_get_params_tbl(cf) %>% arrange(channel)
+    params <- cf_get_panel(cf) %>% arrange(channel)
     if (type == "channel") {
       params <- params[["channel"]]
     } else {

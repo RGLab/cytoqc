@@ -2,18 +2,27 @@
 
 #' Extract channel/marker info from a cytoframe object
 #'
+#' @param cf cytoframe
+#' @param skip_na whether to skip the entries with marker unset (i.e. NA)
 #'
 #' @return a tibble with two columns: "channel" and 'marker'
 #' @importFrom tibble as.tibble
 #' @importFrom dplyr select rename
 #' @importFrom flowCore parameters
-#' @noRd
-cf_get_params_tbl <- function(cf) {
-  pData(parameters(cf)) %>%
+#' @export
+cf_get_panel <- function(cf, skip_na = FALSE) {
+  res <- pData(parameters(cf)) %>%
     as.tibble() %>%
     select(c("name", "desc")) %>%
     rename(channel = name, marker = desc)
+
+  if(skip_na)
+    res <- filter(res, is.na(marker) == FALSE)
+
+  res
 }
+
+
 
 #' @export
 cqc_group <- function(x, ...) UseMethod("cqc_group")
@@ -67,7 +76,7 @@ cqc_group.cqc_cf_list <- function(x, type = c("channel", "marker", "panel", "key
       if (type == "keyword") {
         key <- names(keyword(cf, compact = TRUE))
       } else {
-        key <- cf_get_params_tbl(cf) # %>% arrange(channel)
+        key <- cf_get_panel(cf) # %>% arrange(channel)
         if (type != "channel") {
           key <- filter(key, is.na(marker) == FALSE)
         }
@@ -227,7 +236,7 @@ plot_diff <- function(groups) {
 
       node.label <- paste0("N_", nodeID)
       nodeData(g, node.label, attr = "common") <- TRUE
-      children <- gs_pop_get_children(gs, node, path = "auto")
+      children <- gs_pop_get_children(gs[[1]], node, path = "auto")
       # keep the direct parent of uncommon node
       if (!any(children %in% nodes.uncommon) || node == "root") {
         nodeData(g, node.label, attr = "hidden") <- "1"
