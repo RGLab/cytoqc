@@ -30,7 +30,7 @@ cqc_cf_list <- function(x) {
       stop("Each element in x must be a cytoframe!")
     }
   }
-  class(x) <- c("cqc_cf_list", class(x))
+  class(x) <- c("cqc_cf_list", "cqc_data", class(x))
   x
 }
 
@@ -75,6 +75,6 @@ cqc_gs_list <- function(x) {
     }
     identifier(gs)
   })
-  class(x) <- c("cqc_gs_list", class(x))
+  class(x) <- c("cqc_gs_list", "cqc_data", class(x))
   x
 }

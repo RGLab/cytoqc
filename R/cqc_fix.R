@@ -86,3 +86,70 @@ cqc_update.GatingSet <- function(x, from, to, type, ...) {
     lapply(cs, cqc_update, from, to, type) # cs point to the original data, no need to assigning it back
   }
 }
+
+#' Update panel info
+#'
+#' It updates either 'channel' or 'marker' info depends on the value of 'ref.col'
+#' if ref.col is set to 'channel', then 'channel' column from 'panel' is used as the
+#' reference to be matched against 'cqc_data' and 'marker'  will be set according to 'panel'
+#'
+#' @param x cqc_data
+#' @param panel a tibble contains channel and marker colums (typically returned by 'cf_get_panel` )
+#' @param ref.col the column used as the reference, either 'channel' or 'marker'
+#' @export
+cqc_set_panel <- function(x, panel, ref.col, ...) UseMethod("cqc_set_panel")
+
+#' @export
+cqc_set_panel.cqc_data <- function(x, ...){
+  for(i in x)
+    cqc_set_panel(i, ...)
+}
+
+#' @export
+cqc_set_panel.GatingSet <- function(x,  panel, ref.col, ...){
+  cols <- c("channel", "marker")
+  ref.col <- match.arg(ref.col, cols)
+  cs <- gs_cyto_data(x)
+
+  if (ref.col == "marker") {
+    if(!setequal(colnames(panel), cols))
+      stop("invalid 'panel' info")
+
+    target.col <- cols[-match(ref.col, cols)]
+    old <- paste0(target.col, ".x")
+    new <- paste0(target.col, ".y")
+    cf <- get_cytoframe_from_cs(cs, 1)
+
+    tbl <- cf_get_panel(cf, skip_na = TRUE) %>%
+      inner_join(panel, by = ref.col) %>%
+      filter(get(old) != get(new))
+    if(nrow(tbl) > 0)
+      gs_update_channels(x, map = data.frame(
+                                        old = tbl[[old]],
+                                        new = tbl[[new]]
+                                      )
+                       )
+  } else {
+    lapply(cs, cqc_set_panel,  panel, ref.col, ...) # cs point to the original data, no need to assigning it back
+  }
+}
+#' @export
+cqc_set_panel.cytoframe <- function(x, panel, ref.col, ...){
+  cols <- c("channel", "marker")
+  ref.col <- match.arg(ref.col,cols)
+  if(!setequal(colnames(panel), cols))
+    stop("invalid 'panel' info")
+  target.col <- cols[-match(ref.col, cols)]
+  old <- paste0(target.col, ".x")
+  new <- paste0(target.col, ".y")
+  # fun <- get(paste0("cf_rename_", target.col))
+  cf_get_panel(x, skip_na = TRUE) %>%
+    inner_join(panel, by = ref.col) %>%
+    filter(get(old) != get(new)) %>%
+    rowwise() %>% do({
+      # browser()
+      # fun(x, .[[old]], .[[new]])
+      cqc_update(x, .[[old]], .[[new]], type = target.col)
+    })
+
+}
