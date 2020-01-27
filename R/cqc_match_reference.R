@@ -1,3 +1,11 @@
+#' find the the difference between the reference and target group
+#'
+#'
+#' @param x cqc_group object returned by cqc_group call
+#' @param ...
+#'        ref specifies the reference, which can be either an integer group id or a characte vector giving the actual values of the reference
+#'        select the group ids selected for processing
+#'        type the qc type (either "channle", "marker", "gate")
 #' @export
 cqc_match_reference <- function(x, ...) UseMethod("cqc_match_reference")
 

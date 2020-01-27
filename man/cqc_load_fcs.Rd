@@ -9,7 +9,11 @@ This is the method to construct the core data object for cytoQC.}
 cqc_load_fcs(files, is_h5 = TRUE, ...)
 }
 \arguments{
+\item{files}{the fcs file paths}
+
 \item{is_h5}{\code{logical} should the cytoframe be constructed as an h5 disk-backed structure. Default \code{TRUE}.}
+
+\item{...}{parameters passed to 'load_cytoframe_from_fcs'}
 }
 \description{
 Load FCS files

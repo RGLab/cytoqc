@@ -2,22 +2,29 @@
 % Please edit documentation in R/print.R
 \name{knit_print.cqc_group_summary}
 \alias{knit_print.cqc_group_summary}
-\title{#' @export
-print.cqc_group_summary <- function(x, collapse = TRUE, ...){
+\title{print.cqc_group_summary <- function(x, collapse = TRUE, ...){
   if(collapse)
     x <- collapse_params(x)
   class(x) <- class(x)[-1]
   print(x)
-}}
+}
+Customized knit print for cqc_group_summary}
 \usage{
 \method{knit_print}{cqc_group_summary}(x, collapse = TRUE, ...)
 }
+\arguments{
+\item{x}{cqc_group_summary object returned by 'summary' call on `cqc_group`}
+
+\item{collapse}{whether to collapse the same information within each group}
+
+\item{...}{not used}
+}
 \description{
-#' @export
 print.cqc_group_summary <- function(x, collapse = TRUE, ...){
   if(collapse)
     x <- collapse_params(x)
   class(x) <- class(x)[-1]
   print(x)
 }
+Customized knit print for cqc_group_summary
 }

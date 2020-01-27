@@ -1,7 +1,9 @@
 #' Load FCS files
 #' load fcs into 'cqc_cf_list' object which is a list of cytoframes.
 #' This is the method to construct the core data object for cytoQC.
+#' @param files the fcs file paths
 #' @param is_h5 \code{logical} should the cytoframe be constructed as an h5 disk-backed structure. Default \code{TRUE}.
+#' @param ... parameters passed to 'load_cytoframe_from_fcs'
 #' @import flowWorkspace
 #' @importFrom methods is
 #' @export
@@ -34,13 +36,14 @@ cqc_cf_list <- function(x) {
   x
 }
 
-#' @export
-write_fcs <- function(x, ...) UseMethod("write_fcs")
-
 #' Write out tidied flow data (cqc_cf_list) back to fcs
 #' @param x cqc_cf_list
 #' @param ... additional arguments.
-#' @param out the output directory that the FCS will be written
+#'   out the output directory that the FCS will be written
+#'   verbose whether to print each sample name during the writing process
+#' @export
+write_fcs <- function(x, ...) UseMethod("write_fcs")
+
 #' @importFrom flowCore write.FCS
 #' @export
 write_fcs.cqc_cf_list <- function(x, out, verbose = TRUE, ...) {

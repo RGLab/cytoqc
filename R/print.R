@@ -76,7 +76,8 @@ collapse_params <- function(x, ...) {
 
   x
 }
-#' #' @export
+
+# #' @export
 #' print.cqc_group_summary <- function(x, collapse = TRUE, ...){
 #'   if(collapse)
 #'     x <- collapse_params(x)
@@ -84,6 +85,12 @@ collapse_params <- function(x, ...) {
 #'   print(x)
 #' }
 
+#' Customized knit print for cqc_group_summary
+#'
+#'
+#' @param x cqc_group_summary object returned by 'summary' call on `cqc_group`
+#' @param collapse whether to collapse the same information within each group
+#' @param ... not used
 #' @importFrom dplyr ungroup everything
 #' @export
 knit_print.cqc_group_summary <- function(x, collapse = TRUE, ...) {

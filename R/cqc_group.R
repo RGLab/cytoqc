@@ -23,7 +23,23 @@ cf_get_panel <- function(cf, skip_na = FALSE) {
 }
 
 
-
+#' Perform a QC check on flow data.
+#'
+#' This is the first step of the entire qc workflow.
+#' It extracts meta information(specified by 'type' argument) from the raw data
+#' and compare/group them across samples.
+#' This provides a sample-wise data table for the further summary report.
+#'
+#' @return a tibble with 4 columns: object, qc type (e.g. channel), group_id and nobject (i.e. group count)
+#' @param x cqc_cf_list
+#' @param ... additional arguments.
+#'  type specify the qc type, can be "channel", "marker" or "panel"
+#'  delimiter a special character used to separate channel and marker
+#'  keys The vector to supply the keys to be grouped on. default is NULL, which is extracted automatically from the flow data
+#' @examples
+#' \dontrun{
+#' groups <- cqc_group(cqc_cf_list, "channel")
+#' }
 #' @export
 cqc_group <- function(x, ...) UseMethod("cqc_group")
 
@@ -49,23 +65,7 @@ cqc_group.cqc_gs_list <- function(x, type = c("channel", "marker", "panel", "key
   attr(res, "data") <- x
   res
 }
-#' Perform a QC check on flow data.
-#'
-#' This is the first step of the entire qc workflow.
-#' It extracts meta information(specified by 'type' argument) from the raw data
-#' and compare/group them across samples.
-#' This provides a sample-wise data table for the further summary report.
-#'
-#' @return a tibble with 4 columns: object, qc type (e.g. channel), group_id and nobject (i.e. group count)
-#' @param x cqc_cf_list
-#' @param type specify the qc type, can be "channel", "marker" or "panel"
-#' @param delimiter a special character used to separate channel and marker
-#' @param keys The vector to supply the keys to be grouped on. default is NULL, which is extracted automatically from the flow data
-#' @param ... additional arguments.
-#' @examples
-#' \dontrun{
-#' groups <- cqc_group(cqc_cf_list, "channel")
-#' }
+
 #' @export
 #' @importFrom dplyr filter arrange pull mutate group_indices distinct count add_count
 #' @importFrom tidyr separate separate_rows
@@ -186,6 +186,8 @@ diff.cqc_group <- function(x, vars, ...) {
 #' It is used to split samples into separate groups when they can't be reconciled into the sampe group.
 #'
 #' @importFrom purrr walk
+#' @param x cqc_group object
+#' @param f,drop,... not used
 #' @export
 split.cqc_group <- function(x, f, drop = FALSE, ...) {
   cqc_data <- attr(x, "data")
@@ -202,7 +204,7 @@ split.cqc_group <- function(x, f, drop = FALSE, ...) {
 
 #' visualize the tree structure differnece among the GatingSets
 #'
-#' @param groups \code{cqc_group_gate} grouping resulte from \link{cqc_group}.
+#' @param groups \code{cqc_group_gate} grouping resulte from \code{cqc_group}.
 #' @export
 #' @import Rgraphviz graph
 plot_diff <- function(groups) {

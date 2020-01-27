@@ -7,7 +7,7 @@
 plot_diff(groups)
 }
 \arguments{
-\item{groups}{\code{cqc_group_gate} grouping resulte from \link{cqc_group}.}
+\item{groups}{\code{cqc_group_gate} grouping resulte from \code{cqc_group}.}
 }
 \description{
 visualize the tree structure differnece among the GatingSets

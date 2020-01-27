@@ -12,6 +12,8 @@ cqc_set_panel(x, panel, ref.col, ...)
 \item{panel}{a tibble contains channel and marker colums (typically returned by 'cf_get_panel` )}
 
 \item{ref.col}{the column used as the reference, either 'channel' or 'marker'}
+
+\item{...}{unused}
 }
 \description{
 It updates either 'channel' or 'marker' info depends on the value of 'ref.col'

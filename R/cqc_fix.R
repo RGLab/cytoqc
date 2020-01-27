@@ -1,12 +1,11 @@
-
-#' @export
-cqc_fix <- function(x, ...) UseMethod("cqc_fix")
-
 #' Apply the cqc_solution
 #'
 #' Peform the actual fixing action (i.e update or delete)
 #' @param x the cqc_solution returned by 'find_solution' calls
 #' @param ... addiitional arguments not for the user.
+#' @export
+cqc_fix <- function(x, ...) UseMethod("cqc_fix")
+
 #' @importFrom dplyr rowwise do
 #' @export
 cqc_fix.cqc_solution <- function(x, ...) {
@@ -24,8 +23,17 @@ cqc_fix.cqc_solution <- function(x, ...) {
       tibble()
     }))
 }
+
+#' Delete methods for cyto data
+#'
+#' It is typically called automatically by cqc_fix call
+#'
+#' @param x cytoframe or GatingSet
+#' @param value the value to be deleted
+#' @param type one of qc task "channel", "marker", "keyword", "gate"
+#' @param ... unused
 #' @export
-cqc_delete <- function(x, ...) UseMethod("cqc_delete")
+cqc_delete <- function(x, value, type, ...) UseMethod("cqc_delete")
 #' @export
 cqc_delete.cytoframe <- function(x, value, type, ...) {
   if (type == "channel") {
@@ -58,8 +66,18 @@ cqc_delete.GatingSet <- function(x, value, type, ...) {
     })
   }
 }
+
+#' Update methods for cyto data
+#'
+#' It is typically called automatically by cqc_fix call
+#'
+#' @param x cytoframe or GatingSet
+#' @param from the old value to be updated
+#' @param to the old value to be updated
+#' @param type one of qc task "channel", "marker", "keyword", "gate"
+#' @param ... unused
 #' @export
-cqc_update <- function(x, ...) UseMethod("cqc_update")
+cqc_update <- function(x, from, to, type, ...) UseMethod("cqc_update")
 #' @export
 cqc_update.cytoframe <- function(x, from, to, type, ...) {
   if (type == "channel") {
@@ -96,6 +114,7 @@ cqc_update.GatingSet <- function(x, from, to, type, ...) {
 #' @param x cqc_data
 #' @param panel a tibble contains channel and marker colums (typically returned by 'cf_get_panel` )
 #' @param ref.col the column used as the reference, either 'channel' or 'marker'
+#' @param ... unused
 #' @export
 cqc_set_panel <- function(x, panel, ref.col, ...) UseMethod("cqc_set_panel")
 

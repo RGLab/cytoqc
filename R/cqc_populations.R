@@ -1,3 +1,7 @@
+#' post-gating qc check
+#' @param gs GatingSet
+#' @param nodes the populations to check
+#' @param plot whether to plot the gates
 #' @importFrom tidyr pivot_longer pivot_wider
 #' @importFrom shiny shinyApp fluidPage fluidRow column wellPanel selectInput plotOutput renderPlot nearPoints
 #' @importFrom ggcyto autoplot

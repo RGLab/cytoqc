@@ -6,6 +6,11 @@
 \usage{
 \method{split}{cqc_group}(x, f, drop = FALSE, ...)
 }
+\arguments{
+\item{x}{cqc_group object}
+
+\item{f, drop, ...}{not used}
+}
 \description{
 It is used to split samples into separate groups when they can't be reconciled into the sampe group.
 }
