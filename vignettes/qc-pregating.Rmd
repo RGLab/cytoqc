@@ -65,7 +65,7 @@ thisfile <- files[2]
 fr <- read.FCS(thisfile)
 new_col <- exprs(fr)[,8,drop=F]
 colnames(new_col) <- "channelA"
-fr <- cbind2(fr, new_col)
+fr <- fr_append_cols(fr, new_col)
 write.FCS(fr, files[2])
 cqc_data[[2]] <- load_cytoframe_from_fcs(thisfile, is_h5 = TRUE)
 
