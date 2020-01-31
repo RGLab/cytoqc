@@ -80,32 +80,27 @@ summary(check_results)
 
 ## Match against the reference
 ```{r}
-res <- cqc_match(check_results, ref) 
+res <- cqc_match(check_results, ref = 3) 
 res
 ```
-
-*Show the itemized details*
+## Recommend the fix
 ```{r}
-format(solution, itemize = TRUE)
+solution <- cqc_recommend(res)
+solution
 ```
 
-## Export/import the `solution` for revision (if needed)
-```{r eval=FALSE}
-library(readr)
-write_csv(solution, csvfile)
-#manually edit csvfile and load it back
-solution_revised <- read_csv(csvfile)
-```
+
 
 ## Apply the fix
 
 ```{r}
-cqc_params_fix(cqc_data, solution)
+cqc_fix(solution)
 ```
+
 ## Update QC report
 ```{r}
-check_results <- cqc_params_check(cqc_data, reference, type = "channel")
-format(check_results)
+check_results <- cqc_prepare(cqc_data, type = "channel")
+summary(check_results)
 ```
 
 ## Drop redundant channel
@@ -121,12 +116,7 @@ cqc_data <- cqc_drop_samples(cqc_data, check_results)
 length(cqc_data)
 ```
 
-## QC for marker
-```{r eval=FALSE}
-reference <- cqc_params_find_reference(cqc_data, type = "marker")
-check_results <- cqc_params_check(cqc_data, reference, type = "marker")
-format(check_results)
-```
+
 
 
 

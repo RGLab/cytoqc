@@ -49,13 +49,20 @@ cqc_match.cqc_prepare_gate <- function(x, ...) {
 match_reference <- function(x, ref, select = NULL, type, delimiter = "|") {
   res <- summary(x)
   if (is.numeric(ref)) {
+    refid <- ref
     ref <- res %>%
       filter(group_id %in% ref) %>%
       pull(type)
-  }
+  }else
+    refid <- -1
 
   if (!is.null(select)) {
     res <- filter(res, group_id %in% select)
+  }else
+  {
+    if(refid>0)
+      res <- filter(res, group_id != refid)
+
   }
   res <- group_by(res, group_id)
 
