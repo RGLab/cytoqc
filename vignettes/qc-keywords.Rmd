@@ -79,7 +79,7 @@ cf_keyword_rename(cf, "Patient ID",  "PatientId")
 
 ## Group by keywords
 ```{r}
-groups <- cqc_group(cqc_data, "keyword")
+groups <- cqc_prepare(cqc_data, "keyword")
 su <- summary(groups)
 knit_print(su)
 ```
@@ -128,7 +128,7 @@ invisible(lapply(sub_data, cf_keyword_rename, "pt name", "Patient ID"))
 ## Refresh QC report 
 ```{r}
 cqc_data <- cqc_get_data(groups)
-groups <- cqc_group(cqc_data, "keyword")
+groups <- cqc_prepare(cqc_data, "keyword")
 knit_print(summary(groups))
 ```
 
@@ -149,7 +149,7 @@ grps
 solution <- cqc_recommend(res)
 solution
 cqc_fix(solution)
-knit_print(summary(cqc_group(cqc_data, "keyword")))
+knit_print(summary(cqc_prepare(cqc_data, "keyword")))
 
 ```
 

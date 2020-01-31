@@ -2,7 +2,7 @@
 #' @export
 cqc_recommend <- function(x, ...) UseMethod("cqc_recommend")
 #' @export
-cqc_recommend.cqc_group <- function(x, max.distance = 0.1, ...) {
+cqc_recommend.cqc_prepare <- function(x, max.distance = 0.1, ...) {
   match_result <- cqc_match(groups, ...)
   cqc_recommend(match_result, max.distance = max.distance)
 }

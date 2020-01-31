@@ -64,7 +64,7 @@ knit_print.cqc_solution <- function(x, itemize = FALSE, ...) {
 #' @importFrom dplyr summarise
 collapse_params <- function(x, ...) {
   class_names <- class(x)
-  type <- sub("cqc_group_", "", class_names[2])
+  type <- sub("cqc_prepare_", "", class_names[2])
   if (type != "panel") {
     type <- as.symbol(type)
     x <- group_by(x, group_id, nObject) %>%
@@ -78,29 +78,29 @@ collapse_params <- function(x, ...) {
 }
 
 # #' @export
-#' print.cqc_group_summary <- function(x, collapse = TRUE, ...){
+#' print.cqc_prepare_summary <- function(x, collapse = TRUE, ...){
 #'   if(collapse)
 #'     x <- collapse_params(x)
 #'   class(x) <- class(x)[-1]
 #'   print(x)
 #' }
 
-#' Customized knit print for cqc_group_summary
+#' Customized knit print for cqc_prepare_summary
 #'
 #'
-#' @param x cqc_group_summary object returned by 'summary' call on `cqc_group`
+#' @param x cqc_prepare_summary object returned by 'summary' call on `cqc_prepare`
 #' @param collapse whether to collapse the same information within each group
 #' @param ... not used
 #' @importFrom dplyr ungroup everything
 #' @export
-knit_print.cqc_group_summary <- function(x, collapse = TRUE, ...) {
+knit_print.cqc_prepare_summary <- function(x, collapse = TRUE, ...) {
   n <- nrow(x)
   if (collapse) {
     x <- collapse_params(x)
   }
 
   collaspse_idx <- match("group_id", colnames(x))
-  if (is(x, "cqc_group_panel")) {
+  if (is(x, "cqc_prepare_panel")) {
     collaspse_idx <- c(collaspse_idx, match("nObject", colnames(x)))
   }
 
