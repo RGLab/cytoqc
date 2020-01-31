@@ -16,11 +16,11 @@
 #' This object can be viewed using \code{summary}.
 #' A nice print out of the \code{cqc_group} for reports can be generated with \code{knit_print}.
 #'
-#' Next a reference group is chosen using \code{cqc_match_reference()} and passing in a vector of channels or markers to use as the referece.
+#' Next a reference group is chosen using \code{cqc_match()} and passing in a vector of channels or markers to use as the referece.
 #' Alterately one can pass in the group_id of the group to use as a reference.
 #' This returns a \code{cqc_match_result}.
 #'
-#' Next we resolve discrepancies using \code{cqc_find_solution} on the \code{cqc_match_result}.
+#' Next we resolve discrepancies using \code{cqc_recommend} on the \code{cqc_match_result}.
 #' This will propose several ways to resolve discrepancies in the markers, channels, or panel.
 #' Again, a pretty print out can be generated using \code{knit_print}.
 #'

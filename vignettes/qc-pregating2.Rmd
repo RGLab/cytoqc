@@ -15,7 +15,7 @@ vignette: >
 ## The alternative workflow:
 
 1. Run `cqc_group` to see the summary
-2. Manually provide the standard parameter names and `cqc_find_solution` for selected groups
+2. Manually provide the standard parameter names and `cqc_recommend` for selected groups
 3. `cqc_fix` based on the solution or `cqc_drop_groups` for unsolvable issues
 
 ```{r include=FALSE}
@@ -74,8 +74,8 @@ knit_print(su)
 
 ## Match against the references
 ```{r}
-res <- cqc_match_reference(groups, ref = c("cd15", "cd45", "cd14", "cd33"), select = 1:5)
-solution <- cqc_find_solution(res, max.distance = 0.6) 
+res <- cqc_match(groups, ref = c("cd15", "cd45", "cd14", "cd33"), select = 1:5)
+solution <- cqc_recommend(res, max.distance = 0.6) 
 solution
 cqc_fix(solution)
 ```

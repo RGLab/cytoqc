@@ -86,14 +86,14 @@ knit_print(su)
 
 ## Match against reference and report the discrepancy
 ```{r}
-match_result <- cqc_match_reference(groups, ref = 2, select = c(1,4,3,5))
+match_result <- cqc_match(groups, ref = 2, select = c(1,4,3,5))
 match_result
 ```
 
 ## Recommend the fix for the selected groups 
 ```{r}
 
-solution <-  cqc_find_solution(match_result)
+solution <-  cqc_recommend(match_result)
 solution
 ```
 
@@ -134,7 +134,7 @@ knit_print(summary(groups))
 
 ## Check the difference
 ```{r}
-res <- cqc_match_reference(groups, ref = 2, select = 1)
+res <- cqc_match(groups, ref = 2, select = 1)
 res
 ```
 
@@ -146,7 +146,7 @@ grps
 
 ## or drop these keywords if they are not critical
 ```{r}
-solution <- cqc_find_solution(res)
+solution <- cqc_recommend(res)
 solution
 cqc_fix(solution)
 knit_print(summary(cqc_group(cqc_data, "keyword")))

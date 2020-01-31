@@ -52,10 +52,10 @@ knit_print(diff(su))
 plot_diff(groups)
 
 # match reference
-match_result <- cqc_match_reference(groups, ref = 1, select = c(2))
+match_result <- cqc_match(groups, ref = 1, select = c(2))
 match_result
 
-solution <- cqc_find_solution(match_result)
+solution <- cqc_recommend(match_result)
 solution
 
 cqc_fix(solution)
@@ -82,10 +82,10 @@ knit_print(diff(su))
 
 ## Markers are more standardized and go ahead to further clean it
 ```{r}
-res <- cqc_match_reference(groups, ref = 3, select = c(1,2,4,5,6)) 
+res <- cqc_match(groups, ref = 3, select = c(1,2,4,5,6)) 
 res
 
-solution <- cqc_find_solution(res, max.distance = 0.6)
+solution <- cqc_recommend(res, max.distance = 0.6)
 solution
 cqc_fix(solution)
 
@@ -99,10 +99,10 @@ knit_print(summary(groups))
 
 ## Relax string matching to clean up the rest
 ```{r}
-res <- cqc_match_reference(groups, ref = 2, select = c(1)) 
+res <- cqc_match(groups, ref = 2, select = c(1)) 
 res
 
-solution <- cqc_find_solution(res, max.distance = 0.8)
+solution <- cqc_recommend(res, max.distance = 0.8)
 solution
 cqc_fix(solution)
 
@@ -130,10 +130,10 @@ knit_print(diff(su))
 
 ## Remove `H/W` channels
 ```{r}
-res <- cqc_match_reference(groups, ref = 4, select = c(1,2,3)) 
+res <- cqc_match(groups, ref = 4, select = c(1,2,3)) 
 res
 
-solution <- cqc_find_solution(res, max.distance = 0.6)
+solution <- cqc_recommend(res, max.distance = 0.6)
 solution
 cqc_fix(solution)
 ```

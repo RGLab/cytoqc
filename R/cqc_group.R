@@ -362,7 +362,7 @@ cqc_get_data <- function(groups, id = NULL) {
 #' @param ref specifies the reference, which can be either an integer group id or a characte vector giving the actual values of the reference
 #' @return the original cqc report with the reference info attached
 cqc_set_reference <- function(x, ref) {
-  .Defunct("cqc_match_reference")
+  .Defunct("cqc_match")
   attr(x, "reference") <- ref
   x
 }

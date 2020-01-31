@@ -7,30 +7,30 @@
 #'        select the group ids selected for processing
 #'        type the qc type (either "channle", "marker", "gate")
 #' @export
-cqc_match_reference <- function(x, ...) UseMethod("cqc_match_reference")
+cqc_match <- function(x, ...) UseMethod("cqc_match")
 
 #' @export
-cqc_match_reference.cqc_group_channel <- function(x, ...) {
+cqc_match.cqc_group_channel <- function(x, ...) {
   res <- match_reference(x, type = "channel", ...)
   class(res) <- c("cqc_match_result_channel", class(res))
   res
 }
 
 #' @export
-cqc_match_reference.cqc_group_marker <- function(x, ...) {
+cqc_match.cqc_group_marker <- function(x, ...) {
   res <- match_reference(x, type = "marker", ...)
   class(res) <- c("cqc_match_result_marker", class(res))
   res
 }
 
 #' @export
-cqc_match_reference.cqc_group_keyword <- function(x, ...) {
+cqc_match.cqc_group_keyword <- function(x, ...) {
   res <- match_reference(x, type = "keyword", ...)
   class(res) <- c("cqc_match_result_keyword", class(res))
   res
 }
 #' @export
-cqc_match_reference.cqc_group_gate <- function(x, ...) {
+cqc_match.cqc_group_gate <- function(x, ...) {
   res <- match_reference(x, type = "gate", ...)
   class(res) <- c("cqc_match_result_gate", class(res))
   res

@@ -114,10 +114,10 @@ knit_print(diff(su))
 plot_diff(groups)
 
 # match reference
-match_result <- cqc_match_reference(groups, ref = 3, select = c(1,2,4))
+match_result <- cqc_match(groups, ref = 3, select = c(1,2,4))
 match_result
 
-solution <- cqc_find_solution(match_result)
+solution <- cqc_recommend(match_result)
 solution
 
 cqc_fix(solution)
@@ -136,14 +136,14 @@ diff(su)
 
 
 ```{r}
-match_result <-  cqc_match_reference(groups, ref = 2, select = c(1, 3, 4))
+match_result <-  cqc_match(groups, ref = 2, select = c(1, 3, 4))
 match_result
 ```
 
 ## Recommend the solution  
 
 ```{r}
-solution <- cqc_find_solution(match_result)
+solution <- cqc_recommend(match_result)
 knit_print(solution)
 ```
 
@@ -192,10 +192,10 @@ diff(su)
 
 ## Standardize the markers
 ```{r}
-res <- cqc_match_reference(groups, ref = 2, select = c(1,3)) 
+res <- cqc_match(groups, ref = 2, select = c(1,3)) 
 res
 
-solution <- cqc_find_solution(res, max.distance = 0.6)
+solution <- cqc_recommend(res, max.distance = 0.6)
 solution
 cqc_fix(solution)
 
