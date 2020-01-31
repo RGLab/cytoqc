@@ -1,0 +1,145 @@
+---
+title: cytoqc for lyoplate -- bcell panel
+output: rmarkdown::html_vignette
+always_allow_html: yes
+vignette: >
+  %\VignetteIndexEntry{cytoqc-gs}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r include=FALSE}
+library(knitr)
+knitr::opts_chunk$set(warning = FALSE, message = FALSE)
+library(kableExtra)
+```
+
+
+```{r}
+library(flowCore)
+library(flowWorkspace)
+library(cytoqc)
+```
+```{r}
+path <- "~/remote/fh/fast/gottardo_r/mike_working/lyoplate_out/parsed"
+centers <- c('BIIR','CIMR','Miami','NHLBI','Stanford','UCLA','Yale')
+```
+
+## Load gs
+```{r}
+panel <- "bcell"
+gslist <- sapply(centers, function(center) {
+  message("Center: ", center)
+  gs <- load_gs(file.path(path, center, panel))
+  gs_clone(gs)
+})
+
+```
+
+## QC Check gates
+```{r}
+cqc_data <- cqc_gs_list(gslist)
+
+#group by gates
+groups <- cqc_prepare(cqc_data, "gate")
+su <- summary(groups)
+knit_print(su)
+knit_print(diff(su))
+
+#vis the difference
+plot_diff(groups)
+
+# match reference
+match_result <- cqc_match(groups, ref = 1, select = c(2))
+match_result
+
+solution <- cqc_recommend(match_result)
+solution
+
+cqc_fix(solution)
+
+summary(cqc_prepare(cqc_data, "gate"))
+```
+## QC check for channel
+```{r}
+groups <- cqc_prepare(cqc_data, "channel")
+su <- summary(groups)
+knit_print(su)
+diff(su)
+```
+
+
+## Channels are very different across centers so move on to check marker
+```{r}
+#summarise marker groups
+groups <- cqc_prepare(cqc_data, "marker")
+su <- summary(groups)
+knit_print(su)
+knit_print(diff(su))
+```
+
+## Markers are more standardized and go ahead to further clean it
+```{r}
+res <- cqc_match(groups, ref = 2, select = c(1,3,4,5,6)) 
+res
+
+solution <- cqc_recommend(res, max.distance = 0.6)
+solution
+cqc_fix(solution)
+
+```
+## update checks
+```{r}
+groups <- cqc_prepare(cqc_data, "marker")
+knit_print(summary(groups))
+
+```
+
+## Relax string matching to clean up the rest
+```{r}
+res <- cqc_match(groups, ref = 2, select = c(1)) 
+res
+
+solution <- cqc_recommend(res, max.distance = 0.7)
+solution
+cqc_fix(solution)
+
+groups <- cqc_prepare(cqc_data, "marker")
+knit_print(summary(groups))
+```
+
+## Use the marker as reference to standardize the channels across centers
+```{r}
+panel <- cf_get_panel(gs_cyto_data(cqc_data[[1]])[[1]], skip_na = TRUE)
+panel
+cqc_set_panel(cqc_data, panel, ref.col = "marker")
+groups <- cqc_prepare(cqc_data, "panel")
+knit_print(summary(groups))
+```
+
+## Refresh QC report 
+```{r}
+groups <- cqc_prepare(cqc_data, "channel")
+su <- summary(groups)
+knit_print(su)
+knit_print(diff(su))
+
+```
+
+## Remove `H/W` channels
+```{r}
+res <- cqc_match(groups, ref = 4, select = c(1,2,3)) 
+res
+
+solution <- cqc_recommend(res, max.distance = 0.6)
+solution
+cqc_fix(solution)
+```
+
+## Coerce it directly into single `GatingSet` (zero-copying)
+```{r eval=FALSE}
+gs <- merge_list_to_gs(cqc_data)
+gs
+```
+
+

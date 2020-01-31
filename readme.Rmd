@@ -52,7 +52,7 @@ thisfile <- files[2]
 fr <- read.FCS(thisfile)
 new_col <- exprs(fr)[,8,drop=F]
 colnames(new_col) <- "channelA"
-fr <- cbind2(fr, new_col)
+fr <- fr_append_cols(fr, new_col)
 write.FCS(fr, files[2])
 cqc_data[[2]] <- load_cytoframe_from_fcs(thisfile, is_h5 = TRUE)
 
@@ -69,24 +69,19 @@ cf <- cqc_data[[4]]
 cf_swap_colnames(cf, "FL1-H", "FL2-H")
 
 ```
-## Determine the reference
 
-```{r}
-reference <- cqc_params_find_reference(cqc_data, type = "channel")
-paste(reference, collapse = ", ")
-```
 
-## QC check
+## Prepare the data
 ```{r}
-check_results <- cqc_params_check(cqc_data, reference, type = "channel")
-format(check_results)
+check_results <- cqc_prepare(cqc_data, type = "channel")
+summary(check_results)
 ```
 
 
-## Recommend the fix 
+## Match against the reference
 ```{r}
-solution <- cqc_params_propose_solution(check_results) 
-format(solution)
+res <- cqc_match(check_results, ref) 
+res
 ```
 
 *Show the itemized details*

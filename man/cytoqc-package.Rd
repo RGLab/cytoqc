@@ -20,22 +20,22 @@ The process for running cytoqc from FCS files consists of several steps.
 First, one loads the data from FCS files using  \code{cqc_load_fcs()}.
 The data is loaded into a \code{cqc_cf_list} object.
 
-Next a QC evaluation of  "channel", "marker" or "panel" is performed using \code{cqc_group()}.
-This returns a \code{cqc_group} family object, specific to either the "channel", "marker" or "panel" qc.
+Next a QC evaluation of  "channel", "marker" or "panel" is performed using \code{cqc_prepare()}.
+This returns a \code{cqc_prepare} family object, specific to either the "channel", "marker" or "panel" qc.
 This object can be viewed using \code{summary}.
-A nice print out of the \code{cqc_group} for reports can be generated with \code{knit_print}.
+A nice print out of the \code{cqc_prepare} for reports can be generated with \code{knit_print}.
 
-Next a reference group is chosen using \code{cqc_match_reference()} and passing in a vector of channels or markers to use as the referece.
+Next a reference group is chosen using \code{cqc_match()} and passing in a vector of channels or markers to use as the referece.
 Alterately one can pass in the group_id of the group to use as a reference.
 This returns a \code{cqc_match_result}.
 
-Next we resolve discrepancies using \code{cqc_find_solution} on the \code{cqc_match_result}.
+Next we resolve discrepancies using \code{cqc_recommend} on the \code{cqc_match_result}.
 This will propose several ways to resolve discrepancies in the markers, channels, or panel.
 Again, a pretty print out can be generated using \code{knit_print}.
 
 Finally the proppsed solution can either be edited (by writing it out to a csv file and editing it), or by applying \code{cqc_fix()} to the \code{cqc_solution}.
 
-The QC can be updated after applying the fix using \code{cqc_group} again.
+The QC can be updated after applying the fix using \code{cqc_prepare} again.
 
 Any groups that cannot be standardized can be dropped using \code{cqc_drop_groups}.
 
