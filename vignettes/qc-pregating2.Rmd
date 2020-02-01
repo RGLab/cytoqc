@@ -14,7 +14,7 @@ vignette: >
 
 ## The alternative workflow:
 
-1. Run `cqc_prepare` to see the summary
+1. Run `cqc_check` to see the summary
 2. Manually provide the standard parameter names and `cqc_recommend` for selected groups
 3. `cqc_fix` based on the solution or `cqc_drop_groups` for unsolvable issues
 
@@ -67,7 +67,7 @@ markernames(cf) <- c(`FL2-A` = "markerA")
 
 ```{r}
 #summarise marker groups
-groups <- cqc_prepare(cqc_data, "marker")
+groups <- cqc_check(cqc_data, "marker")
 su <- summary(groups)
 knit_print(su)
 ```
@@ -81,7 +81,7 @@ cqc_fix(solution)
 ```
 ## update checks
 ```{r}
-groups <- cqc_prepare(cqc_data, "marker")
+groups <- cqc_check(cqc_data, "marker")
 summary(groups)
 ```
 

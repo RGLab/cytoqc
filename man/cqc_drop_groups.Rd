@@ -2,15 +2,15 @@
 % Please edit documentation in R/cqc_group.R
 \name{cqc_drop_groups}
 \alias{cqc_drop_groups}
-\title{Remove outlier groups from the result of 'cqc_prepare'.}
+\title{Remove outlier groups from the result of 'cqc_check'.}
 \usage{
 cqc_drop_groups(groups, id)
 }
 \arguments{
-\item{groups}{the object returned by 'cqc_prepares'}
+\item{groups}{the object returned by 'cqc_checks'}
 
 \item{id}{the group id to be dropped from the dataset}
 }
 \description{
-Remove outlier groups from the result of 'cqc_prepare'.
+Remove outlier groups from the result of 'cqc_check'.
 }

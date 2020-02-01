@@ -1,7 +1,7 @@
 #' find the the difference between the reference and target group
 #'
 #'
-#' @param x cqc_prepare object returned by cqc_prepare call
+#' @param x cqc_check object returned by cqc_check call
 #' @param ...
 #'        ref specifies the reference, which can be either an integer group id or a characte vector giving the actual values of the reference
 #'        select the group ids selected for processing
@@ -10,27 +10,27 @@
 cqc_match <- function(x, ...) UseMethod("cqc_match")
 
 #' @export
-cqc_match.cqc_prepare_channel <- function(x, ...) {
+cqc_match.cqc_check_channel <- function(x, ...) {
   res <- match_reference(x, type = "channel", ...)
   class(res) <- c("cqc_match_result_channel", class(res))
   res
 }
 
 #' @export
-cqc_match.cqc_prepare_marker <- function(x, ...) {
+cqc_match.cqc_check_marker <- function(x, ...) {
   res <- match_reference(x, type = "marker", ...)
   class(res) <- c("cqc_match_result_marker", class(res))
   res
 }
 
 #' @export
-cqc_match.cqc_prepare_keyword <- function(x, ...) {
+cqc_match.cqc_check_keyword <- function(x, ...) {
   res <- match_reference(x, type = "keyword", ...)
   class(res) <- c("cqc_match_result_keyword", class(res))
   res
 }
 #' @export
-cqc_match.cqc_prepare_gate <- function(x, ...) {
+cqc_match.cqc_check_gate <- function(x, ...) {
   res <- match_reference(x, type = "gate", ...)
   class(res) <- c("cqc_match_result_gate", class(res))
   res

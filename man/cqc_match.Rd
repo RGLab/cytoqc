@@ -7,7 +7,7 @@
 cqc_match(x, ...)
 }
 \arguments{
-\item{x}{cqc_prepare object returned by cqc_prepare call}
+\item{x}{cqc_check object returned by cqc_check call}
 
 \item{...}{ref specifies the reference, which can be either an integer group id or a characte vector giving the actual values of the reference
 select the group ids selected for processing

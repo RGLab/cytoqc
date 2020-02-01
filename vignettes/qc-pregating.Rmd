@@ -13,7 +13,7 @@ vignette: >
 
 ## The basic workflow:
 
-1. Run `cqc_prepare` to see the summary
+1. Run `cqc_check` to see the summary
 2. `cqc_match` and `cqc_recommend` for selected groups
 3. `cqc_fix` based on the solution or `cqc_drop_groups` for unsolvable issues
 4. Iterate 1~3 steps until data is cleaned
@@ -85,7 +85,7 @@ cf_swap_colnames(cf, "FL1-H", "FL2-H")
 
 ## QC check for channel
 ```{r}
-groups <- cqc_prepare(cqc_data, "channel")
+groups <- cqc_check(cqc_data, "channel")
 su <- summary(groups)
 su
 diff(su)
@@ -127,7 +127,7 @@ cqc_fix(solution)
 
 ## Refresh QC report 
 ```{r}
-groups <- cqc_prepare(cqc_data, "channel")
+groups <- cqc_check(cqc_data, "channel")
 summary(groups)
 ```
 
@@ -156,7 +156,7 @@ markernames(cf) <- c(`FL2-A` = "markerA")
 
 ```{r}
 #summarise marker groups
-groups <- cqc_prepare(cqc_data, "marker")
+groups <- cqc_check(cqc_data, "marker")
 su <- summary(groups)
 diff(su)
 ```
@@ -173,7 +173,7 @@ cqc_fix(solution)
 ```
 ## update checks
 ```{r}
-groups <- cqc_prepare(cqc_data, "marker")
+groups <- cqc_check(cqc_data, "marker")
 su <- summary(groups)
 diff(su)
 ```
@@ -187,7 +187,7 @@ data_list
 ## QC for panel 
 ```{r}
 # first data set is already clean
-summary(cqc_prepare(data_list[[1]], "panel"))
+summary(cqc_check(data_list[[1]], "panel"))
 ```
 
 
@@ -211,7 +211,7 @@ cs
 
 ## Further split the data by panel
 ```{r}
-grps <- cqc_prepare(data_list[[2]], "panel")
+grps <- cqc_check(data_list[[2]], "panel")
 diff(summary(grps))
 split(grps)
 ```

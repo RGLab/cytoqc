@@ -105,7 +105,7 @@ gs_update_channels(gs4, map = data.frame(old = c("R660-A")
 cqc_data <- cqc_gs_list(list(gs1,gs2,gs3,gs4,gs5))
 
 #group by gates
-groups <- cqc_prepare(cqc_data, "gate")
+groups <- cqc_check(cqc_data, "gate")
 su <- summary(groups)
 knit_print(su)
 knit_print(diff(su))
@@ -122,11 +122,11 @@ solution
 
 cqc_fix(solution)
 
-summary(cqc_prepare(cqc_data, "gate"))
+summary(cqc_check(cqc_data, "gate"))
 ```
 ## QC check for channel
 ```{r}
-groups <- cqc_prepare(cqc_data, "channel")
+groups <- cqc_check(cqc_data, "channel")
 su <- summary(groups)
 su
 diff(su)
@@ -156,7 +156,7 @@ cqc_fix(solution)
 
 ## Refresh QC report 
 ```{r}
-groups <- cqc_prepare(cqc_data, "channel")
+groups <- cqc_check(cqc_data, "channel")
 knit_print(summary(groups))
 ```
 
@@ -185,7 +185,7 @@ markernames(cf) <- c(`Time` = "time")
 
 ```{r}
 #summarise marker groups
-groups <- cqc_prepare(cqc_data, "marker")
+groups <- cqc_check(cqc_data, "marker")
 su <- summary(groups)
 diff(su)
 ```
@@ -202,7 +202,7 @@ cqc_fix(solution)
 ```
 ## update checks
 ```{r}
-groups <- cqc_prepare(cqc_data, "marker")
+groups <- cqc_check(cqc_data, "marker")
 summary(groups)
 
 ```

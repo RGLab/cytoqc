@@ -2,9 +2,10 @@
 output: github_document
 always_allow_html: yes
 ---
-# cytoqc -- A QC tool for openCyto
+# cytoqc -- A standardization tool for openCyto
 
-*cytoqc* performs pre-cleaning, pre-gating and post-gating QC checks.
+*cytoqc* checks and standardizes channels, markers, keywords, gates of the cytodata .
+
 
 ```{r include=FALSE}
 knitr::opts_chunk$set(warning = FALSE, message = FALSE)
@@ -69,21 +70,26 @@ cf <- cqc_data[[4]]
 cf_swap_colnames(cf, "FL1-H", "FL2-H")
 
 ```
+## The basic workflow can be summarised as four steps:
 
+1. check
+2. match
+3. recommend
+4. fix
 
-## Prepare the data
+### 1. Check the consistency across samples
 ```{r}
-check_results <- cqc_prepare(cqc_data, type = "channel")
+check_results <- cqc_check(cqc_data, type = "channel")
 summary(check_results)
 ```
 
 
-## Match against the reference
+### 2. Match the reference
 ```{r}
 res <- cqc_match(check_results, ref = 3) 
 res
 ```
-## Recommend the fix
+### 3. Recommend the fix
 ```{r}
 solution <- cqc_recommend(res)
 solution
@@ -91,29 +97,28 @@ solution
 
 
 
-## Apply the fix
+### 4. Apply the fix
 
 ```{r}
 cqc_fix(solution)
 ```
 
-## Update QC report
+## Update check report
 ```{r}
-check_results <- cqc_prepare(cqc_data, type = "channel")
+check_results <- cqc_check(cqc_data, type = "channel")
 summary(check_results)
 ```
 
-## Drop redundant channel
+## Drop outlier group
 ```{r}
-cqc_data <- cqc_params_drop_not_in_reference(cqc_data, check_results)
+check_results <- cqc_drop_groups(check_results, id = 1)
+summary(check_results)
 ```
      
-## Refresh QC report and drop the samples that still can not be fixed
+## Return the cleaned data
 ```{r}
-check_results <- cqc_params_check(cqc_data, reference, type = "channel")
-format(check_results)
-cqc_data <- cqc_drop_samples(cqc_data, check_results)
-length(cqc_data)
+cqc_data <- cqc_get_data(check_results)
+cqc_data
 ```
 
 

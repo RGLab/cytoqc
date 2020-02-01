@@ -7,7 +7,7 @@
 plot_diff(groups)
 }
 \arguments{
-\item{groups}{\code{cqc_prepare_gate} grouping resulte from \code{cqc_prepare}.}
+\item{groups}{\code{cqc_check_gate} grouping resulte from \code{cqc_check}.}
 }
 \description{
 visualize the tree structure differnece among the GatingSets

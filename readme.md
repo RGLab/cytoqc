@@ -1,7 +1,8 @@
 
-# cytoqc – A QC tool for openCyto
+# cytoqc – A standardization tool for openCyto
 
-*cytoqc* performs pre-cleaning, pre-gating and post-gating QC checks.
+*cytoqc* checks and standardizes channels, markers, keywords, gates of
+the cytodata .
 
 ``` r
 library(flowCore)
@@ -20,23 +21,150 @@ cqc_data
     ## cytoqc data: 
     ## 21  samples
 
-## Determine the reference
+## The basic workflow can be summarised as four steps:
+
+1.  check
+2.  match
+3.  recommend
+4.  fix
+
+### 1\. Check the consistency across samples
 
 ``` r
-reference <- cqc_params_find_reference(cqc_data, type = "channel")
-paste(reference, collapse = ", ")
+check_results <- cqc_check(cqc_data, type = "channel")
+summary(check_results)
 ```
 
-    ## [1] "FL1-H, FL2-A, FL2-H, FL3-H, FL4-H, FSC-H, SSC-H, Time"
+<table class="table table-bordered" style="font-size: 12px; width: auto !important; ">
 
-## QC check
+<thead>
+
+<tr>
+
+<th style="text-align:right;color: black !important;background-color: #e5f5e0 !important;">
+
+group\_id
+
+</th>
+
+<th style="text-align:right;color: black !important;background-color: #e5f5e0 !important;">
+
+nObject
+
+</th>
+
+<th style="text-align:left;color: black !important;background-color: #e5f5e0 !important;">
+
+channel
+
+</th>
+
+</tr>
+
+</thead>
+
+<tbody>
+
+<tr>
+
+<td style="text-align:right;">
+
+3
+
+</td>
+
+<td style="text-align:right;">
+
+18
+
+</td>
+
+<td style="text-align:left;">
+
+FL1-H, FL2-A, FL2-H, FL3-H, FL4-H, FSC-H, SSC-H, Time
+
+</td>
+
+</tr>
+
+<tr>
+
+<td style="text-align:right;">
+
+1
+
+</td>
+
+<td style="text-align:right;">
+
+1
+
+</td>
+
+<td style="text-align:left;">
+
+channelA, FL1-H, FL2-A, FL2-H, FL3-H, FL4-H, FSC-H, SSC1-H, Time
+
+</td>
+
+</tr>
+
+<tr>
+
+<td style="text-align:right;">
+
+2
+
+</td>
+
+<td style="text-align:right;">
+
+1
+
+</td>
+
+<td style="text-align:left;">
+
+FL1-H, FL2-A, FL2-H, FL3-H, FL4-H, fsc-h, SSC-H
+
+</td>
+
+</tr>
+
+<tr>
+
+<td style="text-align:right;">
+
+4
+
+</td>
+
+<td style="text-align:right;">
+
+1
+
+</td>
+
+<td style="text-align:left;">
+
+FL1-H, FL2-A, FL2-H, FL3-H, FL4-H, fsc-h, SSC1-H, Time
+
+</td>
+
+</tr>
+
+</tbody>
+
+</table>
+
+### 2\. Match the reference
 
 ``` r
-check_results <- cqc_params_check(cqc_data, reference, type = "channel")
-format(check_results)
+res <- cqc_match(check_results, ref = 3) 
+res
 ```
 
-<table class="table table-bordered" style="width: auto !important; ">
+<table class="table table-bordered" style="font-size: 12px; width: auto !important; ">
 
 <thead>
 
@@ -44,7 +172,7 @@ format(check_results)
 
 <th style="text-align:left;color: black !important;background-color: #9ebcda !important;">
 
-FCS
+group\_id
 
 </th>
 
@@ -57,7 +185,7 @@ reference
 
 <th style="text-align:left;color: black !important;background-color: #9ebcda !important;">
 
-Missing
+Missing channels
 
 </th>
 
@@ -71,7 +199,29 @@ Missing
 
 <td style="text-align:left;font-weight: bold;">
 
-s6a01.fcs
+1
+
+</td>
+
+<td style="text-align:left;">
+
+channelA,SSC1-H
+
+</td>
+
+<td style="text-align:left;">
+
+SSC-H
+
+</td>
+
+</tr>
+
+<tr>
+
+<td style="text-align:left;font-weight: bold;">
+
+2
 
 </td>
 
@@ -93,29 +243,7 @@ FSC-H,Time
 
 <td style="text-align:left;font-weight: bold;">
 
-s6a02.fcs
-
-</td>
-
-<td style="text-align:left;">
-
-SSC1-H,channelA
-
-</td>
-
-<td style="text-align:left;">
-
-SSC-H
-
-</td>
-
-</tr>
-
-<tr>
-
-<td style="text-align:left;font-weight: bold;">
-
-s6a03.fcs
+4
 
 </td>
 
@@ -137,14 +265,14 @@ FSC-H,SSC-H
 
 </table>
 
-## Recommend the fix
+### 3\. Recommend the fix
 
 ``` r
-solution <- cqc_params_propose_solution(check_results) 
-format(solution)
+solution <- cqc_recommend(res)
+solution
 ```
 
-<table class="table table-bordered" style="width: auto !important; ">
+<table class="table table-bordered table-condensed" style="font-size: 12px; width: auto !important; ">
 
 <thead>
 
@@ -166,64 +294,23 @@ Proposed change
 
 <td style="text-align:left;">
 
-fsc-h –\> FSC-H
-
-</td>
-
-</tr>
-
-<tr>
-
-<td style="text-align:left;">
-
 SSC1-H –\> SSC-H
 
 </td>
 
 </tr>
 
-</tbody>
-
-</table>
-
-*Show the itemized
-details*
-
-``` r
-format(solution, itemize = TRUE)
-```
-
-<table class="table table-bordered" style="width: auto !important; ">
-
-<thead>
-
 <tr>
 
-<th style="text-align:left;color: black !important;background-color: #e5f5e0 !important;">
+<td style="text-align:left;">
 
-FCS
+<span style="     text-decoration: line-through;">channelA</span>
 
-</th>
-
-<th style="text-align:left;color: black !important;background-color: #e5f5e0 !important;">
-
-Proposed change
-
-</th>
+</td>
 
 </tr>
 
-</thead>
-
-<tbody>
-
 <tr>
-
-<td style="text-align:left;font-weight: bold;">
-
-s6a01.fcs
-
-</td>
 
 <td style="text-align:left;">
 
@@ -233,97 +320,44 @@ fsc-h –\> FSC-H
 
 </tr>
 
-<tr>
-
-<td style="text-align:left;font-weight: bold;">
-
-s6a02.fcs
-
-</td>
-
-<td style="text-align:left;">
-
-SSC1-H –\>
-SSC-H
-
-</td>
-
-</tr>
-
-<tr>
-
-<td style="text-align:left;vertical-align: top !important;font-weight: bold;" rowspan="2">
-
-s6a03.fcs
-
-</td>
-
-<td style="text-align:left;">
-
-fsc-h –\> FSC-H
-
-</td>
-
-</tr>
-
-<tr>
-
-<td style="text-align:left;font-weight: bold;">
-
-SSC1-H –\> SSC-H
-
-</td>
-
-</tr>
-
 </tbody>
 
 </table>
 
-## Export/import the `solution` for revision (if needed)
+### 4\. Apply the fix
 
 ``` r
-library(readr)
-write_csv(solution, csvfile)
-#manually edit csvfile and load it back
-solution_revised <- read_csv(csvfile)
+cqc_fix(solution)
 ```
 
-## Apply the fix
+## Update check report
 
 ``` r
-cqc_params_fix(cqc_data, solution)
+check_results <- cqc_check(cqc_data, type = "channel")
+summary(check_results)
 ```
 
-## Update QC report
-
-``` r
-check_results <- cqc_params_check(cqc_data, reference, type = "channel")
-format(check_results)
-```
-
-<table class="table table-bordered" style="width: auto !important; ">
+<table class="table table-bordered" style="font-size: 12px; width: auto !important; ">
 
 <thead>
 
 <tr>
 
-<th style="text-align:left;color: black !important;background-color: #9ebcda !important;">
+<th style="text-align:right;color: black !important;background-color: #e5f5e0 !important;">
 
-FCS
-
-</th>
-
-<th style="text-align:left;color: black !important;background-color: #9ebcda !important;">
-
-Not in
-reference
+group\_id
 
 </th>
 
-<th style="text-align:left;color: black !important;background-color: #9ebcda !important;">
+<th style="text-align:right;color: black !important;background-color: #e5f5e0 !important;">
 
-Missing
+nObject
+
+</th>
+
+<th style="text-align:left;color: black !important;background-color: #e5f5e0 !important;">
+
+channel
 
 </th>
 
@@ -335,19 +369,21 @@ Missing
 
 <tr>
 
-<td style="text-align:left;font-weight: bold;">
+<td style="text-align:right;">
 
-s6a01.fcs
+2
+
+</td>
+
+<td style="text-align:right;">
+
+20
 
 </td>
 
 <td style="text-align:left;">
 
-</td>
-
-<td style="text-align:left;">
-
-Time
+FL1-H, FL2-A, FL2-H, FL3-H, FL4-H, FSC-H, SSC-H, Time
 
 </td>
 
@@ -355,19 +391,21 @@ Time
 
 <tr>
 
-<td style="text-align:left;font-weight: bold;">
+<td style="text-align:right;">
 
-s6a02.fcs
+1
+
+</td>
+
+<td style="text-align:right;">
+
+1
 
 </td>
 
 <td style="text-align:left;">
 
-channelA
-
-</td>
-
-<td style="text-align:left;">
+FL1-H, FL2-A, FL2-H, FL3-H, FL4-H, FSC-H, SSC-H
 
 </td>
 
@@ -377,41 +415,34 @@ channelA
 
 </table>
 
-## Drop redundant channel
+## Drop outlier group
 
 ``` r
-cqc_data <- cqc_params_drop_not_in_reference(cqc_data, check_results)
+check_results <- cqc_drop_groups(check_results, id = 1)
+summary(check_results)
 ```
 
-## Refresh QC report and drop the samples that still can not be fixed
-
-``` r
-check_results <- cqc_params_check(cqc_data, reference, type = "channel")
-format(check_results)
-```
-
-<table class="table table-bordered" style="width: auto !important; ">
+<table class="table table-bordered" style="font-size: 12px; width: auto !important; ">
 
 <thead>
 
 <tr>
 
-<th style="text-align:left;color: black !important;background-color: #9ebcda !important;">
+<th style="text-align:right;color: black !important;background-color: #e5f5e0 !important;">
 
-FCS
-
-</th>
-
-<th style="text-align:left;color: black !important;background-color: #9ebcda !important;">
-
-Not in
-reference
+group\_id
 
 </th>
 
-<th style="text-align:left;color: black !important;background-color: #9ebcda !important;">
+<th style="text-align:right;color: black !important;background-color: #e5f5e0 !important;">
 
-Missing
+nObject
+
+</th>
+
+<th style="text-align:left;color: black !important;background-color: #e5f5e0 !important;">
+
+channel
 
 </th>
 
@@ -423,19 +454,21 @@ Missing
 
 <tr>
 
-<td style="text-align:left;font-weight: bold;">
+<td style="text-align:right;">
 
-s6a01.fcs
+2
+
+</td>
+
+<td style="text-align:right;">
+
+20
 
 </td>
 
 <td style="text-align:left;">
 
-</td>
-
-<td style="text-align:left;">
-
-Time
+FL1-H, FL2-A, FL2-H, FL3-H, FL4-H, FSC-H, SSC-H, Time
 
 </td>
 
@@ -445,17 +478,12 @@ Time
 
 </table>
 
-``` r
-cqc_data <- cqc_drop_samples(cqc_data, check_results)
-length(cqc_data)
-```
-
-    ## [1] 20
-
-## QC for marker
+## Return the cleaned data
 
 ``` r
-reference <- cqc_params_find_reference(cqc_data, type = "marker")
-check_results <- cqc_params_check(cqc_data, reference, type = "marker")
-format(check_results)
+cqc_data <- cqc_get_data(check_results)
+cqc_data
 ```
+
+    ## cytoqc data: 
+    ## 20  samples

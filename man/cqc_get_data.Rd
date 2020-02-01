@@ -2,15 +2,15 @@
 % Please edit documentation in R/cqc_group.R
 \name{cqc_get_data}
 \alias{cqc_get_data}
-\title{Extract the data from the result of a 'cqc_prepares' call.}
+\title{Extract the data from the result of a 'cqc_checks' call.}
 \usage{
 cqc_get_data(groups, id = NULL)
 }
 \arguments{
-\item{groups}{the object returned by 'cqc_prepares'}
+\item{groups}{the object returned by 'cqc_checks'}
 
 \item{id}{the group id to be selected from the dataset, default is NULL, meaning all data}
 }
 \description{
-Extract the data from the result of a 'cqc_prepares' call.
+Extract the data from the result of a 'cqc_checks' call.
 }
