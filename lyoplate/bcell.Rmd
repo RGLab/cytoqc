@@ -58,7 +58,7 @@ summary(cqc_check(cqc_data, "gate"))
 ```{r}
 groups <- cqc_check(cqc_data, "channel")
 su <- summary(groups)
-knit_print(su)
+su
 diff(su)
 ```
 
@@ -89,7 +89,7 @@ write.csv(solution, tmp)
 ```
 
 Once revised it can be reloaded.
-```{r}
+```{r eval=FALSE}
 cqc_read(solution)
 ```
 

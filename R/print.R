@@ -78,10 +78,15 @@ collapse_params <- function(x, ...) {
 }
 
 #' @export
+print.cqc_check <- function(x, ...){
+   print(summary(x), ...)
+}
+
+#' @export
 print.cqc_check_summary <- function(x, collapse = TRUE, ...){
   if(collapse)
     x <- collapse_params(x)
-  class(x) <- class(x)[-1]
+  class(x) <- class(x)[-(1:3)]
   print(x)
 }
 

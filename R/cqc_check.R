@@ -173,12 +173,12 @@ diff.cqc_check_panel <- function(x, ...) {
 #' @importFrom purrr reduce map map_dfr
 #' @export
 diff.cqc_check <- function(x, vars, ...) {
-  grps <- x %>%
+  grps <- x %>% summary %>%
     group_split(group_id)
   commons <- grps %>% reduce(inner_join, by = vars)
   grps %>%
     map_dfr(anti_join, y = commons, by = vars) %>%
-    `class<-`(value = class(x))
+    `class<-`(value =c("cqc_check_summary", class(x)))
 }
 
 #' Split the result of 'cqc_check' into groups
@@ -209,7 +209,7 @@ split.cqc_check <- function(x, f, drop = FALSE, ...) {
 #' @import Rgraphviz graph
 plot_diff <- function(groups) {
   grps <- split(groups)
-  df <- diff(summary(groups))
+  df <- diff((groups))
 
   nGrps <- length(grps)
   # par(mfrow = c(1,nGrps))
