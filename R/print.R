@@ -100,6 +100,10 @@ print.cqc_check_summary <- function(x, collapse = TRUE, ...){
   print(x)
 }
 
+#' @export
+knit_print.cqc_check <- function(x, ...){
+  knit_print(summary(x), ...)
+}
 #' Customized knit print for cqc_check_summary
 #'
 #'
@@ -108,15 +112,14 @@ print.cqc_check_summary <- function(x, collapse = TRUE, ...){
 #' @param ... not used
 #' @importFrom dplyr ungroup everything
 #' @export
-knit_print.cqc_check <- function(x, collapse = TRUE, ...) {
-  x <- summary(x)
-  type <- object_type(x)
-  colnames(x)[match("nObject", colnames(x))] = paste0("n", type)
-
+knit_print.cqc_check_summary <- function(x, collapse = TRUE, ...) {
   n <- nrow(x)
   if (collapse) {
     x <- collapse_params(x)
   }
+  type <- object_type(x)
+  type <-  paste0("n", type)
+  colnames(x)[match("nObject", colnames(x))] = type
 
   collaspse_idx <- match("group_id", colnames(x))
   if (is(x, "cqc_check_panel")) {
@@ -124,7 +127,7 @@ knit_print.cqc_check <- function(x, collapse = TRUE, ...) {
   }
 
   x <- x %>%
-    arrange(desc(nObject)) %>%
+    arrange(desc(get(type))) %>%
     kable() %>%
     kable_styling("bordered", full_width = F, position = "left", font_size = 12)
   # browser()
@@ -139,7 +142,7 @@ knit_print.cqc_check <- function(x, collapse = TRUE, ...) {
 
 #' @export
 #' @importFrom tidyr spread
-print.cqc_check_panel <- function(x, anchor = c("channel", "marker"), ...){
+format.cqc_check_panel <- function(x, anchor = c("channel", "marker"), ...){
   # x <- summary(x)
   anchor <- match.arg(anchor)
   if(anchor == "channel")
@@ -151,6 +154,31 @@ print.cqc_check_panel <- function(x, anchor = c("channel", "marker"), ...){
     mutate(group_id := paste("group", group_id), nObject := paste0("(n=", nObject, ")")) %>%
     unite(grp, group_id, nObject, sep = "") %>% #merge grp cols
     spread(grp, !!value) %>%
-    `class<-`(value = class(x)[-(1:2)]) %>%
+    `class<-`(value = c("cqc_check_panel_wide", class(x)))
+}
+
+#' @export
+print.cqc_check_panel_wide <- function(x, ...){
+    x %>% `class<-`(value = class(x)[-(1:3)]) %>%
     print
 }
+#' @export
+print.cqc_check_panel <- function(x, ...){
+  format(x, ...) %>%
+    print
+}
+
+#' @export
+knit_print.cqc_check_panel <- function(x, ...){
+
+  format(x, ...) %>%
+    knit_print
+}
+#' @export
+#' @importFrom DT datatable
+knit_print.cqc_check_panel_wide <- function(x, ...){
+  x%>%
+    `class<-`(value = class(x)[-(1:3)])  %>% datatable %>% knit_print
+}
+
+

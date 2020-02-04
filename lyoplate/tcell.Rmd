@@ -1,5 +1,5 @@
 ---
-output: github_document
+output: html_document
 always_allow_html: yes
 ---
 # QC for tcell panel
@@ -16,6 +16,8 @@ library(kableExtra)
 library(flowCore)
 library(flowWorkspace)
 library(cytoqc)
+library(printr)
+library(DT)
 ```
 ```{r}
 path <- "~/remote/fh/fast/gottardo_r/mike_working/lyoplate_out/parsed"
@@ -97,11 +99,13 @@ cqc_fix(solution)
 cqc_check(cqc_data, "marker")
 ```
 
+
 ## check pannel
 ```{r}
 res <- cqc_check(cqc_data, "panel")
 res
-print(res, anchor = "marker")
+format(res, anchor = "marker")
+
 ```
 
 ## Use the marker as reference to standardize the channels across centers
