@@ -97,6 +97,13 @@ cqc_fix(solution)
 cqc_check(cqc_data, "marker")
 ```
 
+## check pannel
+```{r}
+res <- cqc_check(cqc_data, "panel")
+res
+print(res, anchor = "marker")
+```
+
 ## Use the marker as reference to standardize the channels across centers
 ```{r}
 cf <- gs_cyto_data(cqc_data[[1]])[[1]]

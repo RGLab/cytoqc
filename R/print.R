@@ -95,7 +95,7 @@ print.cqc_check_summary <- function(x, collapse = TRUE, ...){
   if(collapse)
     x <- collapse_params(x)
   type <- object_type(x)
-  colnames(x)[2] = paste0("n", type)
+  colnames(x)[match("nObject", colnames(x))] = paste0("n", type)
   class(x) <- class(x)[-(1:3)]
   print(x)
 }
@@ -111,7 +111,7 @@ print.cqc_check_summary <- function(x, collapse = TRUE, ...){
 knit_print.cqc_check <- function(x, collapse = TRUE, ...) {
   x <- summary(x)
   type <- object_type(x)
-  colnames(x)[2] = paste0("n", type)
+  colnames(x)[match("nObject", colnames(x))] = paste0("n", type)
 
   n <- nrow(x)
   if (collapse) {
@@ -135,4 +135,22 @@ knit_print.cqc_check <- function(x, collapse = TRUE, ...) {
   }
 
   knit_print(x)
+}
+
+#' @export
+#' @importFrom tidyr spread
+print.cqc_check_panel <- function(x, anchor = c("channel", "marker"), ...){
+  # x <- summary(x)
+  anchor <- match.arg(anchor)
+  if(anchor == "channel")
+    value <- "marker"
+  else
+    value <- "channel"
+  #long to wide
+  x %>% summary %>%
+    mutate(group_id := paste("group", group_id), nObject := paste0("(n=", nObject, ")")) %>%
+    unite(grp, group_id, nObject, sep = "") %>% #merge grp cols
+    spread(grp, !!value) %>%
+    `class<-`(value = class(x)[-(1:2)]) %>%
+    print
 }
