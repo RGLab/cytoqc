@@ -44,7 +44,8 @@ cf_get_panel <- function(cf, skip_na = FALSE) {
 cqc_check <- function(x, ...) UseMethod("cqc_check")
 
 #' @export
-cqc_check.cqc_gs_list <- function(x, type = c("channel", "marker", "panel", "keyword", "gate"), delimiter = "|", ...) {
+cqc_check.cqc_gs_list <- function(x, type, delimiter = "|", ...) {
+  type = match.arg(type, c("channel", "marker", "panel", "keyword", "gate"))
   cflist <- sapply(x, function(gs) get_cytoframe_from_cs(gs_pop_get_data(gs), 1)) # TODO:qc within gs to ensure all data are consistent
   cflist <- cqc_cf_list(cflist)
   if (type == "gate") {
@@ -69,7 +70,8 @@ cqc_check.cqc_gs_list <- function(x, type = c("channel", "marker", "panel", "key
 #' @export
 #' @importFrom dplyr filter arrange pull mutate group_indices distinct count add_count
 #' @importFrom tidyr separate separate_rows
-cqc_check.cqc_cf_list <- function(x, type = c("channel", "marker", "panel", "keyword"), keys = NULL, delimiter = "|", ...) {
+cqc_check.cqc_cf_list <- function(x, type, keys = NULL, delimiter = "|", ...) {
+  type = match.arg(type, c("channel", "marker", "panel", "keyword"))
   sep <- paste0(delimiter, delimiter) # double delimiter for sep params and single delimiter for sep channel and marker
   if (is.null(keys)) {
     keys <- sapply(x, function(cf) {
