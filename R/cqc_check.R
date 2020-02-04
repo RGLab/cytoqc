@@ -22,6 +22,31 @@ cf_get_panel <- function(cf, skip_na = FALSE) {
   res
 }
 
+#' @rdname cqc_check
+#' @export
+cqc_check_channel <- function(x, ...){
+  cqc_check(x, type = "channel", ...)
+}
+#' @rdname cqc_check
+#' @export
+cqc_check_marker <- function(x, ...){
+  cqc_check(x, type = "marker", ...)
+}
+#' @rdname cqc_check
+#' @export
+cqc_check_panel <- function(x, ...){
+  cqc_check(x, type = "panel", ...)
+}
+#' @rdname cqc_check
+#' @export
+cqc_check_keyword <- function(x, ...){
+  cqc_check(x, type = "keyword", ...)
+}
+#' @rdname cqc_check
+#' @export
+cqc_check_gate <- function(x, ...){
+  cqc_check(x, type = "gate", ...)
+}
 
 #' Perform a QC check on flow data.
 #'
@@ -71,7 +96,10 @@ cqc_check.cqc_gs_list <- function(x, type, delimiter = "|", ...) {
 #' @importFrom dplyr filter arrange pull mutate group_indices distinct count add_count
 #' @importFrom tidyr separate separate_rows
 cqc_check.cqc_cf_list <- function(x, type, keys = NULL, delimiter = "|", ...) {
-  type = match.arg(type, c("channel", "marker", "panel", "keyword"))
+  types <-  c("channel", "marker", "panel", "keyword")
+  if(!is.null(keys))#passed down from cqc_check.cqc_gs_list
+    types <- c(types, "gate")
+  type = match.arg(type, types)
   sep <- paste0(delimiter, delimiter) # double delimiter for sep params and single delimiter for sep channel and marker
   if (is.null(keys)) {
     keys <- sapply(x, function(cf) {
