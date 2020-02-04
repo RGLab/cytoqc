@@ -133,6 +133,7 @@ summary.cqc_check <- function(object, ...) {
     select(-c(object)) %>%
     distinct()
   class(res) <- c("cqc_check_summary", class(res))
+  attr(res, "data") <- attr(object, "data")
   res
 }
 
@@ -178,7 +179,9 @@ diff.cqc_check <- function(x, vars, ...) {
   commons <- grps %>% reduce(inner_join, by = vars)
   grps %>%
     map_dfr(anti_join, y = commons, by = vars) %>%
-    `class<-`(value =c("cqc_check_summary", class(x)))
+    `class<-`(value =c("cqc_check_summary", class(x))) %>%
+    `attr<-`("data", value = attr(x, "data"))
+
 }
 
 #' Split the result of 'cqc_check' into groups

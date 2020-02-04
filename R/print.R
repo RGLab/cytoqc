@@ -82,10 +82,20 @@ print.cqc_check <- function(x, ...){
    print(summary(x), ...)
 }
 
+object_type <- function(x){
+  dat <- attr(x, "data")
+  if(is(dat, "cqc_gs_list"))
+    "GatingSet"
+  else
+    "FCS"
+}
+
 #' @export
 print.cqc_check_summary <- function(x, collapse = TRUE, ...){
   if(collapse)
     x <- collapse_params(x)
+  type <- object_type(x)
+  colnames(x)[2] = paste0("n", type)
   class(x) <- class(x)[-(1:3)]
   print(x)
 }
@@ -98,7 +108,11 @@ print.cqc_check_summary <- function(x, collapse = TRUE, ...){
 #' @param ... not used
 #' @importFrom dplyr ungroup everything
 #' @export
-knit_print.cqc_check_summary <- function(x, collapse = TRUE, ...) {
+knit_print.cqc_check <- function(x, collapse = TRUE, ...) {
+  x <- summary(x)
+  type <- object_type(x)
+  colnames(x)[2] = paste0("n", type)
+
   n <- nrow(x)
   if (collapse) {
     x <- collapse_params(x)
@@ -106,7 +120,7 @@ knit_print.cqc_check_summary <- function(x, collapse = TRUE, ...) {
 
   collaspse_idx <- match("group_id", colnames(x))
   if (is(x, "cqc_check_panel")) {
-    collaspse_idx <- c(collaspse_idx, match("nObject", colnames(x)))
+    collaspse_idx <- c(collaspse_idx, match(type, colnames(x)))
   }
 
   x <- x %>%

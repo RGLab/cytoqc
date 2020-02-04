@@ -99,25 +99,24 @@ cqc_check(cqc_data, "marker")
 
 ## Use the marker as reference to standardize the channels across centers
 ```{r}
-panel <- cf_get_panel(gs_cyto_data(cqc_data[[1]])[[1]], skip_na = TRUE)
+cf <- gs_cyto_data(cqc_data[[1]])[[1]]
+panel <- cf_get_panel(cf, skip_na = TRUE)
 panel
 cqc_set_panel(cqc_data, panel, ref.col = "marker")
 groups <- cqc_check(cqc_data, "panel")
-summary(groups)
+groups
 ```
 
 ## Refresh QC report 
 ```{r}
 groups <- cqc_check(cqc_data, "channel")
-su <- summary(groups)
-su
-knit_print(diff(su))
+diff(groups)
 
 ```
 
 ## Remove `H/W` channels
 ```{r}
-res <- cqc_match(groups, ref = 4, select = c(1,2,3)) 
+res <- cqc_match(groups, ref = 4) 
 res
 
 solution <- cqc_recommend(res, max.distance = 0.6)
