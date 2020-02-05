@@ -74,8 +74,7 @@ cf_swap_colnames(cf, "FL1-H", "FL2-H")
 
 1. check
 2. match
-3. recommend
-4. fix
+3. fix
 
 ### 1. Check the consistency across samples
 ```{r}
@@ -89,15 +88,8 @@ check_results
 res <- cqc_match(check_results, ref = 3) 
 res
 ```
-### 3. Recommend the fix
-```{r}
-solution <- cqc_recommend(res)
-solution
-```
 
-
-
-### 4. Apply the fix
+### 3. Apply the fix
 
 ```{r}
 cqc_fix(solution)

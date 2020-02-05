@@ -12,27 +12,23 @@ cqc_match <- function(x, ...) UseMethod("cqc_match")
 #' @export
 cqc_match.cqc_check_channel <- function(x, ...) {
   res <- match_reference(x, type = "channel", ...)
-  class(res) <- c("cqc_match_result_channel", class(res))
   res
 }
 
 #' @export
 cqc_match.cqc_check_marker <- function(x, ...) {
   res <- match_reference(x, type = "marker", ...)
-  class(res) <- c("cqc_match_result_marker", class(res))
   res
 }
 
 #' @export
 cqc_match.cqc_check_keyword <- function(x, ...) {
   res <- match_reference(x, type = "keyword", ...)
-  class(res) <- c("cqc_match_result_keyword", class(res))
   res
 }
 #' @export
 cqc_match.cqc_check_gate <- function(x, ...) {
   res <- match_reference(x, type = "gate", ...)
-  class(res) <- c("cqc_match_result_gate", class(res))
   res
 }
 #' find the the difference between the reference and target group
@@ -46,7 +42,7 @@ cqc_match.cqc_check_gate <- function(x, ...) {
 #' @importFrom dplyr bind_rows group_keys group_by
 #' @importFrom purrr set_names
 #' @noRd
-match_reference <- function(x, ref, select = NULL, type, delimiter = "|") {
+match_reference <- function(x, ref, select = NULL, type, delimiter = "|", ...) {
   res <- summary(x)
   if (is.numeric(ref)) {
     refid <- ref
@@ -78,9 +74,14 @@ match_reference <- function(x, ref, select = NULL, type, delimiter = "|") {
     }) %>%
     set_names(group_keys(res)[["group_id"]])
 
-  class(res) <- c("cqc_match_result", class(res))
+  class(res) <- c(paste0("cqc_match_result_", type), "cqc_match_result", class(res))
+
   attr(res, "groups") <- x
 
+  solution <- cqc_recommend(res, ...)
+
+  res <- list(solution = solution, match_result = res)
+  class(res) <- c("cqc_match_result_and_solution", class(res))
   res
 }
 

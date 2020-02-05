@@ -106,6 +106,7 @@ res <- cqc_check(cqc_data, "panel")
 res
 ```
 
+
 ### Spread markers
 ```{r}
 format(res, anchor = "marker")

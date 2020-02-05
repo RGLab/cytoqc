@@ -1,31 +1,25 @@
 
-#' @export
 cqc_recommend <- function(x, ...) UseMethod("cqc_recommend")
-#' @export
 cqc_recommend.cqc_check <- function(x, max.distance = 0.1, ...) {
   match_result <- cqc_match(groups, ...)
   cqc_recommend(match_result, max.distance = max.distance)
 }
 
-#' @export
 cqc_recommend.cqc_match_result_channel <- function(x, ...) {
   res <- cqc_recommend.cqc_match_result(x, ...)
   attr(res, "class") <- c("cqc_solution_channel", attr(res, "class"))
   res
 }
-#' @export
 cqc_recommend.cqc_match_result_marker <- function(x, ...) {
   res <- cqc_recommend.cqc_match_result(x, ...)
   attr(res, "class") <- c("cqc_solution_marker", attr(res, "class"))
   res
 }
-#' @export
 cqc_recommend.cqc_match_result_keyword <- function(x, ...) {
   res <- cqc_recommend.cqc_match_result(x, ...)
   attr(res, "class") <- c("cqc_solution_keyword", attr(res, "class"))
   res
 }
-#' @export
 cqc_recommend.cqc_match_result_gate <- function(x, ...) {
   res <- cqc_recommend.cqc_match_result(x, ...)
   attr(res, "class") <- c("cqc_solution_gate", attr(res, "class"))
@@ -45,7 +39,6 @@ cqc_recommend.cqc_match_result_gate <- function(x, ...) {
 #' @param ... additional arguments not for the user.
 #' @importFrom tibble tibble add_row
 #' @importFrom utils adist
-#' @export
 cqc_recommend.cqc_match_result <- function(x, max.distance = 0.1, ...) {
   res <- map_dfr(x, function(check_result) {
     unknown <- check_result[["unknown"]]

@@ -6,6 +6,10 @@
 #' @export
 cqc_fix <- function(x, ...) UseMethod("cqc_fix")
 
+#' @export
+cqc_fix.cqc_match_result_and_solution <- function(x, ...) {
+  cqc_fix(x[["solution"]])
+}
 #' @importFrom dplyr rowwise do
 #' @export
 cqc_fix.cqc_solution <- function(x, ...) {
