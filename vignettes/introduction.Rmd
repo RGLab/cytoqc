@@ -86,9 +86,8 @@ cf_swap_colnames(cf, "FL1-H", "FL2-H")
 ## QC check for channel
 ```{r}
 groups <- cqc_check(cqc_data, "channel")
-su <- summary(groups)
-su
-diff(su)
+groups
+diff(groups)
 ```
 
 ## Match against the reference to find discrepancy
@@ -128,7 +127,7 @@ cqc_fix(solution)
 ## Refresh QC report 
 ```{r}
 groups <- cqc_check(cqc_data, "channel")
-summary(groups)
+groups
 ```
 
 ## Drop groups that can not be fixed
@@ -157,8 +156,7 @@ markernames(cf) <- c(`FL2-A` = "markerA")
 ```{r}
 #summarise marker groups
 groups <- cqc_check(cqc_data, "marker")
-su <- summary(groups)
-diff(su)
+diff(groups)
 ```
 
 ## Pick references and groups to fix
@@ -174,8 +172,7 @@ cqc_fix(solution)
 ## update checks
 ```{r}
 groups <- cqc_check(cqc_data, "marker")
-su <- summary(groups)
-diff(su)
+diff(groups)
 ```
 
 ## split by groups
@@ -187,7 +184,7 @@ data_list
 ## QC for panel 
 ```{r}
 # first data set is already clean
-summary(cqc_check(data_list[[1]], "panel"))
+cqc_check(data_list[[1]], "panel")
 ```
 
 
@@ -212,7 +209,7 @@ cs
 ## Further split the data by panel
 ```{r}
 grps <- cqc_check(data_list[[2]], "panel")
-diff(summary(grps))
+diff(grps)
 split(grps)
 ```
 

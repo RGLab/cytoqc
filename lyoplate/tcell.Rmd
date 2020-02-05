@@ -104,9 +104,14 @@ cqc_check(cqc_data, "marker")
 ```{r}
 res <- cqc_check(cqc_data, "panel")
 res
+```
+
+### Spread markers
+```{r}
 format(res, anchor = "marker")
 
 ```
+
 
 ## Use the marker as reference to standardize the channels across centers
 ```{r}

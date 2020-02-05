@@ -32,7 +32,7 @@ cqc_data
 
 ``` r
 check_results <- cqc_check(cqc_data, type = "channel")
-summary(check_results)
+check_results
 ```
 
 <table class="table table-bordered" style="font-size: 12px; width: auto !important; ">
@@ -49,7 +49,7 @@ group\_id
 
 <th style="text-align:right;color: black !important;background-color: #e5f5e0 !important;">
 
-nObject
+nFCS
 
 </th>
 
@@ -334,7 +334,7 @@ cqc_fix(solution)
 
 ``` r
 check_results <- cqc_check(cqc_data, type = "channel")
-summary(check_results)
+check_results
 ```
 
 <table class="table table-bordered" style="font-size: 12px; width: auto !important; ">
@@ -351,7 +351,7 @@ group\_id
 
 <th style="text-align:right;color: black !important;background-color: #e5f5e0 !important;">
 
-nObject
+nFCS
 
 </th>
 
@@ -419,7 +419,7 @@ FL1-H, FL2-A, FL2-H, FL3-H, FL4-H, FSC-H, SSC-H
 
 ``` r
 check_results <- cqc_drop_groups(check_results, id = 1)
-summary(check_results)
+check_results
 ```
 
 <table class="table table-bordered" style="font-size: 12px; width: auto !important; ">
@@ -436,7 +436,7 @@ group\_id
 
 <th style="text-align:right;color: black !important;background-color: #e5f5e0 !important;">
 
-nObject
+nFCS
 
 </th>
 
@@ -487,3 +487,14 @@ cqc_data
 
     ## cytoqc data: 
     ## 20  samples
+
+## Coerce it inot `cytoset`
+
+``` r
+cytoset(cqc_data)
+```
+
+    ## A cytoset with 20 samples.
+    ## 
+    ##   column names:
+    ##     FSC-H, SSC-H, FL1-H, FL2-H, FL3-H, FL2-A, FL4-H, Time
