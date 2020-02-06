@@ -47,13 +47,10 @@ diff(groups)
 plot_diff(groups)
 
 # match reference
-match_result <- cqc_match(groups, ref = 1, select = c(2))
+match_result <- cqc_match(groups, ref = 1)
 match_result
 
-solution <- cqc_recommend(match_result)
-solution
-
-cqc_fix(solution)
+cqc_fix(match_result)
 
 cqc_check(cqc_data, "gate")
 ```

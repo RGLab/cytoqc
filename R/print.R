@@ -43,10 +43,10 @@ format.cqc_match_result_and_solution <- function(x, ...) {
       #init column
       col_to_show <- rep("*", length(ref))
       #drop the recommended deletion
-      df <- filter(df, !is.na(to))
+      df1 <- filter(df, !is.na(to))
       #fill the refs with the recommended edit
-      matched.ref <- df[["to"]]
-      matched.target <- df[["from"]]
+      matched.ref <- df1[["to"]]
+      matched.target <- df1[["from"]]
       idx <- match(matched.ref, ref)
       col_to_show[idx] <- matched.target
       # browser()
@@ -60,11 +60,20 @@ format.cqc_match_result_and_solution <- function(x, ...) {
       else
         unmatched.target <- paste(unmatched.target, collapse = ",")
       col_to_show <- c(col_to_show, unmatched.target)
+
+      ##append the redundant item
+      torm <- filter(df, is.na(to))[["from"]]
+      if(length(torm) == 0)
+        torm <- ""
+      else
+        torm <- paste(torm, collapse = ",")
+      col_to_show <- c(col_to_show, torm)
+
       col_to_show <- list(col_to_show)
       names(col_to_show) <- gid
       col_to_show
     })
-  tbl <- cbind(c(ref, ""), tbl)
+  tbl <- cbind(c(ref, "Unmatched", "To Delete"), tbl)
   colnames(tbl)[1] <- "Ref"
   tbl
 }
