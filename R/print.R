@@ -35,46 +35,56 @@ format.cqc_match_result_and_solution <- function(x, ...) {
   #combine match res and recommened solution to present it as wide format for easy viewing the data
   ref <- x[["ref"]]
   match_result <- x[["match_result"]]
-  tbl <- group_split(x[["solution"]], group_id) %>%
-    map_dfc(function(df) {
-      gid <- as.character(df[["group_id"]][1])
-      missing <- match_result[[gid]][["missing"]]
-      unknown <- match_result[[gid]][["unknown"]]
+  gids <- names(x[["match_result"]])
+  tbl <- map_dfc(gids, function(gid) {
+      df <- filter(x[["solution"]], group_id == gid)
+      this_res <- match_result[[gid]]
       #init column
       col_to_show <- rep("*", length(ref))
-      #drop the recommended deletion
-      df1 <- filter(df, !is.na(to))
-      #fill the refs with the recommended edit
-      matched.ref <- df1[["to"]]
-      matched.target <- df1[["from"]]
-      idx <- match(matched.ref, ref)
-      col_to_show[idx] <- matched.target
-      # browser()
-      #fill the unmatched refs
-      unmatched.ref <- missing[!missing%in%matched.ref]
-      col_to_show[match(unmatched.ref, ref)] <- NA
-      #append the unmatched target
-      unmatched.target <- unknown[-match(matched.target, unknown)]
-      if(length(unmatched.target) == 0)
-        unmatched.target <- ""
-      else
-        unmatched.target <- paste(unmatched.target, collapse = ",")
-      col_to_show <- c(col_to_show, unmatched.target)
 
-      ##append the redundant item
-      torm <- filter(df, is.na(to))[["from"]]
-      if(length(torm) == 0)
-        torm <- ""
-      else
-        torm <- paste(torm, collapse = ",")
-      col_to_show <- c(col_to_show, torm)
+      if(!is.null(this_res))
+      {
+        missing <- this_res[["missing"]]
+        unknown <- this_res[["unknown"]]
+         #drop the recommended deletion
+        df1 <- filter(df, !is.na(to))
+        #fill the refs with the recommended edit
+        matched.ref <- df1[["to"]]
+        matched.target <- df1[["from"]]
+        idx <- match(matched.ref, ref)
+        col_to_show[idx] <- matched.target
+        # browser()
+        #fill the unmatched refs
+        unmatched.ref <- missing[!missing%in%matched.ref]
+        col_to_show[match(unmatched.ref, ref)] <- NA
+        #append the unmatched target
+        if(length(matched.target)>0)
+          unmatched.target <- unknown[-match(matched.target, unknown)]#exclude the matched ones
+        else
+          unmatched.target <- unknown
+        if(length(unmatched.target) == 0)
+          unmatched.target <- ""
+        else
+          unmatched.target <- paste(unmatched.target, collapse = ",")
+        col_to_show <- c(col_to_show, unmatched.target)
+
+        ##append the redundant item
+        torm <- filter(df, is.na(to))[["from"]]
+        if(length(torm) == 0)
+          torm <- ""
+        else
+          torm <- paste(torm, collapse = ",")
+        col_to_show <- c(col_to_show, torm)
+      }else
+        col_to_show <- c(col_to_show, "", "")
 
       col_to_show <- list(col_to_show)
       names(col_to_show) <- gid
       col_to_show
     })
-  tbl <- cbind(c(ref, "Unmatched", "To Delete"), tbl)
-  colnames(tbl)[1] <- "Ref"
+  tbl <- cbind(c(ref, "", ""), tbl)
+  tbl <- cbind(c(rep("", length(ref)), "Unmatched", "To Delete"), tbl)
+  colnames(tbl)[1:2] <- c("", "Ref")
   tbl
 }
 #' @importFrom knitr kable

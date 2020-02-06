@@ -71,12 +71,20 @@ groups
 ```{r}
 res <- cqc_match(groups, ref = 3) 
 res
+```
 
-solution <- cqc_recommend(res, max.distance = 0.6)
-solution
+## Re-match by relaxing the string matching threshold
+```{r}
+res <- cqc_match(groups, ref = 3, max.distance = 0.6)
+res
+```
+
+
+```{r}
 cqc_fix(solution)
 
 ```
+
 ## update checks
 ```{r}
 groups <- cqc_check(cqc_data, "marker")
