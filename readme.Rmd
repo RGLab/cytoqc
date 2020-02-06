@@ -11,6 +11,7 @@ always_allow_html: yes
 knitr::opts_chunk$set(warning = FALSE, message = FALSE)
 library(knitr)
 library(kableExtra)
+library(printr)
 ```
 
 
@@ -84,7 +85,7 @@ check_results
 
 
 ### 2. Match the reference
-```{r}
+```{r render=normal_print}
 res <- cqc_match(check_results, ref = 3) 
 res
 ```
@@ -92,7 +93,7 @@ res
 ### 3. Apply the fix
 
 ```{r}
-cqc_fix(solution)
+cqc_fix(res)
 ```
 
 ## Update check report

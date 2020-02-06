@@ -19,7 +19,55 @@ print.cqc_match_result <- function(x, ...) {
   print(as_tibble(x))
 }
 
+#' @export
+print.cqc_match_result_and_solution <- function(x, ...) {
+  print(format(x, ...))
+}
 
+
+#' @export
+knit_print.cqc_match_result_and_solution <- function(data, ...) {
+  datatable(format(data, ...))
+}
+#' @export
+#' @importFrom purrr map_dfc
+format.cqc_match_result_and_solution <- function(x, ...) {
+  #combine match res and recommened solution to present it as wide format for easy viewing the data
+  ref <- x[["ref"]]
+  match_result <- x[["match_result"]]
+  tbl <- group_split(x[["solution"]], group_id) %>%
+    map_dfc(function(df) {
+      gid <- as.character(df[["group_id"]][1])
+      missing <- match_result[[gid]][["missing"]]
+      unknown <- match_result[[gid]][["unknown"]]
+      #init column
+      col_to_show <- rep("*", length(ref))
+      #drop the recommended deletion
+      df <- filter(df, !is.na(to))
+      #fill the refs with the recommended edit
+      matched.ref <- df[["to"]]
+      matched.target <- df[["from"]]
+      idx <- match(matched.ref, ref)
+      col_to_show[idx] <- matched.target
+      # browser()
+      #fill the unmatched refs
+      unmatched.ref <- missing[!missing%in%matched.ref]
+      col_to_show[match(unmatched.ref, ref)] <- NA
+      #append the unmatched target
+      unmatched.target <- unknown[-match(matched.target, unknown)]
+      if(length(unmatched.target) == 0)
+        unmatched.target <- ""
+      else
+        unmatched.target <- paste(unmatched.target, collapse = ",")
+      col_to_show <- c(col_to_show, unmatched.target)
+      col_to_show <- list(col_to_show)
+      names(col_to_show) <- gid
+      col_to_show
+    })
+  tbl <- cbind(c(ref, ""), tbl)
+  colnames(tbl)[1] <- "Ref"
+  tbl
+}
 #' @importFrom knitr kable
 #' @importFrom kableExtra kable_styling row_spec
 #' @export

@@ -80,7 +80,7 @@ match_reference <- function(x, ref, select = NULL, type, delimiter = "|", ...) {
 
   solution <- cqc_recommend(res, ...)
 
-  res <- list(solution = solution, match_result = res)
+  res <- list(solution = solution, match_result = res, ref = ref)
   class(res) <- c("cqc_match_result_and_solution", class(res))
   res
 }

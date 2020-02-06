@@ -25,8 +25,7 @@ cqc_data
 
 1.  check
 2.  match
-3.  recommend
-4.  fix
+3.  fix
 
 ### 1\. Check the consistency across samples
 
@@ -164,170 +163,21 @@ res <- cqc_match(check_results, ref = 3)
 res
 ```
 
-<table class="table table-bordered" style="font-size: 12px; width: auto !important; ">
+    ##     Ref        1     2      4
+    ## 1 FL1-H        *     *      *
+    ## 2 FL2-A        *     *      *
+    ## 3 FL2-H        *     *      *
+    ## 4 FL3-H        *     *      *
+    ## 5 FL4-H        *     *      *
+    ## 6 FSC-H        * fsc-h  fsc-h
+    ## 7 SSC-H   SSC1-H     * SSC1-H
+    ## 8  Time        *  <NA>      *
+    ## 9       channelA
 
-<thead>
-
-<tr>
-
-<th style="text-align:left;color: black !important;background-color: #9ebcda !important;">
-
-group\_id
-
-</th>
-
-<th style="text-align:left;color: black !important;background-color: #9ebcda !important;">
-
-Not in
-reference
-
-</th>
-
-<th style="text-align:left;color: black !important;background-color: #9ebcda !important;">
-
-Missing channels
-
-</th>
-
-</tr>
-
-</thead>
-
-<tbody>
-
-<tr>
-
-<td style="text-align:left;font-weight: bold;">
-
-1
-
-</td>
-
-<td style="text-align:left;">
-
-channelA,SSC1-H
-
-</td>
-
-<td style="text-align:left;">
-
-SSC-H
-
-</td>
-
-</tr>
-
-<tr>
-
-<td style="text-align:left;font-weight: bold;">
-
-2
-
-</td>
-
-<td style="text-align:left;">
-
-fsc-h
-
-</td>
-
-<td style="text-align:left;">
-
-FSC-H,Time
-
-</td>
-
-</tr>
-
-<tr>
-
-<td style="text-align:left;font-weight: bold;">
-
-4
-
-</td>
-
-<td style="text-align:left;">
-
-fsc-h,SSC1-H
-
-</td>
-
-<td style="text-align:left;">
-
-FSC-H,SSC-H
-
-</td>
-
-</tr>
-
-</tbody>
-
-</table>
-
-### 3\. Recommend the fix
+### 3\. Apply the fix
 
 ``` r
-solution <- cqc_recommend(res)
-solution
-```
-
-<table class="table table-bordered table-condensed" style="font-size: 12px; width: auto !important; ">
-
-<thead>
-
-<tr>
-
-<th style="text-align:left;color: black !important;background-color: #e5f5e0 !important;">
-
-Proposed change
-
-</th>
-
-</tr>
-
-</thead>
-
-<tbody>
-
-<tr>
-
-<td style="text-align:left;">
-
-SSC1-H –\> SSC-H
-
-</td>
-
-</tr>
-
-<tr>
-
-<td style="text-align:left;">
-
-<span style="     text-decoration: line-through;">channelA</span>
-
-</td>
-
-</tr>
-
-<tr>
-
-<td style="text-align:left;">
-
-fsc-h –\> FSC-H
-
-</td>
-
-</tr>
-
-</tbody>
-
-</table>
-
-### 4\. Apply the fix
-
-``` r
-cqc_fix(solution)
+cqc_fix(res)
 ```
 
 ## Update check report
