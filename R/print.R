@@ -85,6 +85,13 @@ format.cqc_match_result_and_solution <- function(x, ...) {
   tbl <- cbind(c(ref, "", ""), tbl)
   tbl <- cbind(c(rep("", length(ref)), "Unmatched", "To Delete"), tbl)
   colnames(tbl)[1:2] <- c("", "Ref")
+  #rm last two rows if they are all empty
+  torm <- tbl[nrow(tbl),-1]
+  if(isTRUE(all(torm == "")))
+    tbl <- tbl[-nrow(tbl),]
+  unmatched <- tbl[nrow(tbl), -1]
+  if(isTRUE(all(unmatched == "")))
+    tbl <- tbl[-nrow(tbl),]
   tbl
 }
 #' @importFrom knitr kable

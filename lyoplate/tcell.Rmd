@@ -79,9 +79,18 @@ res <- cqc_match(groups, ref = 3, max.distance = 0.6)
 res
 ```
 
+## Manually match the individual items that are still not matched
+```{r}
+res <- cqc_update_match(res, group = 1, map = c("CD4 PerCP-Cy55" = "CD4"
+                                              , "CD8 APC-H7" = "CD8"
+                                              , "Live Dead FITC" = "LIVE")
+                        )
+res
+```
+
 
 ```{r}
-cqc_fix(solution)
+cqc_fix(res)
 
 ```
 
@@ -91,19 +100,6 @@ groups <- cqc_check(cqc_data, "marker")
 groups
 
 ```
-
-## Relax string matching to clean up the rest
-```{r}
-res <- cqc_match(groups, ref = 2) 
-res
-
-solution <- cqc_recommend(res, max.distance = 0.8)
-solution
-cqc_fix(solution)
-
-cqc_check(cqc_data, "marker")
-```
-
 
 ## check pannel
 ```{r}
@@ -132,6 +128,7 @@ groups
 ## Refresh QC report 
 ```{r}
 groups <- cqc_check(cqc_data, "channel")
+groups
 diff(groups)
 
 ```
@@ -141,9 +138,7 @@ diff(groups)
 res <- cqc_match(groups, ref = 4) 
 res
 
-solution <- cqc_recommend(res, max.distance = 0.6)
-solution
-cqc_fix(solution)
+cqc_fix(res)
 ```
 
 ## Coerce it directly into single `GatingSet` (zero-copying)
