@@ -57,19 +57,25 @@ format.cqc_match_result_and_solution <- function(x, ...) {
         #fill the unmatched refs
         unmatched.ref <- missing[!missing%in%matched.ref]
         col_to_show[match(unmatched.ref, ref)] <- NA
-        #append the unmatched target
+
+        ## the redundant item
+        torm <- filter(df, is.na(to))[["from"]]
+
+        # the unmatched target
         if(length(matched.target)>0)
           unmatched.target <- unknown[-match(matched.target, unknown)]#exclude the matched ones
         else
           unmatched.target <- unknown
+
+        unmatched.target <- unmatched.target[!unmatched.target %in% torm]#exclude the deletion entries
+
+        #append unmatched.target
         if(length(unmatched.target) == 0)
           unmatched.target <- ""
         else
           unmatched.target <- paste(unmatched.target, collapse = ",")
         col_to_show <- c(col_to_show, unmatched.target)
-
-        ##append the redundant item
-        torm <- filter(df, is.na(to))[["from"]]
+        #append deletions
         if(length(torm) == 0)
           torm <- ""
         else
@@ -85,13 +91,18 @@ format.cqc_match_result_and_solution <- function(x, ...) {
   tbl <- cbind(c(ref, "", ""), tbl)
   tbl <- cbind(c(rep("", length(ref)), "Unmatched", "To Delete"), tbl)
   colnames(tbl)[1:2] <- c("", "Ref")
-  #rm last two rows if they are all empty
-  torm <- tbl[nrow(tbl),-1]
-  if(isTRUE(all(torm == "")))
-    tbl <- tbl[-nrow(tbl),]
-  unmatched <- tbl[nrow(tbl), -1]
+
+   #rm last two rows if they are all empty
+  ridx <- nrow(tbl) - 1
+  unmatched <- tbl[ridx, -1]
   if(isTRUE(all(unmatched == "")))
-    tbl <- tbl[-nrow(tbl),]
+    tbl <- tbl[-ridx,]
+
+  ridx <- nrow(tbl)
+  torm <- tbl[ridx,-1]
+  if(isTRUE(all(torm == "")))
+    tbl <- tbl[-ridx,]
+
   tbl
 }
 #' @importFrom knitr kable

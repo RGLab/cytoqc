@@ -1,5 +1,5 @@
 ---
-output: html_document
+output: github_document
 always_allow_html: yes
 ---
 # QC for tcell panel
@@ -102,14 +102,14 @@ groups
 ```
 
 ## check pannel
-```{r}
+```{r render=normal_print}
 res <- cqc_check(cqc_data, "panel")
 res
 ```
 
 
 ### Spread markers
-```{r}
+```{r render=normal_print}
 format(res, anchor = "marker")
 
 ```
