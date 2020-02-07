@@ -44,11 +44,11 @@ groups
 diff(groups)
 
 #vis the difference
-plot_diff(groups)
+# plot_diff(groups)
 
 # match reference
 match_result <- cqc_match(groups, ref = 1)
-match_result
+# match_result
 
 cqc_fix(match_result)
 

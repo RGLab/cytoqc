@@ -27,11 +27,72 @@ print.cqc_match_result_and_solution <- function(x, ...) {
 
 #' @export
 knit_print.cqc_match_result_and_solution <- function(data, ...) {
-  datatable(format(data, ...))
+  df <- format(data, show_check_mark = FALSE, ...)
+  ncol <- ncol(df)
+
+  df_color <- format(data, ...)#check mark preserved version of coloring
+  df_color[] <- lapply(df_color, as.character)
+  #start color encoding
+  ref_vec <- df_color[,"Ref"]
+  nref <- sum(ref_vec!="")
+  df_color[1:nref,"Ref"] <- "gray"
+  for(i in seq_len(ncol)[-(1:2)])
+  {
+    vec <- df_color[1:nref, i]
+    vec[is.na(vec)] <- ""
+    #color the approximately matched
+    vec[vec != "" & vec != "\u2713"] <- "green"
+    #color the extact matched
+    vec[vec == "\u2713"] <- "gray"
+    #color the unmatched
+    vec[vec==""] <- "red"
+    df_color[1:nref, i] <- vec
+  }
+
+  ridx.Unmatched <- which(df_color[,1]=="Unmatched")
+  if(length(ridx.Unmatched) > 0)
+  {
+    vec <- df_color[ridx.Unmatched, ]
+    row <- vec[, -c(1:2)]
+    row[row != ""] <- "red"
+    vec[, -c(1:2)] <- row
+    vec[1] <- "white"
+    df_color[ridx.Unmatched, ] <- vec
+  }
+
+  ridx.rm <- which(df_color[,1]=="To delete")
+  if(length(ridx.rm) > 0)
+  {
+    vec <- df_color[ridx.rm, ]
+    row <- vec[, -c(1:2)]
+    row[row != ""] <- "brown"
+    vec[, -c(1:2)] <- row
+    vec[1] <- "white"
+    df_color[ridx.rm, ] <- vec
+  }
+
+  df_color[df_color==""] <-  "white"
+
+  #append df_color
+  df <- cbind(df, df_color)
+  col_ref_col_idx <- (ncol+1):(ncol+ncol)
+  #apply the color map
+  colors <- unique(unlist(df_color))
+
+  datatable(df
+            , colnames = c("", colnames(df)[-1])
+            , options = list(
+     columnDefs = list(list(targets = col_ref_col_idx, visible = FALSE)) #hide df_color cols
+   ))%>%
+          formatStyle(1:ncol, col_ref_col_idx
+                      , backgroundColor = styleEqual(colors, colors)
+          )
+
+
 }
 #' @export
 #' @importFrom purrr map_dfc
-format.cqc_match_result_and_solution <- function(x, ...) {
+format.cqc_match_result_and_solution <- function(x, show_check_mark = TRUE, ...) {
   #combine match res and recommened solution to present it as wide format for easy viewing the data
   ref <- x[["ref"]]
   match_result <- x[["match_result"]]
@@ -40,8 +101,10 @@ format.cqc_match_result_and_solution <- function(x, ...) {
       df <- filter(x[["solution"]], group_id == gid)
       this_res <- match_result[[gid]]
       #init column
-      col_to_show <- rep("\u2713", length(ref))
-
+      if(show_check_mark)
+        col_to_show <- rep("\u2713", length(ref))
+      else
+        col_to_show <- ref
       if(!is.null(this_res))
       {
         missing <- this_res[["missing"]]
