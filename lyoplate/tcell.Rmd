@@ -16,8 +16,8 @@ library(kableExtra)
 library(flowCore)
 library(flowWorkspace)
 library(cytoqc)
-library(printr)
-library(DT)
+# library(printr)
+# library(DT)
 ```
 ```{r}
 path <- "~/remote/fh/fast/gottardo_r/mike_working/lyoplate_out/parsed"
@@ -32,11 +32,11 @@ gslist <- sapply(centers, function(center) {
   gs <- load_gs(file.path(path, center, panel))
 })
 
+cqc_data <- cqc_gs_list(gslist)
 ```
 
 ## QC Check gates
 ```{r}
-cqc_data <- cqc_gs_list(gslist)
 
 #group by gates
 groups <- cqc_check(cqc_data, "gate")

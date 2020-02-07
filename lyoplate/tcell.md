@@ -5,8 +5,8 @@
 library(flowCore)
 library(flowWorkspace)
 library(cytoqc)
-library(printr)
-library(DT)
+# library(printr)
+# library(DT)
 ```
 
 ``` r
@@ -190,104 +190,12 @@ plot_diff(groups)
 
 ``` r
 # match reference
-match_result <- cqc_match(groups, ref = 1, select = c(2))
+match_result <- cqc_match(groups, ref = 1)
 match_result
 ```
 
-<table class="table table-bordered" style="font-size: 12px; width: auto !important; ">
-
-<thead>
-
-<tr>
-
-<th style="text-align:left;color: black !important;background-color: #9ebcda !important;">
-
-group\_id
-
-</th>
-
-<th style="text-align:left;color: black !important;background-color: #9ebcda !important;">
-
-Not in
-reference
-
-</th>
-
-<th style="text-align:left;color: black !important;background-color: #9ebcda !important;">
-
-Missing channels
-
-</th>
-
-</tr>
-
-</thead>
-
-<tbody>
-
-<tr>
-
-<td style="text-align:left;font-weight: bold;">
-
-2
-
-</td>
-
-<td style="text-align:left;">
-
-singlets
-
-</td>
-
-<td style="text-align:left;">
-
-</td>
-
-</tr>
-
-</tbody>
-
-</table>
-
 ``` r
-solution <- cqc_recommend(match_result)
-solution
-```
-
-<table class="table table-bordered table-condensed" style="font-size: 12px; width: auto !important; ">
-
-<thead>
-
-<tr>
-
-<th style="text-align:left;color: black !important;background-color: #e5f5e0 !important;">
-
-Proposed change
-
-</th>
-
-</tr>
-
-</thead>
-
-<tbody>
-
-<tr>
-
-<td style="text-align:left;">
-
-<span style="     text-decoration: line-through;">singlets</span>
-
-</td>
-
-</tr>
-
-</tbody>
-
-</table>
-
-``` r
-cqc_fix(solution)
+cqc_fix(match_result)
 
 cqc_check(cqc_data, "gate")
 ```
@@ -740,301 +648,25 @@ res <- cqc_match(groups, ref = 3)
 res
 ```
 
-<table class="table table-bordered" style="font-size: 12px; width: auto !important; ">
-
-<thead>
-
-<tr>
-
-<th style="text-align:left;color: black !important;background-color: #9ebcda !important;">
-
-group\_id
-
-</th>
-
-<th style="text-align:left;color: black !important;background-color: #9ebcda !important;">
-
-Not in
-reference
-
-</th>
-
-<th style="text-align:left;color: black !important;background-color: #9ebcda !important;">
-
-Missing channels
-
-</th>
-
-</tr>
-
-</thead>
-
-<tbody>
-
-<tr>
-
-<td style="text-align:left;font-weight: bold;">
-
-1
-
-</td>
-
-<td style="text-align:left;">
-
-CCR7 PE,CD3 V450,CD38 APC,CD4 PerCP-Cy55,CD45RA PE-Cy7,CD8 APC-H7,HLA-DR
-V500,Live Dead FITC
-
-</td>
-
-<td style="text-align:left;">
-
-CCR7,CD3,CD38,CD4,CD45RA,CD8,HLA-DR,LIVE
-
-</td>
-
-</tr>
-
-<tr>
-
-<td style="text-align:left;font-weight: bold;">
-
-2
-
-</td>
-
-<td style="text-align:left;">
-
-HLA DR,Live/Dead
-
-</td>
-
-<td style="text-align:left;">
-
-HLA-DR,LIVE
-
-</td>
-
-</tr>
-
-<tr>
-
-<td style="text-align:left;font-weight: bold;">
-
-4
-
-</td>
-
-<td style="text-align:left;">
-
-HLADR,LIVE\_GREEN
-
-</td>
-
-<td style="text-align:left;">
-
-HLA-DR,LIVE
-
-</td>
-
-</tr>
-
-<tr>
-
-<td style="text-align:left;font-weight: bold;">
-
-5
-
-</td>
-
-<td style="text-align:left;">
-
-CD197,LIVE DEAD
-
-</td>
-
-<td style="text-align:left;">
-
-CCR7,LIVE
-
-</td>
-
-</tr>
-
-<tr>
-
-<td style="text-align:left;font-weight: bold;">
-
-6
-
-</td>
-
-<td style="text-align:left;">
-
-CD197,Live Green
-
-</td>
-
-<td style="text-align:left;">
-
-CCR7,LIVE
-
-</td>
-
-</tr>
-
-</tbody>
-
-</table>
+## Re-match by relaxing the string matching threshold
 
 ``` r
-solution <- cqc_recommend(res, max.distance = 0.6)
-solution
+res <- cqc_match(groups, ref = 3, max.distance = 0.6)
+res
 ```
 
-<table class="table table-bordered table-condensed" style="font-size: 12px; width: auto !important; ">
-
-<thead>
-
-<tr>
-
-<th style="text-align:left;color: black !important;background-color: #e5f5e0 !important;">
-
-Proposed change
-
-</th>
-
-</tr>
-
-</thead>
-
-<tbody>
-
-<tr>
-
-<td style="text-align:left;">
-
-CCR7 PE –\> CCR7
-
-</td>
-
-</tr>
-
-<tr>
-
-<td style="text-align:left;">
-
-CD38 APC –\> CD38
-
-</td>
-
-</tr>
-
-<tr>
-
-<td style="text-align:left;">
-
-CD3 V450 –\> CD3
-
-</td>
-
-</tr>
-
-<tr>
-
-<td style="text-align:left;">
-
-HLA-DR V500 –\> HLA-DR
-
-</td>
-
-</tr>
-
-<tr>
-
-<td style="text-align:left;">
-
-CD45RA PE-Cy7 –\> CD45RA
-
-</td>
-
-</tr>
-
-<tr>
-
-<td style="text-align:left;">
-
-HLA DR –\> HLA-DR
-
-</td>
-
-</tr>
-
-<tr>
-
-<td style="text-align:left;">
-
-Live/Dead –\> LIVE
-
-</td>
-
-</tr>
-
-<tr>
-
-<td style="text-align:left;">
-
-HLADR –\> HLA-DR
-
-</td>
-
-</tr>
-
-<tr>
-
-<td style="text-align:left;">
-
-LIVE\_GREEN –\> LIVE
-
-</td>
-
-</tr>
-
-<tr>
-
-<td style="text-align:left;">
-
-CD197 –\> CCR7
-
-</td>
-
-</tr>
-
-<tr>
-
-<td style="text-align:left;">
-
-LIVE DEAD –\> LIVE
-
-</td>
-
-</tr>
-
-<tr>
-
-<td style="text-align:left;">
-
-Live Green –\> LIVE
-
-</td>
-
-</tr>
-
-</tbody>
-
-</table>
+## Manually match the individual items that are still not matched
 
 ``` r
-cqc_fix(solution)
+res <- cqc_update_match(res, group = 1, map = c("CD4 PerCP-Cy55" = "CD4"
+                                              , "CD8 APC-H7" = "CD8"
+                                              , "Live Dead FITC" = "LIVE")
+                        )
+res
+```
+
+``` r
+cqc_fix(res)
 ```
 
 ## update checks
@@ -1042,212 +674,6 @@ cqc_fix(solution)
 ``` r
 groups <- cqc_check(cqc_data, "marker")
 groups
-```
-
-<table class="table table-bordered" style="font-size: 12px; width: auto !important; ">
-
-<thead>
-
-<tr>
-
-<th style="text-align:right;color: black !important;background-color: #e5f5e0 !important;">
-
-group\_id
-
-</th>
-
-<th style="text-align:right;color: black !important;background-color: #e5f5e0 !important;">
-
-nGatingSet
-
-</th>
-
-<th style="text-align:left;color: black !important;background-color: #e5f5e0 !important;">
-
-marker
-
-</th>
-
-</tr>
-
-</thead>
-
-<tbody>
-
-<tr>
-
-<td style="text-align:right;">
-
-2
-
-</td>
-
-<td style="text-align:right;">
-
-6
-
-</td>
-
-<td style="text-align:left;">
-
-CCR7, CD3, CD38, CD4, CD45RA, CD8, HLA-DR, LIVE
-
-</td>
-
-</tr>
-
-<tr>
-
-<td style="text-align:right;">
-
-1
-
-</td>
-
-<td style="text-align:right;">
-
-1
-
-</td>
-
-<td style="text-align:left;">
-
-CCR7, CD3, CD38, CD4 PerCP-Cy55, CD45RA, CD8 APC-H7, HLA-DR, Live Dead
-FITC
-
-</td>
-
-</tr>
-
-</tbody>
-
-</table>
-
-## Relax string matching to clean up the rest
-
-``` r
-res <- cqc_match(groups, ref = 2) 
-res
-```
-
-<table class="table table-bordered" style="font-size: 12px; width: auto !important; ">
-
-<thead>
-
-<tr>
-
-<th style="text-align:left;color: black !important;background-color: #9ebcda !important;">
-
-group\_id
-
-</th>
-
-<th style="text-align:left;color: black !important;background-color: #9ebcda !important;">
-
-Not in
-reference
-
-</th>
-
-<th style="text-align:left;color: black !important;background-color: #9ebcda !important;">
-
-Missing channels
-
-</th>
-
-</tr>
-
-</thead>
-
-<tbody>
-
-<tr>
-
-<td style="text-align:left;font-weight: bold;">
-
-1
-
-</td>
-
-<td style="text-align:left;">
-
-CD4 PerCP-Cy55,CD8 APC-H7,Live Dead FITC
-
-</td>
-
-<td style="text-align:left;">
-
-CD4,CD8,LIVE
-
-</td>
-
-</tr>
-
-</tbody>
-
-</table>
-
-``` r
-solution <- cqc_recommend(res, max.distance = 0.8)
-solution
-```
-
-<table class="table table-bordered table-condensed" style="font-size: 12px; width: auto !important; ">
-
-<thead>
-
-<tr>
-
-<th style="text-align:left;color: black !important;background-color: #e5f5e0 !important;">
-
-Proposed change
-
-</th>
-
-</tr>
-
-</thead>
-
-<tbody>
-
-<tr>
-
-<td style="text-align:left;">
-
-CD8 APC-H7 –\> CD8
-
-</td>
-
-</tr>
-
-<tr>
-
-<td style="text-align:left;">
-
-Live Dead FITC –\> LIVE
-
-</td>
-
-</tr>
-
-<tr>
-
-<td style="text-align:left;">
-
-CD4 PerCP-Cy55 –\> CD4
-
-</td>
-
-</tr>
-
-</tbody>
-
-</table>
-
-``` r
-cqc_fix(solution)
-
-cqc_check(cqc_data, "marker")
 ```
 
 <table class="table table-bordered" style="font-size: 12px; width: auto !important; ">
@@ -1310,32 +736,44 @@ CCR7, CD3, CD38, CD4, CD45RA, CD8, HLA-DR, LIVE
 
 ``` r
 res <- cqc_check(cqc_data, "panel")
-datatable(res)
+res
 ```
 
-<!--html_preserve-->
+    ## # A tibble: 25 x 8
+    ##    channel `group 1(n=1)` `group 2(n=1)` `group 3(n=1)` `group 4(n=1)`
+    ##    <chr>   <chr>          <chr>          <chr>          <chr>         
+    ##  1 <Alexa… LIVE           <NA>           <NA>           <NA>          
+    ##  2 <Am Cy… <NA>           HLA-DR         <NA>           <NA>          
+    ##  3 <AmCya… HLA-DR         <NA>           HLA-DR         <NA>          
+    ##  4 <APC-A> CD38           CD38           CD38           CD38          
+    ##  5 <APC-C… CD8            CD8            CD8            CD8           
+    ##  6 <APC-H… <NA>           <NA>           <NA>           <NA>          
+    ##  7 <B515-… <NA>           <NA>           <NA>           <NA>          
+    ##  8 <B710-… <NA>           <NA>           <NA>           <NA>          
+    ##  9 <BD Ho… <NA>           <NA>           <NA>           <NA>          
+    ## 10 <BD Ho… <NA>           <NA>           <NA>           <NA>          
+    ## # … with 15 more rows, and 3 more variables: `group 5(n=1)` <chr>, `group
+    ## #   6(n=1)` <chr>, `group 7(n=1)` <chr>
 
-<div id="htmlwidget-0f1e839db43c573eba75" class="datatables html-widget" style="width:100%;height:auto;">
-
-</div>
-
-<script type="application/json" data-for="htmlwidget-0f1e839db43c573eba75">{"x":{"filter":"none","data":[["1","2","3","4","5","6","7","8","9","10","11","12","13","14","15","16","17","18","19","20","21","22","23","24","25","26","27","28","29","30","31","32","33","34","35","36","37","38","39","40","41","42","43","44","45","46","47","48","49","50","51","52","53","54","55","56"],["fa2432d8-e52c-4953-b549-6cdae382099a","fa2432d8-e52c-4953-b549-6cdae382099a","fa2432d8-e52c-4953-b549-6cdae382099a","fa2432d8-e52c-4953-b549-6cdae382099a","fa2432d8-e52c-4953-b549-6cdae382099a","fa2432d8-e52c-4953-b549-6cdae382099a","fa2432d8-e52c-4953-b549-6cdae382099a","fa2432d8-e52c-4953-b549-6cdae382099a","b7078dad-fd23-44b0-a0cf-eae65b87bc2c","b7078dad-fd23-44b0-a0cf-eae65b87bc2c","b7078dad-fd23-44b0-a0cf-eae65b87bc2c","b7078dad-fd23-44b0-a0cf-eae65b87bc2c","b7078dad-fd23-44b0-a0cf-eae65b87bc2c","b7078dad-fd23-44b0-a0cf-eae65b87bc2c","b7078dad-fd23-44b0-a0cf-eae65b87bc2c","b7078dad-fd23-44b0-a0cf-eae65b87bc2c","5c2f4132-cdba-416c-9b03-16fa61db93df","5c2f4132-cdba-416c-9b03-16fa61db93df","5c2f4132-cdba-416c-9b03-16fa61db93df","5c2f4132-cdba-416c-9b03-16fa61db93df","5c2f4132-cdba-416c-9b03-16fa61db93df","5c2f4132-cdba-416c-9b03-16fa61db93df","5c2f4132-cdba-416c-9b03-16fa61db93df","5c2f4132-cdba-416c-9b03-16fa61db93df","706f1264-8b3c-44a3-9184-bc3be38d8604","706f1264-8b3c-44a3-9184-bc3be38d8604","706f1264-8b3c-44a3-9184-bc3be38d8604","706f1264-8b3c-44a3-9184-bc3be38d8604","706f1264-8b3c-44a3-9184-bc3be38d8604","706f1264-8b3c-44a3-9184-bc3be38d8604","706f1264-8b3c-44a3-9184-bc3be38d8604","706f1264-8b3c-44a3-9184-bc3be38d8604","b55ed8d1-b99a-4ea0-95c0-86bcc32a2d60","b55ed8d1-b99a-4ea0-95c0-86bcc32a2d60","b55ed8d1-b99a-4ea0-95c0-86bcc32a2d60","b55ed8d1-b99a-4ea0-95c0-86bcc32a2d60","b55ed8d1-b99a-4ea0-95c0-86bcc32a2d60","b55ed8d1-b99a-4ea0-95c0-86bcc32a2d60","b55ed8d1-b99a-4ea0-95c0-86bcc32a2d60","b55ed8d1-b99a-4ea0-95c0-86bcc32a2d60","e1c3f750-59bf-48ab-9a29-4064aaeeeb30","e1c3f750-59bf-48ab-9a29-4064aaeeeb30","e1c3f750-59bf-48ab-9a29-4064aaeeeb30","e1c3f750-59bf-48ab-9a29-4064aaeeeb30","e1c3f750-59bf-48ab-9a29-4064aaeeeb30","e1c3f750-59bf-48ab-9a29-4064aaeeeb30","e1c3f750-59bf-48ab-9a29-4064aaeeeb30","e1c3f750-59bf-48ab-9a29-4064aaeeeb30","d69e11e5-d0e2-4549-8641-3c8d90c58603","d69e11e5-d0e2-4549-8641-3c8d90c58603","d69e11e5-d0e2-4549-8641-3c8d90c58603","d69e11e5-d0e2-4549-8641-3c8d90c58603","d69e11e5-d0e2-4549-8641-3c8d90c58603","d69e11e5-d0e2-4549-8641-3c8d90c58603","d69e11e5-d0e2-4549-8641-3c8d90c58603","d69e11e5-d0e2-4549-8641-3c8d90c58603"],["&lt;APC-A&gt;","&lt;APC-H7-A&gt;","&lt;FITC-A&gt;","&lt;PE-A&gt;","&lt;PE-Cy7-A&gt;","&lt;PerCP-Cy5-5-A&gt;","&lt;V450-A&gt;","&lt;V500-A&gt;","&lt;Alexa Fluor 488-A&gt;","&lt;AmCyan-A&gt;","&lt;APC-A&gt;","&lt;APC-Cy7-A&gt;","&lt;Pacific Blue-A&gt;","&lt;PE YG-A&gt;","&lt;PE-Cy7 YG-A&gt;","&lt;PerCP-Cy5-5-A&gt;","&lt;AmCyan-A&gt;","&lt;APC-A&gt;","&lt;APC-Cy7-A&gt;","&lt;FITC-A&gt;","&lt;Pacific Blue-A&gt;","&lt;PE Cy7 YG-A&gt;","&lt;PE-A&gt;","&lt;PerCP-Cy5-5-A&gt;","&lt;B515-A&gt;","&lt;B710-A&gt;","&lt;G560-A&gt;","&lt;G780-A&gt;","&lt;R660-A&gt;","&lt;R780-A&gt;","&lt;V450-A&gt;","&lt;V545-A&gt;","&lt;Am Cyan-A&gt;","&lt;APC-A&gt;","&lt;APC-Cy7-A&gt;","&lt;FITC-A&gt;","&lt;Pacific Blue-A&gt;","&lt;PE-A&gt;","&lt;PE-Cy7-A&gt;","&lt;PerCP-Cy5-5-A&gt;","&lt;APC-A&gt;","&lt;APC-H7-A&gt;","&lt;BD Horizon V450-A&gt;","&lt;BD Horizon V500-A&gt;","&lt;FITC-A&gt;","&lt;PE-A&gt;","&lt;PE-Cy7-A&gt;","&lt;PerCP-Cy5-5-A&gt;","&lt;APC-A&gt;","&lt;APC-Cy7-A&gt;","&lt;FITC-A&gt;","&lt;PE-A&gt;","&lt;PE-Cy7-A&gt;","&lt;PerCP-Cy5-5-A&gt;","&lt;V450-A&gt;","&lt;V500-A&gt;"],["CD38","CD8","LIVE","CCR7","CD45RA","CD4","CD3","HLA-DR","LIVE","HLA-DR","CD38","CD8","CD3","CCR7","CD45RA","CD4","HLA-DR","CD38","CD8","LIVE","CD3","CD45RA","CCR7","CD4","LIVE","CD4","CCR7","CD45RA","CD38","CD8","CD3","HLA-DR","HLA-DR","CD38","CD8","LIVE","CD3","CCR7","CD45RA","CD4","CD38","CD8","CD3","HLA-DR","LIVE","CCR7","CD45RA","CD4","CD38","CD8","LIVE","CCR7","CD45RA","CD4","CD3","HLA-DR"],[6,6,6,6,6,6,6,6,1,1,1,1,1,1,1,1,3,3,3,3,3,3,3,3,7,7,7,7,7,7,7,7,2,2,2,2,2,2,2,2,5,5,5,5,5,5,5,5,4,4,4,4,4,4,4,4],[1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1]],"container":"<table class=\"display\">\n  <thead>\n    <tr>\n      <th> <\/th>\n      <th>object<\/th>\n      <th>channel<\/th>\n      <th>marker<\/th>\n      <th>group_id<\/th>\n      <th>nObject<\/th>\n    <\/tr>\n  <\/thead>\n<\/table>","options":{"columnDefs":[{"className":"dt-right","targets":[4,5]},{"orderable":false,"targets":0}],"order":[],"autoWidth":false,"orderClasses":false}},"evals":[],"jsHooks":[]}</script>
-
-<!--/html_preserve-->
+### Spread markers
 
 ``` r
-datatable(format(res, anchor = "marker"))
+format(res, anchor = "marker")
 ```
 
-<!--html_preserve-->
-
-<div id="htmlwidget-edf4923fed16a80ffdec" class="datatables html-widget" style="width:100%;height:auto;">
-
-</div>
-
-<script type="application/json" data-for="htmlwidget-edf4923fed16a80ffdec">{"x":{"filter":"none","data":[["1","2","3","4","5","6","7","8"],["CCR7","CD3","CD38","CD4","CD45RA","CD8","HLA-DR","LIVE"],["&lt;PE YG-A&gt;","&lt;Pacific Blue-A&gt;","&lt;APC-A&gt;","&lt;PerCP-Cy5-5-A&gt;","&lt;PE-Cy7 YG-A&gt;","&lt;APC-Cy7-A&gt;","&lt;AmCyan-A&gt;","&lt;Alexa Fluor 488-A&gt;"],["&lt;PE-A&gt;","&lt;Pacific Blue-A&gt;","&lt;APC-A&gt;","&lt;PerCP-Cy5-5-A&gt;","&lt;PE-Cy7-A&gt;","&lt;APC-Cy7-A&gt;","&lt;Am Cyan-A&gt;","&lt;FITC-A&gt;"],["&lt;PE-A&gt;","&lt;Pacific Blue-A&gt;","&lt;APC-A&gt;","&lt;PerCP-Cy5-5-A&gt;","&lt;PE Cy7 YG-A&gt;","&lt;APC-Cy7-A&gt;","&lt;AmCyan-A&gt;","&lt;FITC-A&gt;"],["&lt;PE-A&gt;","&lt;V450-A&gt;","&lt;APC-A&gt;","&lt;PerCP-Cy5-5-A&gt;","&lt;PE-Cy7-A&gt;","&lt;APC-Cy7-A&gt;","&lt;V500-A&gt;","&lt;FITC-A&gt;"],["&lt;PE-A&gt;","&lt;BD Horizon V450-A&gt;","&lt;APC-A&gt;","&lt;PerCP-Cy5-5-A&gt;","&lt;PE-Cy7-A&gt;","&lt;APC-H7-A&gt;","&lt;BD Horizon V500-A&gt;","&lt;FITC-A&gt;"],["&lt;PE-A&gt;","&lt;V450-A&gt;","&lt;APC-A&gt;","&lt;PerCP-Cy5-5-A&gt;","&lt;PE-Cy7-A&gt;","&lt;APC-H7-A&gt;","&lt;V500-A&gt;","&lt;FITC-A&gt;"],["&lt;G560-A&gt;","&lt;V450-A&gt;","&lt;R660-A&gt;","&lt;B710-A&gt;","&lt;G780-A&gt;","&lt;R780-A&gt;","&lt;V545-A&gt;","&lt;B515-A&gt;"]],"container":"<table class=\"display\">\n  <thead>\n    <tr>\n      <th> <\/th>\n      <th>marker<\/th>\n      <th>group 1(n=1)<\/th>\n      <th>group 2(n=1)<\/th>\n      <th>group 3(n=1)<\/th>\n      <th>group 4(n=1)<\/th>\n      <th>group 5(n=1)<\/th>\n      <th>group 6(n=1)<\/th>\n      <th>group 7(n=1)<\/th>\n    <\/tr>\n  <\/thead>\n<\/table>","options":{"order":[],"autoWidth":false,"orderClasses":false,"columnDefs":[{"orderable":false,"targets":0}]}},"evals":[],"jsHooks":[]}</script>
-
-<!--/html_preserve-->
+    ## # A tibble: 8 x 8
+    ##   marker `group 1(n=1)` `group 2(n=1)` `group 3(n=1)` `group 4(n=1)`
+    ##   <chr>  <chr>          <chr>          <chr>          <chr>         
+    ## 1 CCR7   <PE YG-A>      <PE-A>         <PE-A>         <PE-A>        
+    ## 2 CD3    <Pacific Blue… <Pacific Blue… <Pacific Blue… <V450-A>      
+    ## 3 CD38   <APC-A>        <APC-A>        <APC-A>        <APC-A>       
+    ## 4 CD4    <PerCP-Cy5-5-… <PerCP-Cy5-5-… <PerCP-Cy5-5-… <PerCP-Cy5-5-…
+    ## 5 CD45RA <PE-Cy7 YG-A>  <PE-Cy7-A>     <PE Cy7 YG-A>  <PE-Cy7-A>    
+    ## 6 CD8    <APC-Cy7-A>    <APC-Cy7-A>    <APC-Cy7-A>    <APC-Cy7-A>   
+    ## 7 HLA-DR <AmCyan-A>     <Am Cyan-A>    <AmCyan-A>     <V500-A>      
+    ## 8 LIVE   <Alexa Fluor … <FITC-A>       <FITC-A>       <FITC-A>      
+    ## # … with 3 more variables: `group 5(n=1)` <chr>, `group 6(n=1)` <chr>, `group
+    ## #   7(n=1)` <chr>
 
 ## Use the marker as reference to standardize the channels across centers
 
@@ -1345,21 +783,62 @@ panel <- cf_get_panel(cf, skip_na = TRUE)
 panel
 ```
 
-<table>
+    ## # A tibble: 8 x 2
+    ##   channel         marker  
+    ##   <I<chr>>        <I<chr>>
+    ## 1 <APC-A>         CD38    
+    ## 2 <APC-H7-A>      CD8     
+    ## 3 <FITC-A>        LIVE    
+    ## 4 <PerCP-Cy5-5-A> CD4     
+    ## 5 <V450-A>        CD3     
+    ## 6 <V500-A>        HLA-DR  
+    ## 7 <PE-A>          CCR7    
+    ## 8 <PE-Cy7-A>      CD45RA
+
+``` r
+cqc_set_panel(cqc_data, panel, ref.col = "marker")
+groups <- cqc_check(cqc_data, "panel")
+groups
+```
+
+<!--html_preserve-->
+
+<div id="htmlwidget-90781823c45f8a0a0745" class="datatables html-widget" style="width:960px;height:500px;">
+
+</div>
+
+<script type="application/json" data-for="htmlwidget-90781823c45f8a0a0745">{"x":{"filter":"none","data":[["1","2","3","4","5","6","7","8"],["&lt;APC-A&gt;","&lt;APC-H7-A&gt;","&lt;FITC-A&gt;","&lt;PE-A&gt;","&lt;PE-Cy7-A&gt;","&lt;PerCP-Cy5-5-A&gt;","&lt;V450-A&gt;","&lt;V500-A&gt;"],["CD38","CD8","LIVE","CCR7","CD45RA","CD4","CD3","HLA-DR"]],"container":"<table class=\"display\">\n  <thead>\n    <tr>\n      <th> <\/th>\n      <th>channel<\/th>\n      <th>group 1(n=7)<\/th>\n    <\/tr>\n  <\/thead>\n<\/table>","options":{"order":[],"autoWidth":false,"orderClasses":false,"columnDefs":[{"orderable":false,"targets":0}]}},"evals":[],"jsHooks":[]}</script>
+
+<!--/html_preserve-->
+
+## Refresh QC report
+
+``` r
+groups <- cqc_check(cqc_data, "channel")
+groups
+```
+
+<table class="table table-bordered" style="font-size: 12px; width: auto !important; ">
 
 <thead>
 
 <tr>
 
-<th style="text-align:left;">
+<th style="text-align:right;color: black !important;background-color: #e5f5e0 !important;">
 
-channel
+group\_id
 
 </th>
 
-<th style="text-align:left;">
+<th style="text-align:right;color: black !important;background-color: #e5f5e0 !important;">
 
-marker
+nGatingSet
+
+</th>
+
+<th style="text-align:left;color: black !important;background-color: #e5f5e0 !important;">
+
+channel
 
 </th>
 
@@ -1371,31 +850,23 @@ marker
 
 <tr>
 
-<td style="text-align:left;">
+<td style="text-align:right;">
 
-\<APC-A\>
+1
+
+</td>
+
+<td style="text-align:right;">
+
+3
 
 </td>
 
 <td style="text-align:left;">
 
-CD38
-
-</td>
-
-</tr>
-
-<tr>
-
-<td style="text-align:left;">
-
-\<APC-H7-A\>
-
-</td>
-
-<td style="text-align:left;">
-
-CD8
+\<APC-A\>, \<APC-H7-A\>, \<FITC-A\>, \<PE-A\>, \<PE-Cy7-A\>,
+\<PerCP-Cy5-5-A\>, \<V450-A\>, \<V500-A\>, FSC-A, FSC-H, FSC-W, SSC-A,
+SSC-H, SSC-W, Time
 
 </td>
 
@@ -1403,31 +874,22 @@ CD8
 
 <tr>
 
-<td style="text-align:left;">
+<td style="text-align:right;">
 
-\<FITC-A\>
+4
+
+</td>
+
+<td style="text-align:right;">
+
+2
 
 </td>
 
 <td style="text-align:left;">
 
-LIVE
-
-</td>
-
-</tr>
-
-<tr>
-
-<td style="text-align:left;">
-
-\<PerCP-Cy5-5-A\>
-
-</td>
-
-<td style="text-align:left;">
-
-CD4
+\<APC-A\>, \<APC-H7-A\>, \<FITC-A\>, \<PE-A\>, \<PE-Cy7-A\>,
+\<PerCP-Cy5-5-A\>, \<V450-A\>, \<V500-A\>, FSC-A, SSC-A, Time
 
 </td>
 
@@ -1435,31 +897,23 @@ CD4
 
 <tr>
 
-<td style="text-align:left;">
+<td style="text-align:right;">
 
-\<V450-A\>
+2
+
+</td>
+
+<td style="text-align:right;">
+
+1
 
 </td>
 
 <td style="text-align:left;">
 
-CD3
-
-</td>
-
-</tr>
-
-<tr>
-
-<td style="text-align:left;">
-
-\<V500-A\>
-
-</td>
-
-<td style="text-align:left;">
-
-HLA-DR
+\<APC-A\>, \<APC-H7-A\>, \<FITC-A\>, \<PE-A\>, \<PE-Cy7-A\>,
+\<PerCP-Cy5-5-A\>, \<V450-A\>, \<V500-A\>, FSC-A, FSC-H, SSC-A, SSC-H,
+Time
 
 </td>
 
@@ -1467,31 +921,23 @@ HLA-DR
 
 <tr>
 
-<td style="text-align:left;">
+<td style="text-align:right;">
 
-\<PE-A\>
+3
+
+</td>
+
+<td style="text-align:right;">
+
+1
 
 </td>
 
 <td style="text-align:left;">
 
-CCR7
-
-</td>
-
-</tr>
-
-<tr>
-
-<td style="text-align:left;">
-
-\<PE-Cy7-A\>
-
-</td>
-
-<td style="text-align:left;">
-
-CD45RA
+\<APC-A\>, \<APC-H7-A\>, \<FITC-A\>, \<PE-A\>, \<PE-Cy7-A\>,
+\<PerCP-Cy5-5-A\>, \<V450-A\>, \<V500-A\>, FSC-A, FSC-W, SSC-A, SSC-W,
+Time
 
 </td>
 
@@ -1502,25 +948,6 @@ CD45RA
 </table>
 
 ``` r
-cqc_set_panel(cqc_data, panel, ref.col = "marker")
-groups <- cqc_check(cqc_data, "panel")
-groups
-```
-
-<!--html_preserve-->
-
-<div id="htmlwidget-fd685fcfd55406eb78e2" class="datatables html-widget" style="width:960px;height:500px;">
-
-</div>
-
-<script type="application/json" data-for="htmlwidget-fd685fcfd55406eb78e2">{"x":{"filter":"none","data":[["1","2","3","4","5","6","7","8"],["&lt;APC-A&gt;","&lt;APC-H7-A&gt;","&lt;FITC-A&gt;","&lt;PE-A&gt;","&lt;PE-Cy7-A&gt;","&lt;PerCP-Cy5-5-A&gt;","&lt;V450-A&gt;","&lt;V500-A&gt;"],["CD38","CD8","LIVE","CCR7","CD45RA","CD4","CD3","HLA-DR"]],"container":"<table class=\"display\">\n  <thead>\n    <tr>\n      <th> <\/th>\n      <th>channel<\/th>\n      <th>group 1(n=7)<\/th>\n    <\/tr>\n  <\/thead>\n<\/table>","options":{"order":[],"autoWidth":false,"orderClasses":false,"columnDefs":[{"orderable":false,"targets":0}]}},"evals":[],"jsHooks":[]}</script>
-
-<!--/html_preserve-->
-
-## Refresh QC report
-
-``` r
-groups <- cqc_check(cqc_data, "channel")
 diff(groups)
 ```
 
@@ -1631,170 +1058,8 @@ res <- cqc_match(groups, ref = 4)
 res
 ```
 
-<table class="table table-bordered" style="font-size: 12px; width: auto !important; ">
-
-<thead>
-
-<tr>
-
-<th style="text-align:left;color: black !important;background-color: #9ebcda !important;">
-
-group\_id
-
-</th>
-
-<th style="text-align:left;color: black !important;background-color: #9ebcda !important;">
-
-Not in
-reference
-
-</th>
-
-<th style="text-align:left;color: black !important;background-color: #9ebcda !important;">
-
-Missing channels
-
-</th>
-
-</tr>
-
-</thead>
-
-<tbody>
-
-<tr>
-
-<td style="text-align:left;font-weight: bold;">
-
-1
-
-</td>
-
-<td style="text-align:left;">
-
-FSC-H,FSC-W,SSC-H,SSC-W
-
-</td>
-
-<td style="text-align:left;">
-
-</td>
-
-</tr>
-
-<tr>
-
-<td style="text-align:left;font-weight: bold;">
-
-2
-
-</td>
-
-<td style="text-align:left;">
-
-FSC-H,SSC-H
-
-</td>
-
-<td style="text-align:left;">
-
-</td>
-
-</tr>
-
-<tr>
-
-<td style="text-align:left;font-weight: bold;">
-
-3
-
-</td>
-
-<td style="text-align:left;">
-
-FSC-W,SSC-W
-
-</td>
-
-<td style="text-align:left;">
-
-</td>
-
-</tr>
-
-</tbody>
-
-</table>
-
 ``` r
-solution <- cqc_recommend(res, max.distance = 0.6)
-solution
-```
-
-<table class="table table-bordered table-condensed" style="font-size: 12px; width: auto !important; ">
-
-<thead>
-
-<tr>
-
-<th style="text-align:left;color: black !important;background-color: #e5f5e0 !important;">
-
-Proposed change
-
-</th>
-
-</tr>
-
-</thead>
-
-<tbody>
-
-<tr>
-
-<td style="text-align:left;">
-
-<span style="     text-decoration: line-through;">FSC-H</span>
-
-</td>
-
-</tr>
-
-<tr>
-
-<td style="text-align:left;">
-
-<span style="     text-decoration: line-through;">FSC-W</span>
-
-</td>
-
-</tr>
-
-<tr>
-
-<td style="text-align:left;">
-
-<span style="     text-decoration: line-through;">SSC-H</span>
-
-</td>
-
-</tr>
-
-<tr>
-
-<td style="text-align:left;">
-
-<span style="     text-decoration: line-through;">SSC-W</span>
-
-</td>
-
-</tr>
-
-</tbody>
-
-</table>
-
-``` r
-cqc_fix(solution)
+cqc_fix(res)
 ```
 
 ## Coerce it directly into single `GatingSet` (zero-copying)

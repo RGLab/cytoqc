@@ -40,7 +40,7 @@ format.cqc_match_result_and_solution <- function(x, ...) {
       df <- filter(x[["solution"]], group_id == gid)
       this_res <- match_result[[gid]]
       #init column
-      col_to_show <- rep("*", length(ref))
+      col_to_show <- rep("\u2713", length(ref))
 
       if(!is.null(this_res))
       {
