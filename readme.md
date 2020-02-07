@@ -163,16 +163,16 @@ res <- cqc_match(check_results, ref = 3)
 res
 ```
 
-    ##     Ref        1     2      4
-    ## 1 FL1-H        *     *      *
-    ## 2 FL2-A        *     *      *
-    ## 3 FL2-H        *     *      *
-    ## 4 FL3-H        *     *      *
-    ## 5 FL4-H        *     *      *
-    ## 6 FSC-H        * fsc-h  fsc-h
-    ## 7 SSC-H   SSC1-H     * SSC1-H
-    ## 8  Time        *  <NA>      *
-    ## 9       channelA
+    ##                Ref        1     2      4
+    ## 1            FL1-H        ✓     ✓      ✓
+    ## 2            FL2-A        ✓     ✓      ✓
+    ## 3            FL2-H        ✓     ✓      ✓
+    ## 4            FL3-H        ✓     ✓      ✓
+    ## 5            FL4-H        ✓     ✓      ✓
+    ## 6            FSC-H        ✓ fsc-h  fsc-h
+    ## 7            SSC-H   SSC1-H     ✓ SSC1-H
+    ## 8             Time        ✓  <NA>      ✓
+    ## 10 To Delete       channelA
 
 ### 3\. Apply the fix
 

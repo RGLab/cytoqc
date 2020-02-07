@@ -102,10 +102,13 @@ cqc_update_match <- function(x, group_id = NULL, map){
   cls <- class(x$solution)
   if(is.null(group_id))
   {
-    group_id <- as.integer(names(match_res))
+    group_id <- names(match_res)
   }
   new_solution <- map_dfr(group_id, function(gid){
-    tibble(group_id = gid, from = names(map), to = map)
+    from <- names(map)
+    unknown <- match_res[[gid]][["unknown"]]
+    from <- from[from %in% unknown]
+    tibble(group_id = as.integer(gid), from = from, to = map[from])
   })
 
   x$solution <- bind_rows(x$solution, new_solution)
