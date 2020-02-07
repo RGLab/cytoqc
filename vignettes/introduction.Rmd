@@ -14,8 +14,8 @@ vignette: >
 ## The basic workflow:
 
 1. Run `cqc_check` to see the summary
-2. `cqc_match` and `cqc_recommend` for selected groups
-3. `cqc_fix` based on the solution or `cqc_drop_groups` for unsolvable issues
+2. `cqc_match` to match against reference group
+3. `cqc_fix` based on the match results or `cqc_drop_groups` for unsolvable issues
 4. Iterate 1~3 steps until data is cleaned
 5. `split` the data into multiple sets for multi-panel cases
 
