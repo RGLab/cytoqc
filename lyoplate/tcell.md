@@ -22,13 +22,13 @@ gslist <- sapply(centers, function(center) {
   message("Center: ", center)
   gs <- load_gs(file.path(path, center, panel))
 })
+
+cqc_data <- cqc_gs_list(gslist)
 ```
 
 ## QC Check gates
 
 ``` r
-cqc_data <- cqc_gs_list(gslist)
-
 #group by gates
 groups <- cqc_check(cqc_data, "gate")
 groups
@@ -183,18 +183,12 @@ singlets
 
 ``` r
 #vis the difference
-plot_diff(groups)
-```
+# plot_diff(groups)
 
-![](tcell_files/figure-gfm/unnamed-chunk-5-1.png)<!-- -->![](tcell_files/figure-gfm/unnamed-chunk-5-2.png)<!-- -->
-
-``` r
 # match reference
 match_result <- cqc_match(groups, ref = 1)
-match_result
-```
+# match_result
 
-``` r
 cqc_fix(match_result)
 
 cqc_check(cqc_data, "gate")
@@ -803,11 +797,11 @@ groups
 
 <!--html_preserve-->
 
-<div id="htmlwidget-90781823c45f8a0a0745" class="datatables html-widget" style="width:960px;height:500px;">
+<div id="htmlwidget-d50c9c488f932329f67b" class="datatables html-widget" style="width:960px;height:500px;">
 
 </div>
 
-<script type="application/json" data-for="htmlwidget-90781823c45f8a0a0745">{"x":{"filter":"none","data":[["1","2","3","4","5","6","7","8"],["&lt;APC-A&gt;","&lt;APC-H7-A&gt;","&lt;FITC-A&gt;","&lt;PE-A&gt;","&lt;PE-Cy7-A&gt;","&lt;PerCP-Cy5-5-A&gt;","&lt;V450-A&gt;","&lt;V500-A&gt;"],["CD38","CD8","LIVE","CCR7","CD45RA","CD4","CD3","HLA-DR"]],"container":"<table class=\"display\">\n  <thead>\n    <tr>\n      <th> <\/th>\n      <th>channel<\/th>\n      <th>group 1(n=7)<\/th>\n    <\/tr>\n  <\/thead>\n<\/table>","options":{"order":[],"autoWidth":false,"orderClasses":false,"columnDefs":[{"orderable":false,"targets":0}]}},"evals":[],"jsHooks":[]}</script>
+<script type="application/json" data-for="htmlwidget-d50c9c488f932329f67b">{"x":{"filter":"none","data":[["1","2","3","4","5","6","7","8"],["&lt;APC-A&gt;","&lt;APC-H7-A&gt;","&lt;FITC-A&gt;","&lt;PE-A&gt;","&lt;PE-Cy7-A&gt;","&lt;PerCP-Cy5-5-A&gt;","&lt;V450-A&gt;","&lt;V500-A&gt;"],["CD38","CD8","LIVE","CCR7","CD45RA","CD4","CD3","HLA-DR"]],"container":"<table class=\"display\">\n  <thead>\n    <tr>\n      <th> <\/th>\n      <th>channel<\/th>\n      <th>group 1(n=7)<\/th>\n    <\/tr>\n  <\/thead>\n<\/table>","options":{"order":[],"autoWidth":false,"orderClasses":false,"columnDefs":[{"orderable":false,"targets":0}]}},"evals":[],"jsHooks":[]}</script>
 
 <!--/html_preserve-->
 
