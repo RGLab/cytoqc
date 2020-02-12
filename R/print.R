@@ -30,14 +30,11 @@ knit_print.cqc_match_result_and_solution <- function(x, ...) {
   match_result_to_dt(x,...)%>% knit_print
 }
 
-#' This can be called at rstudio console since knit_print requires PhantomJS when run interactively
-#' @importFrom DT formatStyle styleEqual
-match_result_to_dt <- function(x, ...) {
-
-  df <- format(x, show_check_mark = FALSE, ...)
-  ncol <- ncol(df)
+#' color encoding table for the match report
+match_result_color_tbl <- function(x, ...) {
 
   df_color <- format(x, ...)#check mark preserved version of coloring
+  ncol <- ncol(df_color)
   df_color[] <- lapply(df_color, as.character)
   #start color encoding
   ref_vec <- df_color[,"Ref"]
@@ -79,6 +76,14 @@ match_result_to_dt <- function(x, ...) {
   }
 
   df_color[df_color==""] <-  "white"
+  df_color
+}
+#' This can not be called at rstudio console since knit_print requires PhantomJS when run interactively
+#' @importFrom DT formatStyle styleEqual
+match_result_to_dt <- function(x, ...) {
+  df <- format(x, show_check_mark = FALSE, ...)
+  match_result_color_tbl(x, ...)
+  ncol <- ncol(df_color)
 
   #append df_color
   df <- cbind(df, df_color)

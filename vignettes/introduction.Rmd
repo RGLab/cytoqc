@@ -22,7 +22,6 @@ vignette: >
 ```{r include=FALSE}
 library(knitr)
 knitr::opts_chunk$set(warning = FALSE, message = FALSE)
-library(kableExtra)
 ```
 
 
@@ -167,14 +166,14 @@ data_list
 
 ## QC for panel 
 ```{r}
-# first data set is already clean
-cqc_check(data_list[[1]], "panel")
+# second data set is already clean
+cqc_check(data_list[[2]], "panel")
 ```
 
 
 ## Save the cleaned data as FCS 
 ```{r}
-cleaned <- data_list[[1]]
+cleaned <- data_list[[2]]
 ```
 
 
@@ -190,9 +189,9 @@ cs <- cytoset(cleaned)
 cs
 ```
 
-## Further split the data by panel
+## Further split the third data set by panel
 ```{r}
-grps <- cqc_check(data_list[[2]], "panel")
+grps <- cqc_check(data_list[[3]], "panel")
 grps
 split(grps)
 ```

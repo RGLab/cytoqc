@@ -5,12 +5,14 @@
 \alias{cqc_recommend.cqc_match_result}
 \title{Find solution to resolve the discrepancy discovered by match_reference}
 \usage{
-\method{cqc_recommend}{cqc_match_result}(x, max.distance = 0.1, ...)
+\method{cqc_recommend}{cqc_match_result}(x, max.distance = 0.1, partial = TRUE, ...)
 }
 \arguments{
 \item{x}{A CQC object of some kind. See vignettes.}
 
 \item{max.distance}{Maximum distance allowed for a match. See ?agrep}
+
+\item{partial}{whether to do the partial sub string matching before the approximate string matching}
 
 \item{...}{additional arguments not for the user.}
 }

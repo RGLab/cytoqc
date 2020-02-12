@@ -29,7 +29,7 @@ centers <- c('BIIR','CIMR','Miami','NHLBI','Stanford','UCLA','Yale')
 panel <- "tcell"
 gslist <- sapply(centers, function(center) {
   message("Center: ", center)
-  gs <- load_gs(file.path(path, center, panel))
+  gs <- load_gs(file.path(path, center, panel), select = 1)
 })
 
 cqc_data <- cqc_gs_list(gslist)

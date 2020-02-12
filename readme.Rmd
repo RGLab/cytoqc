@@ -10,8 +10,6 @@ always_allow_html: yes
 ```{r include=FALSE}
 knitr::opts_chunk$set(warning = FALSE, message = FALSE)
 library(knitr)
-library(kableExtra)
-library(printr)
 ```
 
 

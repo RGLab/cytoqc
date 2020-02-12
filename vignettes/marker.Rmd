@@ -21,7 +21,6 @@ vignette: >
 ```{r include=FALSE}
 library(knitr)
 knitr::opts_chunk$set(warning = FALSE, message = FALSE)
-library(kableExtra)
 ```
 
 
@@ -73,7 +72,7 @@ groups
 
 ## Match against the references
 ```{r}
-res <- cqc_match(groups, ref = c("cd15", "cd45", "cd14", "cd33"), max.distance = 0.6)
+res <- cqc_match(groups, ref = c("cd15", "cd45", "cd14", "cd33"))
 res
 cqc_fix(res)
 ```

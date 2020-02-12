@@ -13,7 +13,6 @@ vignette: >
 ```{r include=FALSE}
 library(knitr)
 knitr::opts_chunk$set(warning = FALSE, message = FALSE)
-library(kableExtra)
 ```
 
 
@@ -194,6 +193,6 @@ cqc_check(cqc_data, "marker")
 
 ## Coerce it directly into `GatingSetList` (zero-copying)
 ```{r eval=FALSE}
-gslist <- GatingSetList(cqc_data)
-gslist
+gs <- merge_list_to_gs(cqc_data)
+gs
 ```

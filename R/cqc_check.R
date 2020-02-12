@@ -6,13 +6,12 @@
 #' @param skip_na whether to skip the entries with marker unset (i.e. NA)
 #'
 #' @return a tibble with two columns: "channel" and 'marker'
-#' @importFrom tibble as.tibble
 #' @importFrom dplyr select rename
 #' @importFrom flowCore parameters
 #' @export
 cf_get_panel <- function(cf, skip_na = FALSE) {
   res <- pData(parameters(cf)) %>%
-    as.tibble() %>%
+    as_tibble() %>%
     select(c("name", "desc")) %>%
     rename(channel = name, marker = desc)
 
