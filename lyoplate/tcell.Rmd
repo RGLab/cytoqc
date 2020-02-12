@@ -73,18 +73,9 @@ res <- cqc_match(groups, ref = 3)
 res
 ```
 
-## Re-match by relaxing the string matching threshold
-```{r}
-res <- cqc_match(groups, ref = 3, max.distance = 0.6)
-res
-```
-
 ## Manually match the individual items that are still not matched
 ```{r}
-res <- cqc_update_match(res, group = 1, map = c("CD4 PerCP-Cy55" = "CD4"
-                                              , "CD8 APC-H7" = "CD8"
-                                              , "Live Dead FITC" = "LIVE")
-                        )
+res <- cqc_update_match(res,  map = c("CD197" = "CCR7"))
 res
 ```
 
