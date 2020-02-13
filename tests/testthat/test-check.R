@@ -61,9 +61,39 @@ test_that("cqc_check_marker", {
   expect_equal(format(match_result), test_results_marker[["match"]][["format"]])
   expect_equal(match_result_color_tbl(match_result), test_results_marker[["match"]][["match_result_color_tbl"]])
 
+  expect_error(
+    cqc_update_match(match_result,  map = c("AA" = "CCR7"))
+    , "not found")
+  #attempt to change exact match
+  expect_error(
+    cqc_update_match(match_result,  map = c("CD3" = "CCR7"))
+    , "are reference")
+  #attempt to create match for the value that already has matched ref
+  expect_error(
+    expect_output(cqc_update_match(match_result,  map = c("HLADR" = "CCR7")))
+    , "Found the existing match")
+  #attempt to match to the ref that has been already used
+  expect_error(
+    expect_output(cqc_update_match(match_result,  map = c("CD197" = "LIVE")))
+    , "Found the existing match")
+  #attempt to match to the ref that has already have exact match
+  expect_error(
+    cqc_update_match(match_result,  map = c("CD197" = "CD3"))
+    , "already perfectly matched")
+  #attempt to use in valid ref
+  expect_error(
+    cqc_update_match(match_result,  map = c("CD197" = "AA"))
+    , "not valid reference")
   match_result <- cqc_update_match(match_result,  map = c("CD197" = "CCR7"))
   expect_equivalent(match_result, test_results_marker[["match"]][["result_update"]])
 
+  match_result <- cqc_delete_match(match_result,  map = c("CD197"))
+  expect_equal(match_result, test_results_marker[["match"]][["result"]])
+  expect_error(match_result <- cqc_delete_match(match_result,  map = c("CD197")), "No existing")
+  expect_equal(match_result, test_results_marker[["match"]][["result"]])
+
+
+  match_result <- cqc_update_match(match_result,  map = c("CD197" = "CCR7"))
   cqc_fix(match_result)
   expect_equal(cqc_check(cqc_data, "marker"), test_results_marker[["check"]][["fixed_result"]])
 
