@@ -7,6 +7,11 @@
 cqc_fix <- function(x, ...) UseMethod("cqc_fix")
 
 #' @export
+cqc_fix.default <- function(x, ...) {
+  stop("The input is not a valid 'cqc_match' result!\nPlease make sure to follow the right order of the 'cqc_check-->cqc_match-->cqc_fix' workflow!")
+}
+
+#' @export
 cqc_fix.cqc_match_result_and_solution <- function(x, ...) {
   cqc_fix(x[["solution"]])
 }

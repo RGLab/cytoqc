@@ -10,6 +10,11 @@
 cqc_match <- function(x, ...) UseMethod("cqc_match")
 
 #' @export
+cqc_match.default <- function(x, ...) {
+  stop("The input is not a valid 'cqc_check' result!\nPlease make sure to follow the right order of 'cqc_check-->cqc_match-->cqc_fix' workflow!")
+}
+
+#' @export
 cqc_match.cqc_check_channel <- function(x, ...) {
   res <- match_reference(x, type = "channel", ...)
   res

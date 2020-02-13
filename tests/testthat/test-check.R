@@ -36,16 +36,19 @@ test_that("cf_get_panel", {
 
 test_that("cqc_check_gate", {
   test_results_gate <- test_results[["gate"]]
+
   groups <- cqc_check(cqc_data, "gate")
   expect_is(groups, "cqc_check_gate")
   expect_equal(groups, test_results_gate[["check"]][["result"]])
   expect_equal(summary(groups), test_results_gate[["check"]][["summary"]])
   expect_equal(diff(groups), test_results_gate[["check"]][["diff"]])
 
+  expect_error(cqc_match(cqc_data, ref = 1), "not a valid")
   match_result <- cqc_match(groups, ref = 1)
   expect_equal(match_result, test_results_gate[["match"]][["result"]])
   expect_equal(match_result_color_tbl(match_result), test_results_gate[["match"]][["match_result_color_tbl"]])
 
+  expect_error(cqc_fix(groups), "not a valid")
   cqc_fix(match_result)
   expect_equal(cqc_check(cqc_data, "gate"), test_results_gate[["check"]][["fixed_result"]])
 
