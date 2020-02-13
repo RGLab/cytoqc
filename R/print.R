@@ -82,7 +82,7 @@ match_result_color_tbl <- function(x, ...) {
 #' @importFrom DT formatStyle styleEqual
 match_result_to_dt <- function(x, ...) {
   df <- format(x, show_check_mark = FALSE, ...)
-  match_result_color_tbl(x, ...)
+  df_color <- match_result_color_tbl(x, ...)
   ncol <- ncol(df_color)
 
   #append df_color
