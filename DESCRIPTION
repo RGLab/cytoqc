@@ -30,7 +30,8 @@ Imports:
 License: Artistic-2.0
 biocViews: Infrastructure, FlowCytometry, CellBasedAssays
 Suggests: 
-    rmarkdown
+    rmarkdown,
+    testthat
 VignetteBuilder: knitr
 RoxygenNote: 7.0.2
 Encoding: UTF-8

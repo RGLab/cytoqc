@@ -31,6 +31,7 @@ knit_print.cqc_match_result_and_solution <- function(x, ...) {
 }
 
 #' color encoding table for the match report
+#' @noRd
 match_result_color_tbl <- function(x, ...) {
 
   df_color <- format(x, ...)#check mark preserved version of coloring
@@ -80,6 +81,7 @@ match_result_color_tbl <- function(x, ...) {
 }
 #' This can not be called at rstudio console since knit_print requires PhantomJS when run interactively
 #' @importFrom DT formatStyle styleEqual
+#' @noRd
 match_result_to_dt <- function(x, ...) {
   df <- format(x, show_check_mark = FALSE, ...)
   df_color <- match_result_color_tbl(x, ...)

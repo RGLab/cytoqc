@@ -45,6 +45,7 @@ test_that("cqc_check_gate", {
 
   expect_error(cqc_match(cqc_data, ref = 1), "not a valid")
   match_result <- cqc_match(groups, ref = 1)
+  browser()
   expect_equal(match_result, test_results_gate[["match"]][["result"]])
   expect_equal(match_result_color_tbl(match_result), test_results_gate[["match"]][["match_result_color_tbl"]])
 
