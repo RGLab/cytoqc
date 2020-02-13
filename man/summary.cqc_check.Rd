@@ -12,7 +12,8 @@
 \item{...}{Additional arguments not for the user. Ignore.}
 }
 \description{
-It summarise the sample-wise qc report into group overview report for reference selection and further QC action.
+It summarize the itemized check report into group overview.
+It is automatically triggered by print method of `cqc_check` result.
 }
 \examples{
 \dontrun{

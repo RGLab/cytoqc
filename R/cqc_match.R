@@ -1,7 +1,7 @@
 #' find the the difference between the reference and target group
 #'
 #'
-#' @param x cqc_check object returned by cqc_check call
+#' @param x \code{cqc_check} result returned by cqc_check call
 #' @param ...
 #'        ref specifies the reference, which can be either an integer group id or a characte vector giving the actual values of the reference
 #'        select the group ids selected for processing
@@ -48,8 +48,8 @@ cqc_match.cqc_check_gate <- function(x, ...) {
 #' @importFrom purrr set_names
 #' @noRd
 match_reference <- function(x, ref, select = NULL, type, delimiter = "|", ...) {
-  res <- summary(x)
-  if (is.numeric(ref)) {
+  res <- summary(x)#get group-wise check report
+  if (is.numeric(ref)) {#fetch reference vector from check result if ref is an id
     refid <- ref
     ref <- res %>%
       filter(group_id %in% ref) %>%
@@ -58,21 +58,21 @@ match_reference <- function(x, ref, select = NULL, type, delimiter = "|", ...) {
     refid <- -1
 
   if (!is.null(select)) {
-    res <- filter(res, group_id %in% select)
+    res <- filter(res, group_id %in% select)#select the target groups
   }else
   {
     if(refid>0)
-      res <- filter(res, group_id != refid)
+      res <- filter(res, group_id != refid)#exclude the reference group if ref id is supplied
 
   }
   res <- group_by(res, group_id)
 
   res <- res %>%
-    group_split() %>%
+    group_split() %>%#process each group
     map(function(df) {
-      data <- df[[type]]
-      unknown <- setdiff(data, ref)
-      missing <- setdiff(ref, data)
+      data <- df[[type]]#grab the key column
+      unknown <- setdiff(data, ref) #find the item that are in the target groups but not in ref
+      missing <- setdiff(ref, data) # find the item that are in the ref but not in the other group
       if (length(unknown) > 0 || length(missing) > 0) {
         list(unknown = unknown, missing = missing)
       }
@@ -82,7 +82,7 @@ match_reference <- function(x, ref, select = NULL, type, delimiter = "|", ...) {
   class(res) <- c(paste0("cqc_match_result_", type), "cqc_match_result", class(res))
 
   attr(res, "groups") <- x
-
+  #perform the auto matching between the unknown and missing entries
   solution <- cqc_recommend(res, ...)
 
   res <- list(solution = solution, match_result = res, ref = ref)
@@ -105,23 +105,30 @@ cqc_update_match <- function(x, map, group_id = NULL){
   match_res <- x$match_result
   grp.attr <- attr(x$solution, "group")
   cls <- class(x$solution)
+  #if groupid is not given then apply to all groups
   if(is.null(group_id))
   {
     group_id <- names(match_res)
   }
+  #loop through each group
   new_solution <- map_dfr(group_id, function(gid){
-    from <- names(map)
+    from <- names(map)#grab the src from new input
+    #make sure the new input was listed as one of unmatched items
     unknown <- match_res[[gid]][["unknown"]]
     from <- from[from %in% unknown]
+    #add the new pair into solution
     tibble(group_id = as.integer(gid), from = from, to = map[from])
   })
-
+  #append the new solution to the existing one
   x$solution <- bind_rows(x$solution, new_solution)
   #restore attr
   attr(x$solution, "group") <- grp.attr
   class(x$solution) <- cls
   x
 }
+
+#' Convert the match_result to table
+#' @param x "cqc_match_result" returned as part of cqc_match call
 #' @importFrom dplyr as_tibble
 #' @export
 as_tibble.cqc_match_result <- function(x) {

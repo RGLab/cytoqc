@@ -49,10 +49,11 @@ cqc_recommend.cqc_match_result <- function(x, max.distance = 0.1, partial = TRUE
     if (length(refs_queue) > 0 && length(targets_queue) > 0)
     {
 
-
+      #(1st mat)
       # Levenshtein (edit) distance
       dist_mat <- adist(refs, targets, ignore.case = TRUE)
 
+      #(2nd mat)
       # check if each match passes the max.distance check
       # agrep can be avoided if the formula of max.distance used by agrep is figured out
       is_pass_mat <- do.call(rbind, sapply(refs, function(ref){
@@ -64,8 +65,8 @@ cqc_recommend.cqc_match_result <- function(x, max.distance = 0.1, partial = TRUE
                                        })
                                     }, simplify = FALSE)
                             )
-
-      #check if substring
+      # (3rd mat)
+      #check if one if the substring of the other
       if(partial)
       {
         is_substring_mat <- do.call(rbind, sapply(refs, function(ref){
@@ -81,20 +82,25 @@ cqc_recommend.cqc_match_result <- function(x, max.distance = 0.1, partial = TRUE
       nrows <- nrow(dist_mat)
       ncols <- ncol(dist_mat)
 
+      #combine the info from 3 matrices above to find the best match
 
-      #first scan the substr matched entries
+      #first scan the substr mat to get pairs that has substring match
       is_sub_idx <- which(is_substring_mat)
-      #order by dist
+      #order these substring matched pairs by the approximate string dist
+      #to break tie when multiples are substr-matched to one
       is_sub_idx <- is_sub_idx[order(dist_mat[is_sub_idx])]
-      #then scan the non-substr  entries
-      no_sub_idx <- which((!is_substring_mat)&is_pass_mat)#filter by dist threshold mat
+      #then process the pairs that has no substr relations
+      #and also discard the pairs that do not pass dist threshold
+      no_sub_idx <- which((!is_substring_mat)&is_pass_mat)
+      #order them by dist
       no_sub_idx <- no_sub_idx[order(dist_mat[no_sub_idx])]
+      #add the pairs selected/ordered by the above rules
       for(idx in c(is_sub_idx, no_sub_idx))
       {
         if (length(refs_queue) == 0 || length(targets_queue) == 0)
           break#terminate the loop if one of the queues is empty
 
-          # get x, y coordinates
+        # try to parse out the names of the pair by its x, y coordinates within the mat
         ridx <- idx %% nrows
         if (ridx == 0) {
           ridx <- nrows
@@ -103,10 +109,11 @@ cqc_recommend.cqc_match_result <- function(x, max.distance = 0.1, partial = TRUE
         # get the pair
         from <- targets[cidx]
         to <- refs[ridx]
+        #check if they are already matched by previous iterations
         tind <- match(from, targets_queue)
         rind <- match(to, refs_queue)
-
-        if(!is.na(tind) && !is.na(rind) )#skip already-matched pairs
+        #if new match then add them to the solution
+        if(!is.na(tind) && !is.na(rind) )
         {
           df <- add_row(df, from = from, to = to)
 
@@ -117,8 +124,7 @@ cqc_recommend.cqc_match_result <- function(x, max.distance = 0.1, partial = TRUE
 
       }#end for
     }
-
-    # iteratively try to find the aproximate match between two vecs
+    #add those extra items to deletion list
     if (length(targets_queue) > 0 && length(refs_queue) == 0) {
 
          df <- add_row(df, from = targets_queue, to = NA)
