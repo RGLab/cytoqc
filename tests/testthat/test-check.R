@@ -4,10 +4,6 @@ path <- "~/remote/fh/fast/gottardo_r/mike_working/lyoplate_out/parsed"
 skip_if_not(dir.exists(path))
 
 centers <- c('BIIR','CIMR','Miami','NHLBI','Stanford','UCLA','Yale')
-# test_results_all <- list()
-# saveRDS(test_results_all, "tests/testthat/test_results.rds")
-# test_results_all <- readRDS("tests/testthat/test_results.rds")
-test_results_all <- readRDS("test_results.rds")
 
 ##load gs
 panel <- "tcell"
@@ -45,8 +41,7 @@ test_that("cqc_check_gate", {
 
   expect_error(cqc_match(cqc_data, ref = 1), "not a valid")
   match_result <- cqc_match(groups, ref = 1)
-  browser()
-  expect_equal(match_result, test_results_gate[["match"]][["result"]])
+  expect_equal(match_result, test_results_gate[["match"]][["result"]])#strange that this test fail at package check (but succeed in console)
   expect_equal(match_result_color_tbl(match_result), test_results_gate[["match"]][["match_result_color_tbl"]])
 
   expect_error(cqc_fix(groups), "not a valid")
