@@ -1,0 +1,109 @@
+---
+output: html_document
+always_allow_html: yes
+---
+# QC for DC panel
+
+
+```{r include=FALSE}
+library(knitr)
+knitr::opts_chunk$set(warning = FALSE, message = FALSE)
+library(kableExtra)
+```
+
+
+```{r}
+library(flowCore)
+library(flowWorkspace)
+# library(cytoqc)
+devtools::load_all()
+```
+```{r}
+path <- "~/remote/fh/fast/gottardo_r/mike_working/lyoplate_out/parsed"
+centers <- c('BIIR','CIMR','Miami','NHLBI','Stanford','UCLA','Yale')
+```
+
+## Load gs
+```{r}
+panel <- "DC"
+gslist <- sapply(centers, function(center) {
+  message("Center: ", center)
+  gs <- load_gs(file.path(path, center, panel), select = 1)
+})
+
+```
+## Check marker
+```{r}
+cqc_data <- cqc_gs_list(gslist)
+check_res <- cqc_check(cqc_data, "marker")
+check_res
+```
+
+## Match reference
+```{r}
+match_res <- cqc_match(check_res, ref = 7, max.dist = 0.6)
+match_res
+```
+
+## Manually update the match
+```{r}
+match_res <- cqc_update_match(match_res, c("Lineage APC-H7" = "CD3CD19CD20"))
+match_res
+```
+
+## Apply the match
+```{r}
+cqc_fix(match_res)
+cqc_check(cqc_data, "marker")
+```
+
+## Check panel
+```{r}
+res <- cqc_check(cqc_data, "panel")
+format(res, anchor = "marker")
+```
+
+## Standarize the panel
+```{r}
+cf <- get_cytoframe_from_cs(cqc_data[[1]], 1)
+
+pnl <- cf_get_panel(cf, skip_na = T)
+pnl
+
+cqc_set_panel(cqc_data, pnl, ref.col = "marker")
+cqc_check(cqc_data, "panel")
+```
+
+## check gates
+```{r}
+res <- cqc_check(cqc_data, "gate")
+res
+diff(res)
+match_res <- cqc_match(res, ref = 2)
+match_res
+```
+
+## Singlets are not important for analysis thus can be safely deleted (actually hidden)
+```{r}
+cqc_fix(match_res)
+```
+
+## Check channel again
+```{r}
+res <- cqc_check(cqc_data, "channel")
+res
+match_res <- cqc_match(res, ref = 4)
+match_res
+```
+
+## W/H scatter are for singlets gate thus can be safely removed
+```{r}
+cqc_fix(match_res)
+```
+
+## Merge the standarized data 
+```{r}
+gs <- merge_list_to_gs(gslist)
+gs
+```
+

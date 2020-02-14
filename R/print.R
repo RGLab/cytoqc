@@ -27,7 +27,8 @@ print.cqc_match_result_and_solution <- function(x, ...) {
 
 #' @export
 knit_print.cqc_match_result_and_solution <- function(x, ...) {
-  match_result_to_dt(x,...)%>% knit_print
+  match_result_to_dt(x,...) %>% knit_print
+
 }
 
 #' color encoding table for the match report
@@ -94,13 +95,21 @@ match_result_to_dt <- function(x, ...) {
   colors <- unique(unlist(df_color))
 
   datatable(df
+            , class = "compact"
             , colnames = c("", colnames(df)[-1])
+            , filter = "none"
             , options = list(
      columnDefs = list(list(targets = col_ref_col_idx, visible = FALSE)) #hide df_color cols
-     , pageLength = 12
+     # , pageLength = 12
+     , paging = FALSE
+     , searching = FALSE
+     , info = FALSE
+     , ordering = FALSE
+     , dom = 't'
    ))%>%
           formatStyle(1:ncol, col_ref_col_idx
                       , color = styleEqual(colors, colors)
+                      # , fontSize = "80%"
           )
 
 
@@ -341,7 +350,18 @@ knit_print.cqc_check_panel <- function(x, ...){
 #' @importFrom DT datatable
 knit_print.cqc_check_panel_wide <- function(x, ...){
   x%>%
-    `class<-`(value = class(x)[-(1:3)])  %>% datatable %>% knit_print
+    `class<-`(value = class(x)[-(1:3)])  %>%
+    datatable(filter = "none"
+              , class = "compact"
+            ,options = list( paging = FALSE
+                           , searching = FALSE
+                           , info = FALSE
+                           , ordering = FALSE
+                           , dom = 't'
+                            )
+             ) %>%
+    formatStyle(1:ncol(x)) %>%
+    knit_print
 }
 
 
