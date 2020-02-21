@@ -85,6 +85,7 @@ match_result_color_tbl <- function(x, ...) {
 #' @noRd
 match_result_to_dt <- function(x, ...) {
   df <- format(x, show_check_mark = FALSE, ...)
+  df[is.na(df)] <- "N/A" #display NA in dt
   df_color <- match_result_color_tbl(x, ...)
   ncol <- ncol(df_color)
 
@@ -350,6 +351,7 @@ knit_print.cqc_check_panel <- function(x, ...){
 #' @export
 #' @importFrom DT datatable
 knit_print.cqc_check_panel_wide <- function(x, ...){
+  x[is.na(x)] <- "N/A"
   x%>%
     `class<-`(value = class(x)[-(1:3)])  %>%
     datatable(filter = "none"
@@ -361,7 +363,7 @@ knit_print.cqc_check_panel_wide <- function(x, ...){
                            , dom = 't'
                             )
              ) %>%
-    formatStyle(1:ncol(x)) %>%
+    formatStyle(1:ncol(x), color = styleEqual("N/A", "red")) %>%
     knit_print
 }
 
