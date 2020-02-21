@@ -17,6 +17,9 @@ cf_get_panel <- function(cf, skip_na = FALSE) {
 
   if(skip_na)
     res <- filter(res, is.na(marker) == FALSE)
+  #remove AsIs attribute
+  class(res$channel) <- NULL
+  class(res$marker) <- NULL
 
   res
 }

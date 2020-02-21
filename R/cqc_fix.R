@@ -82,7 +82,9 @@ cqc_delete.GatingSet <- function(x, value, type, ...) {
 #'
 #' @param x cytoframe or GatingSet
 #' @param from the old value to be updated
-#' @param to the old value to be updated
+#' @param to the old value to be updated. Alternatively when type is "marker" it can be a named character which provides
+#'          a pair of channel vs marker and 'from' is ignored , instead 'channel' is used as the reference to select target entry to update
+#'
 #' @param type one of qc task "channel", "marker", "keyword", "gate"
 #' @param ... unused
 #' @export
@@ -92,7 +94,20 @@ cqc_update.cytoframe <- function(x, from, to, type, ...) {
   if (type == "channel") {
     flowWorkspace:::setChannel(x@pointer, from, to)
   } else if (type == "marker") {
-    cf_rename_marker(x, from, to)
+    if(length(names(to)) == 0)
+    {
+      if(from == "")
+        stop("Can't rename the original empty marker directly!Please specify 'to' as a named character which provides
+                  a pair of channel vs marker to select target marker to update")
+      cf_rename_marker(x, from, to)
+    }else
+    {
+      if(from != "")
+        warning("'from' argument is ignored since 'to' is a named character which provides
+                  a pair of channel vs marker to select target marker to update")
+      markernames(x) <- to
+    }
+
   } else if (type == "keyword") {
     cf_keyword_rename(x, from, to)
   } else {
@@ -206,14 +221,24 @@ cqc_set_panel.cytoframe <- function(x, panel, ref.col, ...){
   target.col <- cols[-match(ref.col, cols)]
   old <- paste0(target.col, ".x")
   new <- paste0(target.col, ".y")
-  # fun <- get(paste0("cf_rename_", target.col))
+
   cf_get_panel(x) %>%
     inner_join(panel, by = ref.col) %>%
-    filter(get(old) != get(new)) %>%
+    filter(get(old) != get(new) | is.na(get(old))) %>%
     rowwise() %>% do({
       # browser()
-      # fun(x, .[[old]], .[[new]])
-      cqc_update(x, .[[old]], .[[new]], type = target.col)
+
+      to <- .[[new]]
+      if(target.col == "marker")
+      {
+        from = ""
+        names(to) <- .[["channel"]]
+      }else
+        from = .[[old]]
+
+      cqc_update(x, from, to, type = target.col)
+
+      data.frame()
     })
 
 }
