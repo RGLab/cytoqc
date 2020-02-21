@@ -71,6 +71,8 @@ match_reference <- function(x, ref, select = NULL, type, delimiter = "|", ...) {
     group_split() %>%#process each group
     map(function(df) {
       data <- df[[type]]#grab the key column
+      if(length(data) == 1 && data == "")
+        data <- character()
       unknown <- setdiff(data, ref) #find the item that are in the target groups but not in ref
       missing <- setdiff(ref, data) # find the item that are in the ref but not in the other group
       if (length(unknown) > 0 || length(missing) > 0) {
