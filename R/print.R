@@ -326,6 +326,7 @@ format.cqc_check_panel <- function(x, anchor = c("channel", "marker"), ...){
     mutate(group_id := paste("group", group_id), nObject := paste0("(n=", nObject, ")")) %>%
     unite(grp, group_id, nObject, sep = "") %>% #merge grp cols
     spread(grp, !!value) %>%
+    filter(get(anchor) !="") %>% #rm the empty row that was caused by samples that have entire empty markers
     `class<-`(value = c("cqc_check_panel_wide", class(x)))
 }
 
