@@ -120,20 +120,57 @@ cqc_update.GatingSet <- function(x, from, to, type, ...) {
 #' if ref.col is set to 'channel', then 'channel' column from 'panel' is used as the
 #' reference to be matched against 'cqc_data' and 'marker'  will be set according to 'panel'
 #'
+#' @param x "cqc_check_panel" result from 'cqc_check_panel' or 'cqc_check'call
+#' @param ref the reference group id or a custom panel that is represented as tibble contains channel and marker columns (typically returned by 'cf_get_panel` )
+#' @param by the column used as the fixed anchor, either 'channel' or 'marker'
+#' @param select the groups to be updated. Default is all
+#' @examples
+#' \dontrun{
+#'      res <- cqc_check(cqc_data, "panel")
+#'      cqc_fix_panel(res, 1, "channel") #get panel info from group 1 and set markers of other groups  by using channel as reference
+#'
+#' }
+cqc_fix_panel <- function(x, ref, by, select = NULL)
+{
+  stopifnot(is(x, "cqc_check_panel"))
+  data <- attr(x, "data")
+
+  if(is(ref, "numeric"))
+  {
+    #extract ref panel
+    pnl <- summary(x) %>%
+            filter(group_id == ref) %>%
+            select(channel, marker)
+    #exclude ref group from targets
+    x <- filter(x,group_id != ref)
+    ref <- pnl
+  }
+  if (!is.null(select)) {
+    x <- filter(x, group_id %in% select)#select the target groups
+  }
+  obj <- unique(x[["object"]])
+  for(i in data[obj])
+    cqc_set_panel(i, ref, by)
+  }
+
+
+#' Update panel info
+#'
+#' It updates either 'channel' or 'marker' info depends on the value of 'ref.col'
+#' if ref.col is set to 'channel', then 'channel' column from 'panel' is used as the
+#' reference to be matched against 'cqc_data' and 'marker'  will be set according to 'panel'
+#'
 #' @param x cqc_data
 #' @param panel a tibble contains channel and marker colums (typically returned by 'cf_get_panel` )
 #' @param ref.col the column used as the reference, either 'channel' or 'marker'
 #' @param ... unused
-#' @export
 cqc_set_panel <- function(x, panel, ref.col, ...) UseMethod("cqc_set_panel")
 
-#' @export
 cqc_set_panel.cqc_data <- function(x, ...){
   for(i in x)
     cqc_set_panel(i, ...)
 }
 
-#' @export
 cqc_set_panel.GatingSet <- function(x,  panel, ref.col, ...){
   cols <- c("channel", "marker")
   ref.col <- match.arg(ref.col, cols)
@@ -161,7 +198,6 @@ cqc_set_panel.GatingSet <- function(x,  panel, ref.col, ...){
     lapply(cs, cqc_set_panel,  panel, ref.col, ...) # cs point to the original data, no need to assigning it back
   }
 }
-#' @export
 cqc_set_panel.cytoframe <- function(x, panel, ref.col, ...){
   cols <- c("channel", "marker")
   ref.col <- match.arg(ref.col,cols)
@@ -171,7 +207,7 @@ cqc_set_panel.cytoframe <- function(x, panel, ref.col, ...){
   old <- paste0(target.col, ".x")
   new <- paste0(target.col, ".y")
   # fun <- get(paste0("cf_rename_", target.col))
-  cf_get_panel(x, skip_na = TRUE) %>%
+  cf_get_panel(x) %>%
     inner_join(panel, by = ref.col) %>%
     filter(get(old) != get(new)) %>%
     rowwise() %>% do({
