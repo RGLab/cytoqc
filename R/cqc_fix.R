@@ -145,6 +145,7 @@ cqc_update.GatingSet <- function(x, from, to, type, ...) {
 #'      cqc_fix_panel(res, 1, "channel") #get panel info from group 1 and set markers of other groups  by using channel as reference
 #'
 #' }
+#' @export
 cqc_fix_panel <- function(x, ref, by, select = NULL)
 {
   stopifnot(is(x, "cqc_check_panel"))

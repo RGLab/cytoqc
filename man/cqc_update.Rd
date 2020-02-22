@@ -11,7 +11,8 @@ cqc_update(x, from, to, type, ...)
 
 \item{from}{the old value to be updated}
 
-\item{to}{the old value to be updated}
+\item{to}{the old value to be updated. Alternatively when type is "marker" it can be a named character which provides
+a pair of channel vs marker and 'from' is ignored , instead 'channel' is used as the reference to select target entry to update}
 
 \item{type}{one of qc task "channel", "marker", "keyword", "gate"}
 
