@@ -223,23 +223,19 @@ cqc_set_panel.cytoframe <- function(x, panel, ref.col, ...){
   old <- paste0(target.col, ".x")
   new <- paste0(target.col, ".y")
 
-  cf_get_panel(x) %>%
-    inner_join(panel, by = ref.col) %>%
-    filter(get(old) != get(new) | is.na(get(old))) %>%
-    rowwise() %>% do({
-      # browser()
+  ref.markers <- panel[["marker"]]
+  ref.channels <- panel[["channel"]]
+  pnl1 <- cf_get_panel(x, skip_na = FALSE)
+  if(ref.col == 'channel')
+  {
+    names(ref.markers) <- ref.channels
+    markernames(x) <- ref.markers
+  }else
+  {
+    markers <- pnl1[["marker"]]
 
-      to <- .[[new]]
-      if(target.col == "marker")
-      {
-        from = ""
-        names(to) <- .[["channel"]]
-      }else
-        from = .[[old]]
-
-      cqc_update(x, from, to, type = target.col)
-
-      data.frame()
-    })
-
+    #find idx of ref in target
+    idx <- match(ref.markers, markers)
+    colnames(x)[idx] <- ref.channels
+  }
 }
