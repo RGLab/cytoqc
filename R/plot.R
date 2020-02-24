@@ -35,7 +35,7 @@ shiny_plot <- function(res){
               values=c("#d1495b", "#edae49", "#66a172"), #red, yellow, green
               limits=c("Missing", "Approximate Match", "Exact Match"),
               name="Match Status") +
-            labs(x="Reference", y="Group") +
+            labs(x="Group", y="Reference") +
             theme(axis.title=element_text(size=14, face="bold"),
                   axis.text=element_text(size=12, face="bold"),
                   legend.text=element_text(size=12, face="bold"),
