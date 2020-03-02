@@ -154,7 +154,7 @@ cluster_panels <- function(res, missing_penalty = 1.0){
   max_dist <- max(replace_na(adist(df), 0))
   
   # Distance metric -- partial allows for substring match, which is asymmetric
-  dm <- function(x,y){sum(replace_na(abs(diag(adist(x, y, partial=TRUE))), missing_penalty*max_dist))}
+  dm <- function(x,y){sum(replace_na(diag(adist(x, y, partial=TRUE)), missing_penalty*max_dist))}
   
   ngroups <- ncol(df)
   dist_mat <- matrix(apply(expand.grid(1:ngroups,1:ngroups), 1, function(pair){dm(df[,pair[[1]]], df[,pair[[2]]])}), nrow = ngroups)
