@@ -255,6 +255,13 @@ print.cqc_check <- function(x, ...){
    print(summary(x), ...)
 }
 
+#' @export
+print.cqc_cluster <- function(x, ...){
+  type <- sub("cqc_cluster_", "", class(x)[[1]])
+  cat(paste0("Proposed clustering of groups in to ", x$ngroup, " new datasets based on ", type, ":\n"))
+  print(as.data.frame(x$group_membership), row.names = FALSE)
+}
+
 object_type <- function(x){
   dat <- attr(x, "data")
   if(is(dat, "cqc_gs_list"))
