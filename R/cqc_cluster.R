@@ -50,7 +50,7 @@ cqc_cluster.cqc_check_panel <- function(x, ...){
 
 
 #' @importFrom tibble as_tibble
-#' @importFrom dplyr select distinct 
+#' @importFrom dplyr select distinct n
 #' @importFrom tidyr pivot_wider replace_na
 #' @export
 cluster_labels <- function(check_res, type, ngroup = NULL, height = NULL, missing_penalty = 1.0){

@@ -26,7 +26,8 @@ Imports:
     Rgraphviz,
     graph,
     htmltools,
-    DT
+    DT,
+    crayon
 License: Artistic-2.0
 biocViews: Infrastructure, FlowCytometry, CellBasedAssays
 Suggests: 
