@@ -554,13 +554,12 @@ print_dt.cqc_check_panel_wide <- function(x, ...){
 #' @importFrom dplyr mutate_all
 #' @export
 knit_print.cqc_check_panel_wide <- function(x, ...){
-  # x <- htmlEscape(x)
+  x <- mutate_all(x, htmlEscape)
 
   x[is.na(x)] <- "<font color='red'>N/A</font>"
 
-  # x[x=="FSC-Height"] <- "<font color='red'>N/A</font>"
+  x[x=="FSC-Height"] <- "<font color='red'>N/A</font>"
   x%>%
-    mutate_all(htmlEscape) %>%
     `class<-`(value = class(x)[-(1:3)])  %>%
     kable(escape = F) %>%
     kable_styling(c("bordered", "condensed"), full_width = F, position = "left", font_size = 12) %>%

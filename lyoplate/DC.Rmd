@@ -17,8 +17,8 @@ library(kableExtra)
 ```{r}
 library(flowCore)
 library(flowWorkspace)
-library(cytoqc)
-# devtools::load_all()
+# library(cytoqc)
+devtools::load_all()
 ```
 ```{r}
 path <- "~/remote/fh/fast/gottardo_r/mike_working/lyoplate_out/parsed"
