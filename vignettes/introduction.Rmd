@@ -4,8 +4,10 @@ output: rmarkdown::html_vignette
 always_allow_html: yes
 vignette: >
   %\VignetteIndexEntry{cytoqc-pregating}
-  %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
+  %\VignetteEngine{knitr::rmarkdown}
+editor_options: 
+  chunk_output_type: inline
 ---
 # cytoqc -- A QC tool for openCyto
 
@@ -29,12 +31,13 @@ knitr::opts_chunk$set(warning = FALSE, message = FALSE)
 library(flowCore)
 library(flowWorkspace)
 library(cytoqc)
+# devtools::load_all()
 ```
 
 ```{r include=FALSE}
 # prepare the test data
 data("GvHD")
-fs <- GvHD
+fs <- fsApply(GvHD,function(fr)fr[1,])
 data_dir <- tempfile()
 dir.create(data_dir)
 write.flowSet(fs, data_dir)

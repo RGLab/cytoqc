@@ -350,7 +350,7 @@ knit_print.cqc_check_panel <- function(x, ...){
 }
 #' @export
 #' @importFrom DT datatable
-knit_print.cqc_check_panel_wide <- function(x, ...){
+print_dt.cqc_check_panel_wide <- function(x, ...){
   x[is.na(x)] <- "N/A"
   x%>%
     `class<-`(value = class(x)[-(1:3)])  %>%
@@ -367,4 +367,18 @@ knit_print.cqc_check_panel_wide <- function(x, ...){
     knit_print
 }
 
+#' @importFrom dplyr mutate_all
+#' @export
+knit_print.cqc_check_panel_wide <- function(x, ...){
+  # x <- htmlEscape(x)
 
+  x[is.na(x)] <- "<font color='red'>N/A</font>"
+
+  # x[x=="FSC-Height"] <- "<font color='red'>N/A</font>"
+  x%>%
+    mutate_all(htmlEscape) %>%
+    `class<-`(value = class(x)[-(1:3)])  %>%
+    kable(escape = F) %>%
+    kable_styling(c("bordered", "condensed"), full_width = F, position = "left", font_size = 12) %>%
+    knit_print
+}

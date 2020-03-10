@@ -1,6 +1,8 @@
 ---
 output: html_document
 always_allow_html: yes
+editor_options: 
+  chunk_output_type: inline
 ---
 # QC for DC panel
 
@@ -15,8 +17,8 @@ library(kableExtra)
 ```{r}
 library(flowCore)
 library(flowWorkspace)
-library(cytoqc)
-# devtools::load_all()
+# library(cytoqc)
+devtools::load_all()
 ```
 ```{r}
 path <- "~/remote/fh/fast/gottardo_r/mike_working/lyoplate_out/parsed"
