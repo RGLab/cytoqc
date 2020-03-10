@@ -255,6 +255,190 @@ print.cqc_check <- function(x, ...){
    print(summary(x), ...)
 }
 
+#' @noRd
+#' @export
+knit_print.cqc_cluster_panel <- function(x, ...){
+  # browser()
+  check_res <- attr(x, "check_res")
+  value <- "marker"
+
+  summarized <- check_res %>% summary
+
+  df <- summarized %>%
+    select(-nObject) %>%
+    arrange(group_id) %>%
+    spread(group_id, !!value) %>%
+    as.data.frame()
+
+  nObj <- summarized %>%
+    distinct(group_id, nObject) %>%
+    arrange(group_id) %>%
+    pull(nObject)
+
+  old_groups <- as.numeric(colnames(df)[-1])
+
+  new_groups <- x$group_membership %>%
+    arrange(match(old_groups, old_group)) %>%
+    pull(new_group)
+
+  # Color columns by group for easy viewing
+  colors <- gen_color_palette(length(unique(new_groups)), output="colors")
+  names(colors) <- unique(new_groups)
+
+  colnames(df)[-1] <- sapply(2:ncol(df), function(idx){
+    paste0("Group ", colnames(df)[idx], " (n=", nObj[[idx-1]], ")")
+  })
+  group_row <- c("New Group:", new_groups)
+  df <- rbind(df, group_row)
+  rough <- kable(df) %>% kable_styling()
+  # Should try to convert this for loop if possible, but column_spec makes it a little difficult
+  for (i in 2:ncol(df)){
+    rough <- column_spec(rough, i, color="black", background=colors[[new_groups[[i-1]]]], border_left = TRUE, border_right=TRUE)
+  }
+  rough <- row_spec(rough, nrow(df), color="gray", bold=TRUE, background = "white", hline_after = TRUE)
+  knit_print(rough)
+}
+
+#' @importFrom crayon make_style style
+#' @export
+print.cqc_cluster_panel <- function(x, ...){
+  check_res <- attr(x, "check_res")
+  value <- "marker"
+
+  summarized <- check_res %>% summary
+
+  df <- summarized %>%
+    select(-nObject) %>%
+    arrange(group_id) %>%
+    spread(group_id, !!value) %>%
+    as.data.frame()
+
+  nObj <- summarized %>%
+    distinct(group_id, nObject) %>%
+    arrange(group_id) %>%
+    pull(nObject)
+
+  old_groups <- as.numeric(colnames(df)[-1])
+
+  new_groups <- x$group_membership %>%
+    arrange(match(old_groups, old_group)) %>%
+    pull(new_group)
+
+  # Color columns by group for easy viewing
+  colors <- gen_color_palette(length(unique(new_groups)), output="styles")
+  names(colors) <- unique(new_groups)
+
+  channels <- df[,1]
+  colorized <- data.frame(lapply(2:ncol(df), function(col){
+    colors[[new_groups[[col-1]]]](df[,col])
+  }))
+  colorized <- cbind(df[,1], colorized)
+  colnames(colorized) <- colnames(df)
+  # Kable doesn't handle format decoration well. It bases header width on the
+  # field width of the strings assessed with all formatting decoration (so super wide). So we need
+  # to manually fix that
+  rough <- kable(colorized, format = "rst")
+  # Determining proper width of each column
+  max.widths <- sapply(1:length(df), function(col){
+    max(as.numeric(nchar(colnames(colorized)[col])), max(sapply(df[,col], nchar), na.rm = TRUE))
+  })
+  # Fix === rows
+  headers <- lapply(max.widths, function(width){
+    paste0(strrep("=", width), "  ")
+  })
+  headers <- do.call(paste0, headers)
+  rough[[1]] <- rough[[3]] <- rough[[(length(rough))]] <- headers
+  # Fix actual header row
+  unpadded <- colnames(colorized)
+  padded_top <- lapply(1:length(unpadded), function(idx){
+    paste0(unpadded[[idx]], strrep(" ", max(0, max.widths[[idx]] - nchar(unpadded[[idx]]) + 2)))
+  })
+  padded_bottom <- lapply(1:length(new_groups), function(idx){
+    paste0(new_groups[[idx]], strrep(" ", max(0, max.widths[[idx+1]] - nchar(new_groups[[idx]]) + 2)))
+  })
+  padded_bottom <- paste0("New Group:", strrep(" ", max(0, max.widths[[1]] - 8)), do.call(paste0, padded_bottom))
+
+  rough[[2]] <- do.call(paste0, padded_top)
+
+  buffer <- strrep(" ", (nchar(rough[[1]]) %/% 2) - 5)
+  top <- paste0(buffer, "Old Groups", buffer)
+
+  count_row <- lapply(1:length(nObj), function(idx){
+    paste0(nObj[[idx]], strrep(" ", max(0, max.widths[[idx+1]] - nchar(nObj[[idx]]) + 2)))
+  })
+  count_row <- do.call(paste0, count_row)
+  count_row <- paste0("n =", strrep(" ", max(0, max.widths[[1]] - 1)), count_row)
+
+  rough <- c(top, rough, padded_bottom, headers, count_row)
+
+  final <- structure(rough, class="knitr_kable", format="rst")
+  print(final)
+}
+
+#' @export
+knit_print.cqc_cluster <- function(x, ...){
+  type <- gsub("cqc_cluster_", "", class(x)[[1]])
+  type <- as.symbol(type)
+  check_res <- as_tibble(attr(x, "check_res"))
+
+  summarized <- check_res %>%
+    inner_join(x$group_membership, by=c("group_id" = "old_group")) %>%
+    select(-c(object)) %>%
+    distinct() %>%
+    group_by(group_id, new_group, nObject) %>%
+    summarise(!!type := paste(!!type, collapse = ", ")) %>%
+    arrange(group_id)
+
+  new_groups <- x$group_membership$new_group
+
+  colors <- gen_color_palette(length(unique(new_groups)), output="colors")
+  names(colors) <- unique(new_groups)
+
+  summarized <- kable(summarized) %>% kable_styling()
+
+  summarized %>%
+    by_row
+  # Should try to convert this for loop if possible, but row_spec makes it a little difficult
+  for(i in 1:length(new_groups)){
+    summarized <- row_spec(summarized, i, color = "black", background = colors[[new_groups[[i]]]])
+  }
+  knit_print(summarized)
+}
+
+#' @export
+print.cqc_cluster <- function(x, ...){
+  type <- gsub("cqc_cluster_", "", class(x)[[1]])
+  check_res <- as_tibble(attr(x, "check_res"))
+  summarized <- check_res %>%
+    select(-c(object)) %>%
+    distinct()
+
+  type <- as.symbol(type)
+  summarized <- group_by(summarized, group_id, nObject) %>%
+    summarise(!!type := paste(!!type, collapse = ", ")) %>%
+    arrange(group_id) %>%
+    as.data.frame()
+
+  new_groups <-  x$group_membership %>%
+    arrange(old_group) %>%
+    pull(new_group)
+
+  summarized$new_group <- new_groups
+  summarized <- summarized[,c(1,4,2,3)]
+
+  # Color columns by group for easy viewing
+  colors <- gen_color_palette(length(unique(new_groups)), output="styles")
+  names(colors) <- unique(new_groups)
+
+  colored_markers <- apply(summarized, 1, function(row){
+    style(row[["marker"]], colors[[new_groups[[as.numeric(row[["group_id"]])]]]])
+  })
+  summarized$marker <- colored_markers
+
+  final <- kable(summarized, format="rst")
+  print(final)
+}
+
 object_type <- function(x){
   dat <- attr(x, "data")
   if(is(dat, "cqc_gs_list"))
@@ -381,4 +565,14 @@ knit_print.cqc_check_panel_wide <- function(x, ...){
     kable(escape = F) %>%
     kable_styling(c("bordered", "condensed"), full_width = F, position = "left", font_size = 12) %>%
     knit_print
+}
+gen_color_palette <- function(n, output=c("styles", "colors")){
+  output <- match.arg(output, c("styles", "colors"))
+  colors <- rainbow(n, alpha = 0.3)
+  if(output == "colors")
+    colors
+  else
+    lapply(colors, function(color){
+      make_style(color)
+    })
 }
