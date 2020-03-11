@@ -129,7 +129,9 @@ cqc_check.cqc_cf_list <- function(x, type, keys = NULL, delimiter = "|", ...) {
   #convert to itemized(one entry per object&key) tbl
   res <- tibble(object = names(keys), key = keys)
   #generate group id based on the key
-  gid <- group_indices(res, key)
+  gid <- res %>% 
+    group_by(key) %>%
+    group_indices()
   res <- res %>%
     mutate(group_id = gid) %>%
     add_count(group_id, key) %>%
