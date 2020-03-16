@@ -116,16 +116,25 @@ cqc_update.cytoframe <- function(x, from, to, type, ...) {
 }
 #' @export
 cqc_update.GatingSet <- function(x, from, to, type, ...) {
+  is_gh <- is(x, "GatingHierarchy")
   if (type == "channel") {
     gs_update_channels(x, map = data.frame(
       old = from,
       new = to
     ))
   } else if (type == "gate") {
-    gs_pop_set_name(x, from, to)
+    if(is_gh)
+      gh_pop_set_name(x, from, to)
+    else
+      gs_pop_set_name(x, from, to)
   } else {
-    cs <- gs_cyto_data(x)
-    lapply(cs, cqc_update, from, to, type) # cs point to the original data, no need to assigning it back
+    if(is_gh){
+      cf <- gh_pop_get_data(x, returnType = "cytoframe")
+      cqc_update(cf, from, to, type)
+    }else{
+      cs <- gs_cyto_data(x)
+      lapply(cs, cqc_update, from, to, type) # cs point to the original data, no need to assigning it back
+    }
   }
 }
 
@@ -191,6 +200,11 @@ cqc_set_panel.GatingSet <- function(x,  panel, ref.col, ...){
   cols <- c("channel", "marker")
   ref.col <- match.arg(ref.col, cols)
   cs <- gs_cyto_data(x)
+  is_gh <- is(x, "GatingHierarchy")
+  if(is_gh)
+    cf <- gh_pop_get_data(x, returnType = "cytoframe")
+  else
+    cf <- get_cytoframe_from_cs(cs, 1)
 
   if (ref.col == "marker") {
     if(!setequal(colnames(panel), cols))
@@ -199,7 +213,6 @@ cqc_set_panel.GatingSet <- function(x,  panel, ref.col, ...){
     target.col <- cols[-match(ref.col, cols)]
     old <- paste0(target.col, ".x")
     new <- paste0(target.col, ".y")
-    cf <- get_cytoframe_from_cs(cs, 1)
 
     tbl <- cf_get_panel(cf, skip_na = TRUE) %>%
       inner_join(panel, by = ref.col) %>%
@@ -211,7 +224,10 @@ cqc_set_panel.GatingSet <- function(x,  panel, ref.col, ...){
                                       )
                        )
   } else {
-    lapply(cs, cqc_set_panel,  panel, ref.col, ...) # cs point to the original data, no need to assigning it back
+    if(is_gh)
+      cqc_set_panel(cf, panel, ref.col, ...)
+    else
+      lapply(cs, cqc_set_panel,  panel, ref.col, ...) # cs point to the original data, no need to assigning it back
   }
 }
 cqc_set_panel.cytoframe <- function(x, panel, ref.col, ...){

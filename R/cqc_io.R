@@ -36,6 +36,26 @@ cqc_cf_list <- function(x) {
   x
 }
 
+#' Construct a 'cqc_gs' object from a 'GatingSet'
+#' 
+#' This is mainly for distpatch and wrapping many of the
+#' qc operations on a 'cqc_cf_list' object for the GatingSet's
+#' underlying data
+#' @param x a GatingSet object
+#' @export
+cqc_gs <- function(x) {
+  if (!is(x, "GatingSet")){
+    stop("x must be a GatingSet!")
+  }
+  # Expand GatingSet in to a list of GatingHierarchies for gate qc
+  # Have to avoid a get_cytoset call which could error with internal inconsistency in channel
+  ghlist <- lapply(1:length(flowWorkspace:::.cpp_getSamples(x@pointer)), function(idx) {x[[idx]]})
+  names(ghlist) <- sampleNames(x)
+  
+  class(ghlist) <- c("cqc_gs", "cqc_data", class(x))
+  ghlist
+}
+
 #' Write out tidied flow data (cqc_cf_list) back to fcs
 #' @param x cqc_cf_list
 #' @param ... additional arguments.

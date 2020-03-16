@@ -150,6 +150,34 @@ cqc_check.cqc_cf_list <- function(x, type, keys = NULL, delimiter = "|", ...) {
   res
 }
 
+#' @export
+cqc_check.cqc_gs <- function(x, type, keys = NULL, delimiter = "|", ...) {
+  type = match.arg(type, c("channel", "marker", "panel", "keyword", "gate"))
+  # Get list of cytoframes for dispatching to cqc_cflist methdods
+  cflist <- lapply(1:length(x), function(idx) {gh_pop_get_data(x[[idx]], returnType="cytoframe")})
+  names(cflist) <- names(x)
+  cflist <- cqc_cf_list(cflist)
+  
+  if (type == "gate") {
+    sep <- paste0(delimiter, delimiter)
+    keys <- sapply(x, function(gh) {
+      key <- gh_get_pop_paths(gh, path = "auto")#extract gate paths
+      #order them alphabetically and collapse them as a string
+      key %>%
+        sort() %>%
+        paste(collapse = sep)
+    })
+  } else {
+    keys <- NULL
+  }
+  
+  #dispatch to cqc_check.cqc_cf_list
+  res <- cqc_check(cflist, type, keys, delimiter, ...)
+  
+  attr(res, "data") <- x
+  res
+}
+
 #' Provide the summary view of the cqc_check report.
 #'
 #' It summarize the itemized check report into group overview.
