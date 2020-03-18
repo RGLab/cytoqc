@@ -52,7 +52,7 @@ cqc_gs <- function(x) {
   ghlist <- lapply(1:length(flowWorkspace:::.cpp_getSamples(x@pointer)), function(idx) {x[[idx]]})
   names(ghlist) <- sampleNames(x)
   
-  class(ghlist) <- c("cqc_gs", "cqc_data", class(x))
+  class(ghlist) <- c("cqc_gs", "cqc_data", class(ghlist))
   ghlist
 }
 

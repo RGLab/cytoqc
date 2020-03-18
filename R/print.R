@@ -7,7 +7,7 @@ print.cqc_cf_list <- function(x, ...) {
 #' @export
 print.cqc_gs <- function(x, ...) {
   cat("cytoqc data: \n")
-  cat("GatingSet with", length(x), "samples \n")
+  cat("List of GatingHierarchy objects with", length(x), "samples \n")
 }
 
 #' @importFrom knitr knit_print
