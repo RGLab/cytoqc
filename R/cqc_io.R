@@ -37,7 +37,7 @@ cqc_cf_list <- function(x) {
 }
 
 #' Construct a 'cqc_gs' object from a 'GatingSet'
-#' 
+#'
 #' This is mainly for distpatch and wrapping many of the
 #' qc operations on a 'cqc_cf_list' object for the GatingSet's
 #' underlying data
@@ -51,22 +51,20 @@ cqc_gs <- function(x) {
   # Have to avoid a get_cytoset call which could error with internal inconsistency in channel
   ghlist <- lapply(1:length(flowWorkspace:::.cpp_getSamples(x@pointer)), function(idx) {x[[idx]]})
   names(ghlist) <- sampleNames(x)
-  
+
   class(ghlist) <- c("cqc_gs", "cqc_data", class(ghlist))
   ghlist
 }
 
+
 #' Write out tidied flow data (cqc_cf_list) back to fcs
 #' @param x cqc_cf_list
-#' @param ... additional arguments.
-#'   out the output directory that the FCS will be written
-#'   verbose whether to print each sample name during the writing process
-#' @export
-write_fcs <- function(x, ...) UseMethod("write_fcs")
-
+#' @param out the output directory that the FCS will be written
+#' @param verbose whether to print each sample name during the writing process
+#' @param ... other arguments passed down to 'write.FCS'
 #' @importFrom flowCore write.FCS
 #' @export
-write_fcs.cqc_cf_list <- function(x, out, verbose = TRUE, ...) {
+cqc_write_fcs <- function(x, out, verbose = TRUE, ...) {
   if (!dir.exists(out)) {
     dir.create(out)
   }
@@ -77,7 +75,7 @@ write_fcs.cqc_cf_list <- function(x, out, verbose = TRUE, ...) {
     }
     # fr <- cytoframe_to_flowFrame(x[[sn]])
     fr <- x[[sn]]
-    write.FCS(fr, filename = file.path(out, sn))
+    write.FCS(fr, filename = file.path(out, sn), ...)
   }
 }
 
