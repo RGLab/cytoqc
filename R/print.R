@@ -505,9 +505,9 @@ knit_print.cqc_check_summary <- function(x, collapse = TRUE, ...) {
 
 #' @export
 #' @importFrom tidyr spread
-format.cqc_check_panel <- function(x, anchor = c("channel", "marker"), ...){
+format.cqc_match_result_panel <- function(x, ...){
   # x <- summary(x)
-  anchor <- match.arg(anchor)
+  anchor <- attr(x, "by")
   if(anchor == "channel")
     value <- "marker"
   else
@@ -518,29 +518,41 @@ format.cqc_check_panel <- function(x, anchor = c("channel", "marker"), ...){
     unite(grp, group_id, nObject, sep = "") %>% #merge grp cols
     spread(grp, !!value) %>%
     filter(get(anchor) !="") %>% #rm the empty row that was caused by samples that have entire empty markers
-    `class<-`(value = c("cqc_check_panel_wide", class(x)))
+    `class<-`(value = c("cqc_match_panel_wide", class(x)[-(1:2)]))
 }
 
 #' @export
-print.cqc_check_panel_wide <- function(x, ...){
+print.cqc_match_panel_wide <- function(x, ...){
     x %>% `class<-`(value = class(x)[-(1:3)]) %>%
     print
 }
 #' @export
 print.cqc_check_panel <- function(x, ...){
-  format(x, ...) %>%
+  summary(x, ...) %>%
     print
 }
 
 #' @export
 knit_print.cqc_check_panel <- function(x, ...){
 
-  format(x, ...) %>%
+  summary(x, ...) %>%
     knit_print
 }
 #' @export
+print.cqc_match_result_panel <- function(x, ...){
+  format(x, ...) %>%
+  print
+}
+
+#' @export
+knit_print.cqc_match_result_panel <- function(x, ...){
+
+  format(x, ...) %>%
+  knit_print
+}
+#' @export
 #' @importFrom DT datatable
-print_dt.cqc_check_panel_wide <- function(x, ...){
+print_dt.cqc_match_panel_wide <- function(x, ...){
   x[is.na(x)] <- "N/A"
   x%>%
     `class<-`(value = class(x)[-(1:3)])  %>%
@@ -559,7 +571,7 @@ print_dt.cqc_check_panel_wide <- function(x, ...){
 
 #' @importFrom dplyr mutate_all
 #' @export
-knit_print.cqc_check_panel_wide <- function(x, ...){
+knit_print.cqc_match_panel_wide <- function(x, ...){
   x <- mutate_all(x, htmlEscape)
 
   x[is.na(x)] <- "<font color='red'>N/A</font>"

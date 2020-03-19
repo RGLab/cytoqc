@@ -33,6 +33,7 @@ cqc_fix.cqc_solution <- function(x, ...) {
     }))
 }
 
+
 #' Delete methods for cyto data
 #'
 #' It is typically called automatically by cqc_fix call
@@ -137,6 +138,12 @@ cqc_update.GatingSet <- function(x, from, to, type, ...) {
     }
   }
 }
+#' @export
+cqc_fix.cqc_match_result_panel <- function(x, ...) {
+  ref <- attr(x, "ref")
+  by <- attr(x, "by")
+  cqc_fix_panel(x, ref , by)
+}
 
 #' Update panel info
 #'
@@ -154,7 +161,6 @@ cqc_update.GatingSet <- function(x, from, to, type, ...) {
 #'      cqc_fix_panel(res, 1, "channel") #get panel info from group 1 and set markers of other groups  by using channel as reference
 #'
 #' }
-#' @export
 cqc_fix_panel <- function(x, ref, by, select = NULL)
 {
   stopifnot(is(x, "cqc_check_panel"))
