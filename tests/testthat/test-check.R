@@ -104,12 +104,12 @@ test_that("cqc_check_panel", {
 
   groups <- cqc_check(cqc_data, "panel")
   expect_equal(groups, test_results_panel[["check"]][["result"]])
-  expect_equal(format(groups), test_results_panel[["check"]][["format"]])
-  expect_equal(format(groups, anchor = "marker"), test_results_panel[["check"]][["format_by_marker"]])
+  expres <- test_results_panel[["check"]][["format"]]
+  expect_error(match_res <- cqc_match(groups, ref = 1), "not consistent")
+  match_res <- cqc_match(groups, ref = 6, by = "marker")
+  expect_equal(format(match_res), test_results_panel[["check"]][["format_by_marker"]])
 
-  cf <- gs_cyto_data(cqc_data[[1]])[[1]]
-  panel <- cf_get_panel(cf, skip_na = TRUE)
-  cqc_set_panel(cqc_data, panel, ref.col = "marker")
+  cqc_fix(match_res)
   groups <- cqc_check(cqc_data, "panel")
   expect_equal(groups, test_results_panel[["check"]][["fixed_result"]])
 
