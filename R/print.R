@@ -503,9 +503,16 @@ knit_print.cqc_check_summary <- function(x, collapse = TRUE, ...) {
   knit_print(x)
 }
 
+
+
+#' @export
+format.cqc_match_result_panel <- function(x, ...){
+  res <- format.cqc_check_panel(x, ...)
+}
+
 #' @export
 #' @importFrom tidyr spread
-format.cqc_match_result_panel <- function(x, ...){
+format.cqc_check_panel <- function(x, ...){
   # x <- summary(x)
   anchor <- attr(x, "by")
   if(anchor == "channel")
@@ -518,24 +525,24 @@ format.cqc_match_result_panel <- function(x, ...){
     unite(grp, group_id, nObject, sep = "") %>% #merge grp cols
     spread(grp, !!value) %>%
     filter(get(anchor) !="") %>% #rm the empty row that was caused by samples that have entire empty markers
-    `class<-`(value = c("cqc_match_panel_wide", class(x)[-(1:2)]))
+    `class<-`(value = c("cqc_check_panel_wide", class(x)[-(1:2)]))
 }
 
 #' @export
-print.cqc_match_panel_wide <- function(x, ...){
+print.cqc_check_panel_wide <- function(x, ...){
     x %>% `class<-`(value = class(x)[-(1:3)]) %>%
     print
 }
 #' @export
 print.cqc_check_panel <- function(x, ...){
-  summary(x, ...) %>%
+  format(x, ...) %>%
     print
 }
 
 #' @export
 knit_print.cqc_check_panel <- function(x, ...){
 
-  summary(x, ...) %>%
+  format(x, ...) %>%
     knit_print
 }
 #' @export

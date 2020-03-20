@@ -34,10 +34,12 @@ cqc_check_channel <- function(x, ...){
 cqc_check_marker <- function(x, ...){
   cqc_check(x, type = "marker", ...)
 }
+
+#' @param  by the column used as the anchor when 'x' is the check result of panel, it can be either 'channel' or 'marker'
 #' @rdname cqc_check
 #' @export
-cqc_check_panel <- function(x, ...){
-  cqc_check(x, type = "panel", ...)
+cqc_check_panel <- function(x, by = "channel", ...){
+  cqc_check(x, type = "panel", by = by, ...)
 }
 #' @rdname cqc_check
 #' @export
@@ -61,8 +63,12 @@ cqc_check_gate <- function(x, ...){
 #' @param x cqc_cf_list
 #' @param ... additional arguments.
 #'  type specify the qc type, can be "channel", "marker" or "panel"
+#'
 #'  delimiter a special character used to separate channel and marker
+#'
 #'  keys The vector to supply the keys to be grouped on. default is NULL, which is extracted automatically from the flow data
+#'
+#'
 #' @examples
 #' \dontrun{
 #' groups <- cqc_check(cqc_cf_list, "channel")
@@ -99,7 +105,8 @@ cqc_check.cqc_gs_list <- function(x, type, delimiter = "|", ...) {
 #' @export
 #' @importFrom dplyr filter arrange pull mutate group_indices distinct count add_count
 #' @importFrom tidyr separate separate_rows
-cqc_check.cqc_cf_list <- function(x, type, keys = NULL, delimiter = "|", ...) {
+cqc_check.cqc_cf_list <- function(x, type, keys = NULL, delimiter = "|", by = "channel", ...) {
+  by <- match.arg(by, c("channel", "marker"))
   types <-  c("channel", "marker", "panel", "keyword")
   if(!is.null(keys))#passed down from cqc_check.cqc_gs_list
     types <- c(types, "gate")
@@ -129,7 +136,7 @@ cqc_check.cqc_cf_list <- function(x, type, keys = NULL, delimiter = "|", ...) {
   #convert to itemized(one entry per object&key) tbl
   res <- tibble(object = names(keys), key = keys)
   #generate group id based on the key
-  gid <- res %>% 
+  gid <- res %>%
     group_by(key) %>%
     group_indices()
   res <- res %>%
@@ -139,6 +146,8 @@ cqc_check.cqc_cf_list <- function(x, type, keys = NULL, delimiter = "|", ...) {
     separate_rows(key, sep = paste0("\\Q", sep, "\\E"))#split the collapsed key string into separate rows(one key per row)
   if (type == "panel") {#for panel check, need to split chnl and marker into separate columns
     res <- separate(res, key, c("channel", "marker"), sep = paste0("\\Q", delimiter, "\\E"))
+    attr(res, "by") <- by
+
   } else {
     res <- rename(res, !!type := key)
   }
@@ -157,7 +166,7 @@ cqc_check.cqc_gs <- function(x, type, keys = NULL, delimiter = "|", ...) {
   cflist <- lapply(1:length(x), function(idx) {gh_pop_get_data(x[[idx]], returnType="cytoframe")})
   names(cflist) <- names(x)
   cflist <- cqc_cf_list(cflist)
-  
+
   if (type == "gate") {
     sep <- paste0(delimiter, delimiter)
     keys <- sapply(x, function(gh) {
@@ -170,10 +179,10 @@ cqc_check.cqc_gs <- function(x, type, keys = NULL, delimiter = "|", ...) {
   } else {
     keys <- NULL
   }
-  
+
   #dispatch to cqc_check.cqc_cf_list
   res <- cqc_check(cflist, type, keys, delimiter, ...)
-  
+
   attr(res, "data") <- x
   res
 }

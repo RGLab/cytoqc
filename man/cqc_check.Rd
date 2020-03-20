@@ -13,7 +13,7 @@ cqc_check_channel(x, ...)
 
 cqc_check_marker(x, ...)
 
-cqc_check_panel(x, ...)
+cqc_check_panel(x, by = "channel", ...)
 
 cqc_check_keyword(x, ...)
 
@@ -25,9 +25,13 @@ cqc_check(x, ...)
 \item{x}{cqc_cf_list}
 
 \item{...}{additional arguments.
-type specify the qc type, can be "channel", "marker" or "panel"
-delimiter a special character used to separate channel and marker
-keys The vector to supply the keys to be grouped on. default is NULL, which is extracted automatically from the flow data}
+ type specify the qc type, can be "channel", "marker" or "panel"
+
+ delimiter a special character used to separate channel and marker
+
+ keys The vector to supply the keys to be grouped on. default is NULL, which is extracted automatically from the flow data}
+
+\item{by}{the column used as the anchor when 'x' is the check result of panel, it can be either 'channel' or 'marker'}
 }
 \value{
 a tibble with 4 columns: object, qc type (e.g. channel), group_id and nobject (i.e. group count)

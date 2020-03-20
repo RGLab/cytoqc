@@ -10,10 +10,10 @@ cqc_match(x, ...)
 \item{x}{\code{cqc_check} result returned by cqc_check call}
 
 \item{...}{ref specifies the reference, which can be either an integer group id or a characte vector giving the actual values of the reference
-       select the group ids selected for processing
-       type the qc type (either "channle", "marker", "gate")
 
-       by the column used as the anchor when 'x' is the check result of panel, it can be either 'channel' or 'marker'}
+       select the group ids selected for processing
+
+       type the qc type (either "channle", "marker", "gate")}
 }
 \description{
 find the the difference between the reference and target group

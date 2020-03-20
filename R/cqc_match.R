@@ -3,11 +3,13 @@
 #'
 #' @param x \code{cqc_check} result returned by cqc_check call
 #' @param ...
+#'
 #'        ref specifies the reference, which can be either an integer group id or a characte vector giving the actual values of the reference
+#'
 #'        select the group ids selected for processing
+#'
 #'        type the qc type (either "channle", "marker", "gate")
 #'
-#'        by the column used as the anchor when 'x' is the check result of panel, it can be either 'channel' or 'marker'
 #'
 #' @export
 cqc_match <- function(x, ...) UseMethod("cqc_match")
@@ -42,8 +44,8 @@ cqc_match.cqc_check_gate <- function(x, ...) {
 
 #' @export
 #' @importFrom dplyr group_walk
-cqc_match.cqc_check_panel <- function(x, ref, by = "channel", ...) {
-  by <- match.arg(by, c("channel", "marker"))
+cqc_match.cqc_check_panel <- function(x, ref, ...) {
+  by <- attr(x, "by")
   #check if anchor is already standardized
   stopifnot(is(ref, "numeric"))
   ref_by <- filter(x, group_id == ref)[[by]]
@@ -55,7 +57,6 @@ cqc_match.cqc_check_panel <- function(x, ref, by = "channel", ...) {
   #simply store the ref and by(or anchor)
   #the actual matching(or alignment) is done in format method
   attr(x, "ref") <- ref
-  attr(x, "by") <- by
   class(x) <- c("cqc_match_result_panel", "cqc_match_result", class(x))
   x
 }
