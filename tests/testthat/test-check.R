@@ -106,9 +106,10 @@ test_that("cqc_check_panel", {
   expect_equal(groups, test_results_panel[["check"]][["result"]])
   expres <- test_results_panel[["check"]][["format"]]
   expect_error(match_res <- cqc_match(groups, ref = 1), "not consistent")
-  match_res <- cqc_match(groups, ref = 6, by = "marker")
-  expect_equal(format(match_res), test_results_panel[["check"]][["format_by_marker"]])
 
+  groups <- cqc_check(cqc_data, "panel", by = "marker")
+  expect_equal(format(groups), test_results_panel[["check"]][["format_by_marker"]])
+  match_res <- cqc_match(groups, ref = 6)
   cqc_fix(match_res)
   groups <- cqc_check(cqc_data, "panel")
   expect_equal(groups, test_results_panel[["check"]][["fixed_result"]])

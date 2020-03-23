@@ -87,7 +87,7 @@ match_result_color_tbl <- function(x, ...) {
   df_color
 }
 #' This can not be called at rstudio console since knit_print requires PhantomJS when run interactively
-#' @importFrom DT formatStyle styleEqual
+#' @importFrom DT formatStyle styleEqual datatable
 #' @noRd
 match_result_to_dt <- function(x, ...) {
   df <- format(x, show_check_mark = FALSE, ...)
@@ -506,33 +506,48 @@ knit_print.cqc_check_summary <- function(x, collapse = TRUE, ...) {
 
 
 #' @export
+#' @importFrom colortable set_styling
 format.cqc_match_result_panel <- function(x, ...){
-  res <- format.cqc_check_panel(x, ...)
+  class(x) <- class(x)[-(1:2)]
+  res <- format(x, ...)
+  #add color to ref
+  res[[1]] <- set_styling(res[[1]], text_color = "green")
+  #find the ref col
+  ref <- attr(x, "ref")
+  ref_col <- paste0("group ", ref)
+  ref_idx <- grep(ref_col, colnames(res), fixed = TRUE)
+  res[[ref_idx]] <- set_styling(res[[ref_idx]], text_color = "green")
+  colnames(res)[ref_idx] <- "Ref group"
+
+  res
 }
 
 #' @export
 #' @importFrom tidyr spread
-format.cqc_check_panel <- function(x, ...){
+format.cqc_check_panel <- function(x, color_ref = FALSE, ...){
   # x <- summary(x)
   anchor <- attr(x, "by")
+  # browser()
   if(anchor == "channel")
     value <- "marker"
   else
     value <- "channel"
-  #long to wide
-  x %>% summary %>%
+  # #long to wide
+   x %>% summary %>%
     mutate(group_id := paste("group", group_id), nObject := paste0("(n=", nObject, ")")) %>%
     unite(grp, group_id, nObject, sep = "") %>% #merge grp cols
     spread(grp, !!value) %>%
     filter(get(anchor) !="") %>% #rm the empty row that was caused by samples that have entire empty markers
-    `class<-`(value = c("cqc_check_panel_wide", class(x)[-(1:2)]))
+    `class<-`(value = class(x)[-(1:2)])
+
 }
 
 #' @export
-print.cqc_check_panel_wide <- function(x, ...){
-    x %>% `class<-`(value = class(x)[-(1:3)]) %>%
+print.cqc_match_result_panel <- function(x, ...){
+  format(x, ...) %>%
     print
 }
+
 #' @export
 print.cqc_check_panel <- function(x, ...){
   format(x, ...) %>%
@@ -540,55 +555,39 @@ print.cqc_check_panel <- function(x, ...){
 }
 
 #' @export
-knit_print.cqc_check_panel <- function(x, ...){
-
-  format(x, ...) %>%
-    knit_print
-}
-#' @export
-print.cqc_match_result_panel <- function(x, ...){
-  format(x, ...) %>%
-  print
-}
-
-#' @export
 knit_print.cqc_match_result_panel <- function(x, ...){
 
-  format(x, ...) %>%
-  knit_print
-}
-#' @export
-#' @importFrom DT datatable
-print_dt.cqc_match_panel_wide <- function(x, ...){
-  x[is.na(x)] <- "N/A"
-  x%>%
-    `class<-`(value = class(x)[-(1:3)])  %>%
-    datatable(filter = "none"
-              , class = "compact"
-            ,options = list( paging = FALSE
-                           , searching = FALSE
-                           , info = FALSE
-                           , ordering = FALSE
-                           , dom = 't'
-                            )
-             ) %>%
-    formatStyle(1:ncol(x), color = styleEqual("N/A", "red")) %>%
-    knit_print
+  x <- kable_cqc_check_panel(x, ...)
+  ref_idx <- attr(x, "ref")
+  x %>%
+    column_spec(c(1, ref_idx), color = "green") %>% knit_print
+
 }
 
-#' @importFrom dplyr mutate_all
 #' @export
-knit_print.cqc_match_panel_wide <- function(x, ...){
+knit_print.cqc_check_panel <- function(x, ...){
+  kable_cqc_check_panel(x, ...)%>%
+    knit_print
+
+}
+#' @importFrom dplyr mutate_all
+kable_cqc_check_panel <- function(x, ...){
+
+  attr <- attributes(x)
+
   x <- mutate_all(x, htmlEscape)
+  attributes(x) <- attr
+  x <- format(x, ...)
 
   x[is.na(x)] <- "<font color='red'>N/A</font>"
+  ref_idx <- grep("Ref", colnames(x), fixed = TRUE)
 
-  x[x=="FSC-Height"] <- "<font color='red'>N/A</font>"
-  x%>%
-    `class<-`(value = class(x)[-(1:3)])  %>%
+  # x[x=="FSC-Height"] <- "<font color='red'>N/A</font>"
+  x = x%>%
     kable(escape = F) %>%
-    kable_styling(c("bordered", "condensed"), full_width = F, position = "left", font_size = 12) %>%
-    knit_print
+    kable_styling(c("bordered", "condensed"), full_width = F, position = "left", font_size = 12)
+  attr(x, "ref") <- ref_idx
+  x
 }
 gen_color_palette <- function(n, output=c("styles", "colors")){
   output <- match.arg(output, c("styles", "colors"))

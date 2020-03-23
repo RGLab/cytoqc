@@ -57,6 +57,7 @@ cqc_match.cqc_check_panel <- function(x, ref, ...) {
   #simply store the ref and by(or anchor)
   #the actual matching(or alignment) is done in format method
   attr(x, "ref") <- ref
+  attr(x, "by") <- by
   class(x) <- c("cqc_match_result_panel", "cqc_match_result", class(x))
   x
 }
@@ -237,15 +238,15 @@ cqc_delete_match <- function(x, map, group_id = NULL){
     stop("No existing matches for ", paste(map, collapse = ", "), " to delete!")
   x
 }
-#' Convert the match_result to table
-#' @param x "cqc_match_result" returned as part of cqc_match call
-#' @importFrom dplyr as_tibble
-#' @export
-as_tibble.cqc_match_result <- function(x) {
-  map_dfr(x, function(i) {
-    tibble(
-      "Not in reference" = paste(i[["unknown"]], collapse = ","),
-      "Missing channels" = paste(i[["missing"]], collapse = ",")
-    )
-  }, .id = "group_id")
-}
+#' #' Convert the match_result to table
+#' #' @param x "cqc_match_result" returned as part of cqc_match call
+#' #' @importFrom dplyr as_tibble
+#' #' @export
+#' as_tibble.cqc_match_result <- function(x, ...) {
+#'   map_dfr(x, function(i) {
+#'     tibble(
+#'       "Not in reference" = paste(i[["unknown"]], collapse = ","),
+#'       "Missing channels" = paste(i[["missing"]], collapse = ",")
+#'     )
+#'   }, .id = "group_id")
+#' }

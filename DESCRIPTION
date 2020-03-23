@@ -27,7 +27,8 @@ Imports:
     graph,
     htmltools,
     DT,
-    crayon
+    crayon,
+    colortable
 License: Artistic-2.0
 biocViews: Infrastructure, FlowCytometry, CellBasedAssays
 Suggests: 

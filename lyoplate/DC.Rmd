@@ -17,8 +17,8 @@ library(kableExtra)
 ```{r}
 library(flowCore)
 library(flowWorkspace)
-# library(cytoqc)
-devtools::load_all()
+library(cytoqc)
+# devtools::load_all()
 ```
 ```{r}
 path <- "~/remote/fh/fast/gottardo_r/mike_working/lyoplate_out/parsed"
@@ -61,13 +61,15 @@ cqc_check(cqc_data, "marker")
 
 ## Check panel
 ```{r}
-res <- cqc_check(cqc_data, "panel")
-format(res, anchor = "marker")
+res <- cqc_check(cqc_data, "panel", by = "marker")
+res
 ```
 
 ## Standarize the panel
 ```{r}
-cqc_fix_panel(res, ref = 1, by = "marker")
+res <- cqc_match(res, ref = 2)
+res
+cqc_fix(res)
 cqc_check(cqc_data, "panel")
 ```
 

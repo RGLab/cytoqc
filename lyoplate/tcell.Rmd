@@ -96,23 +96,17 @@ groups
 ```{r}
 res <- cqc_check(cqc_data, "panel")
 res
+res <- cqc_check(cqc_data, "panel", by = "marker")
+res
 ```
 
-## '
-
-## Spread markers
-```{r}
-format(res, anchor = "marker")
-
-```
 
 
 ## Use the marker as reference to standardize the channels across centers
 ```{r}
-cf <- gs_cyto_data(cqc_data[[1]])[[1]]
-panel <- cf_get_panel(cf, skip_na = TRUE)
-panel
-cqc_set_panel(cqc_data, panel, ref.col = "marker")
+res <- cqc_match(res, ref = 3)
+res
+cqc_fix(res)
 groups <- cqc_check(cqc_data, "panel")
 groups
 ```
