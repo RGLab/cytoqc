@@ -1,14 +1,24 @@
-#' Load FCS files
-#' load fcs into 'cqc_cf_list' object which is a list of cytoframes.
+#' Load cqc_data
+#' load fcs or h5 files into 'cqc_cf_list' object which is a list of cytoframes.
 #' This is the method to construct the core data object for cytoQC.
-#' @param files the fcs file paths
+#' @param files the fcs or h5 file paths
 #' @param is_h5 \code{logical} should the cytoframe be constructed as an h5 disk-backed structure. Default \code{TRUE}.
-#' @param ... parameters passed to 'load_cytoframe_from_fcs'
+#'                              It is ignored for \code{cqc_load_h5}
+#' @param ... parameters passed to 'load_cytoframe_from_fcs' or 'load_cytoframe_from_h5'
+#' @rdname cqc_load_fcs
 #' @import flowWorkspace
 #' @importFrom methods is
 #' @export
 cqc_load_fcs <- function(files, is_h5 = TRUE, ...) {
   res <- sapply(files, function(file) load_cytoframe_from_fcs(file, is_h5 = is_h5, ...))
+  names(res) <- basename(names(res))
+  cqc_cf_list(res)
+}
+
+#' @rdname cqc_load_fcs
+#' @export
+cqc_load_h5 <- function(files, is_h5 = TRUE, ...) {
+  res <- sapply(files, function(file) load_cytoframe_from_h5(file, readonly = FALSE, ...))
   names(res) <- basename(names(res))
   cqc_cf_list(res)
 }
@@ -57,12 +67,13 @@ cqc_gs <- function(x) {
 }
 
 
-#' Write out tidied flow data (cqc_cf_list) back to fcs
+#' Write out tidied flow data (cqc_cf_list) back to fcs or h5
 #' @param x cqc_cf_list
-#' @param out the output directory that the FCS will be written
+#' @param out the output directory that the FCS or h5 will be written
 #' @param verbose whether to print each sample name during the writing process
 #' @param ... other arguments passed down to 'write.FCS'
 #' @importFrom flowCore write.FCS
+#' @rdname cqc_write_fcs
 #' @export
 cqc_write_fcs <- function(x, out, verbose = TRUE, ...) {
   if (!dir.exists(out)) {
@@ -73,11 +84,27 @@ cqc_write_fcs <- function(x, out, verbose = TRUE, ...) {
     if (verbose) {
       message("writing ", sn)
     }
-    # fr <- cytoframe_to_flowFrame(x[[sn]])
     fr <- x[[sn]]
     write.FCS(fr, filename = file.path(out, sn), ...)
   }
 }
+
+#' @rdname cqc_write_fcs
+#' @export
+cqc_write_h5 <- function(x, out, verbose = TRUE) {
+  if (!dir.exists(out)) {
+    dir.create(out)
+  }
+  for (sn in names(x))
+  {
+    if (verbose) {
+      message("writing ", sn)
+    }
+    fr <- x[[sn]]
+    cf_write_h5(fr, filename = file.path(out, sn))
+  }
+}
+
 
 #' Construct a 'cqc_gs_list' object from a list of 'GatingSet' objects
 #'

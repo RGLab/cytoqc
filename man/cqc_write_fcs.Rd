@@ -2,19 +2,22 @@
 % Please edit documentation in R/cqc_io.R
 \name{cqc_write_fcs}
 \alias{cqc_write_fcs}
-\title{Write out tidied flow data (cqc_cf_list) back to fcs}
+\alias{cqc_write_h5}
+\title{Write out tidied flow data (cqc_cf_list) back to fcs or h5}
 \usage{
 cqc_write_fcs(x, out, verbose = TRUE, ...)
+
+cqc_write_h5(x, out, verbose = TRUE)
 }
 \arguments{
 \item{x}{cqc_cf_list}
 
-\item{out}{the output directory that the FCS will be written}
+\item{out}{the output directory that the FCS or h5 will be written}
 
 \item{verbose}{whether to print each sample name during the writing process}
 
 \item{...}{other arguments passed down to 'write.FCS'}
 }
 \description{
-Write out tidied flow data (cqc_cf_list) back to fcs
+Write out tidied flow data (cqc_cf_list) back to fcs or h5
 }

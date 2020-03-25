@@ -2,21 +2,25 @@
 % Please edit documentation in R/cqc_io.R
 \name{cqc_load_fcs}
 \alias{cqc_load_fcs}
-\title{Load FCS files
-load fcs into 'cqc_cf_list' object which is a list of cytoframes.
+\alias{cqc_load_h5}
+\title{Load cqc_data
+load fcs or h5 files into 'cqc_cf_list' object which is a list of cytoframes.
 This is the method to construct the core data object for cytoQC.}
 \usage{
 cqc_load_fcs(files, is_h5 = TRUE, ...)
+
+cqc_load_h5(files, is_h5 = TRUE, ...)
 }
 \arguments{
-\item{files}{the fcs file paths}
+\item{files}{the fcs or h5 file paths}
 
-\item{is_h5}{\code{logical} should the cytoframe be constructed as an h5 disk-backed structure. Default \code{TRUE}.}
+\item{is_h5}{\code{logical} should the cytoframe be constructed as an h5 disk-backed structure. Default \code{TRUE}.
+It is ignored for \code{cqc_load_h5}}
 
-\item{...}{parameters passed to 'load_cytoframe_from_fcs'}
+\item{...}{parameters passed to 'load_cytoframe_from_fcs' or 'load_cytoframe_from_h5'}
 }
 \description{
-Load FCS files
-load fcs into 'cqc_cf_list' object which is a list of cytoframes.
+Load cqc_data
+load fcs or h5 files into 'cqc_cf_list' object which is a list of cytoframes.
 This is the method to construct the core data object for cytoQC.
 }
