@@ -506,17 +506,17 @@ knit_print.cqc_check_summary <- function(x, collapse = TRUE, ...) {
 
 
 #' @export
-#' @importFrom colortable set_styling
+#' @importFrom colortable color_vctr
 format.cqc_match_result_panel <- function(x, ...){
   class(x) <- class(x)[-(1:2)]
   res <- format(x, ...)
   #add color to ref
-  res[[1]] <- set_styling(res[[1]], text_color = "green")
+  res[[1]] <- color_vctr(res[[1]], text_color = "green")
   #find the ref col
   ref <- attr(x, "ref")
   ref_col <- paste0("group ", ref)
   ref_idx <- grep(ref_col, colnames(res), fixed = TRUE)
-  res[[ref_idx]] <- set_styling(res[[ref_idx]], text_color = "green")
+  res[[ref_idx]] <- color_vctr(res[[ref_idx]], text_color = "green")
   colnames(res)[ref_idx] <- "Ref group"
 
   res
