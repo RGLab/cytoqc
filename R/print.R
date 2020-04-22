@@ -402,8 +402,6 @@ knit_print.cqc_cluster <- function(x, ...){
 
   summarized <- kable(summarized) %>% kable_styling()
 
-  summarized %>%
-    by_row
   # Should try to convert this for loop if possible, but row_spec makes it a little difficult
   for(i in 1:length(new_groups)){
     summarized <- row_spec(summarized, i, color = "black", background = colors[[new_groups[[i]]]])
