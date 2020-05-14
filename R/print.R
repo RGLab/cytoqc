@@ -187,6 +187,9 @@ format.cqc_match_result_and_solution <- function(x, show_check_mark = TRUE, ...)
   colnames(tbl)[1:2] <- c("", "Ref")
   
   # Add the channels that will be dropped from Ref bc missing in at least one target
+  
+  # Handle old default stringsAsFactors = TRUE
+  tbl$Ref <- as.character(tbl$Ref)
   tbl[nrow(tbl), "Ref"] <- paste(tbl$Ref[apply(tbl, 1, function(row) any(is.na(row)))], collapse = ",")
 
 
