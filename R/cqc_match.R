@@ -50,7 +50,7 @@ cqc_match.cqc_check_panel <- function(x, ref, ...) {
   stopifnot(is(ref, "numeric"))
   ref_by <- filter(x, group_id == ref)[[by]]
   
-  if(unique(x$group_id) > 1){
+  if(length(unique(x$group_id)) > 1){
     x %>% filter(group_id != ref) %>%
       group_by(group_id) %>% group_walk(function(df,...){
         if(!setequal(df[[by]], ref_by))
