@@ -39,6 +39,7 @@ cqc_recommend.cqc_match_result_gate <- function(x, ...) {
 #' @param partial whether to do the partial sub string matching before the approximate string matching
 #' @param ... additional arguments not for the user.
 #' @importFrom tibble tibble add_row
+#' @importFrom dplyr bind_rows anti_join inner_join
 #' @importFrom utils adist
 cqc_recommend.cqc_match_result <- function(x, max.distance = 0.1, partial = TRUE, ...) {
   res <- map_dfr(names(x), function(check_result_name) {
@@ -139,6 +140,31 @@ cqc_recommend.cqc_match_result <- function(x, max.distance = 0.1, partial = TRUE
     }
     df
   })
+  
+  # Now channels flagged for removal from ref need to also be flagged for removal
+  # from targets where those channels were matched (basically a set intersection on channels)
+  
+  # browser()
+  # Channels flagged for removal from ref
+  to_drop_ref <- res %>%
+    distinct() %>%
+    filter(is.na(to) & (group_id == as.integer(attr(x, "ref_id"))))
+  
+  # Expand to rows for targets
+  to_drop_targets <- map_dfr(as.integer(names(x)), function(group){
+    to_drop_ref %>%
+      mutate(group_id=group)
+  })
+  
+  # Handle the possibility that target matched ref by fuzzy matching (rename)
+  to_drop_renamed <- inner_join(to_drop_targets, res, by = c("group_id" = "group_id", "from" = "to"), suffix=c(".ref", ".res"))
+  # Change those rename rows to delete rows
+  res[res$from %in% to_drop_renamed$from.res, "to"] <- NA
+  # Remove the exact match row (because the exact match doesn't exist for those groups)
+  to_drop_targets <- anti_join(to_drop_targets, to_drop_renamed, by = c("group_id", "from"))
+  # Add in the proper exact match delete rows
+  res <- bind_rows(res, to_drop_targets)
+  
   attr(res, "class") <- c("cqc_solution", attr(res, "class"))
   attr(res, "group") <- attr(x, "group")
   res
