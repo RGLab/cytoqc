@@ -41,10 +41,11 @@ cqc_recommend.cqc_match_result_gate <- function(x, ...) {
 #' @importFrom tibble tibble add_row
 #' @importFrom utils adist
 cqc_recommend.cqc_match_result <- function(x, max.distance = 0.1, partial = TRUE, ...) {
-  res <- map_dfr(x, function(check_result) {
+  res <- map_dfr(names(x), function(check_result_name) {
+    check_result <- x[[check_result_name]]
     targets_queue <- targets <- check_result[["unknown"]]
     refs_queue <- refs <- check_result[["missing"]]
-    df <- tibble(from = character(), to = character())
+    df <- tibble(group_id = integer(), from = character(), to = character())
 
     if (length(refs_queue) > 0 && length(targets_queue) > 0)
     {
@@ -115,7 +116,7 @@ cqc_recommend.cqc_match_result <- function(x, max.distance = 0.1, partial = TRUE
         #if new match then add them to the solution
         if(!is.na(tind) && !is.na(rind) )
         {
-          df <- add_row(df, from = from, to = to)
+          df <- add_row(df, group_id = as.integer(check_result_name), from = from, to = to)
 
           # pop the processed item
           refs_queue <- refs_queue[-rind]
@@ -124,15 +125,20 @@ cqc_recommend.cqc_match_result <- function(x, max.distance = 0.1, partial = TRUE
 
       }#end for
     }
-    #add those extra items to deletion list
-    if (length(targets_queue) > 0 && length(refs_queue) == 0) {
-
-         df <- add_row(df, from = targets_queue, to = NA)
-         targets_queue <- character()
-
+    # Add all remaining unmatched channels from targets
+    # AND reference to deletion list
+    if (length(targets_queue) > 0) {
+      df <- add_row(df, group_id = as.integer(check_result_name), from = targets_queue, to = NA)
+      targets_queue <- character()
+    }
+    if (length(refs_queue) > 0) {
+      ref_id <- attr(x, "ref_id")
+      if(!is.null(ref_id))
+        df <- add_row(df, group_id = as.integer(ref_id), from = refs_queue, to = NA)
+      refs_queue <- character()
     }
     df
-  }, .id = "group_id") %>% mutate(group_id = as.integer(group_id))
+  })
   attr(res, "class") <- c("cqc_solution", attr(res, "class"))
   attr(res, "group") <- attr(x, "group")
   res
