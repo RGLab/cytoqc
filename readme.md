@@ -4,6 +4,15 @@
 *cytoqc* checks and standardizes channels, markers, keywords, gates of
 the cytodata .
 
+## Installation
+
+``` r
+remotes::install_github("thebioengineer/colortable")
+remotes::install_github("RGLab/cytoqc")
+```
+
+## Get started
+
 ``` r
 library(flowCore)
 library(flowWorkspace)
@@ -19,7 +28,7 @@ cqc_data
 ```
 
     ## cytoqc data: 
-    ## 21  samples
+    ## 21 samples
 
 ## The basic workflow can be summarised as four steps:
 
@@ -163,16 +172,16 @@ res <- cqc_match(check_results, ref = 3)
 res
 ```
 
-    ##                Ref        1     2      4
-    ## 1            FL1-H        ✓     ✓      ✓
-    ## 2            FL2-A        ✓     ✓      ✓
-    ## 3            FL2-H        ✓     ✓      ✓
-    ## 4            FL3-H        ✓     ✓      ✓
-    ## 5            FL4-H        ✓     ✓      ✓
-    ## 6            FSC-H        ✓ fsc-h  fsc-h
-    ## 7            SSC-H   SSC1-H     ✓ SSC1-H
-    ## 8             Time        ✓  <NA>      ✓
-    ## 10 To Delete       channelA
+    ##                Ref             1     2      4
+    ## 1            FL1-H             ✓     ✓      ✓
+    ## 2            FL2-A             ✓     ✓      ✓
+    ## 3            FL2-H             ✓     ✓      ✓
+    ## 4            FL3-H             ✓     ✓      ✓
+    ## 5            FL4-H             ✓     ✓      ✓
+    ## 6            FSC-H             ✓ fsc-h  fsc-h
+    ## 7            SSC-H        SSC1-H     ✓ SSC1-H
+    ## 8             Time             ✓  <NA>      ✓
+    ## 10 To Delete  Time channelA,Time         Time
 
 ### 3\. Apply the fix
 
@@ -221,104 +230,19 @@ channel
 
 <td style="text-align:right;">
 
-2
-
-</td>
-
-<td style="text-align:right;">
-
-20
-
-</td>
-
-<td style="text-align:left;">
-
-FL1-H, FL2-A, FL2-H, FL3-H, FL4-H, FSC-H, SSC-H, Time
-
-</td>
-
-</tr>
-
-<tr>
-
-<td style="text-align:right;">
-
 1
 
 </td>
 
 <td style="text-align:right;">
 
-1
+21
 
 </td>
 
 <td style="text-align:left;">
 
 FL1-H, FL2-A, FL2-H, FL3-H, FL4-H, FSC-H, SSC-H
-
-</td>
-
-</tr>
-
-</tbody>
-
-</table>
-
-## Drop outlier group
-
-``` r
-check_results <- cqc_drop_groups(check_results, id = 1)
-check_results
-```
-
-<table class="table table-bordered" style="font-size: 12px; width: auto !important; ">
-
-<thead>
-
-<tr>
-
-<th style="text-align:right;color: black !important;background-color: #e5f5e0 !important;">
-
-group\_id
-
-</th>
-
-<th style="text-align:right;color: black !important;background-color: #e5f5e0 !important;">
-
-nFCS
-
-</th>
-
-<th style="text-align:left;color: black !important;background-color: #e5f5e0 !important;">
-
-channel
-
-</th>
-
-</tr>
-
-</thead>
-
-<tbody>
-
-<tr>
-
-<td style="text-align:right;">
-
-2
-
-</td>
-
-<td style="text-align:right;">
-
-20
-
-</td>
-
-<td style="text-align:left;">
-
-FL1-H, FL2-A, FL2-H, FL3-H, FL4-H, FSC-H, SSC-H, Time
 
 </td>
 
@@ -336,7 +260,7 @@ cqc_data
 ```
 
     ## cytoqc data: 
-    ## 20  samples
+    ## 21 samples
 
 ## Coerce it inot `cytoset`
 
@@ -344,7 +268,13 @@ cqc_data
 cytoset(cqc_data)
 ```
 
-    ## A cytoset with 20 samples.
+    ## A cytoset with 21 samples.
     ## 
     ##   column names:
-    ##     FSC-H, SSC-H, FL1-H, FL2-H, FL3-H, FL2-A, FL4-H, Time
+    ##     FSC-H, SSC-H, FL1-H, FL2-H, FL3-H, FL2-A, FL4-H
+
+## Or output to FCS
+
+``` r
+cqc_write_fcs(cqc_data, outdir)
+```
