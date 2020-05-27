@@ -1,5 +1,6 @@
 context("cqc_check")
-path <- "~/remote/fh/fast/gottardo_r/mike_working/lyoplate_out/parsed"
+# path <- "~/remote/fh/fast/gottardo_r/mike_working/lyoplate_out/parsed"
+path <- "/mnt/silo/lyoplate_out/parsed"
 
 skip_if_not(dir.exists(path))
 

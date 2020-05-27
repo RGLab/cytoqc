@@ -11,6 +11,6 @@ cqc_gs(x)
 }
 \description{
 This is mainly for distpatch and wrapping many of the
-qc operations on a 'cqc_cf_list' object for the GatingSet's
+qc operations on a \code{\link{cqc_cf_list}} object for the GatingSet's
 underlying data
 }
