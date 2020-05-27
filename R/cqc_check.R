@@ -256,13 +256,11 @@ diff.cqc_check_panel <- function(x, ...) {
 #' @param vars variable to split by. Determined automatically.
 #' @param ... Additional arguments not for the user. Ignore.
 #' @examples
-#' \dontrun{
 #' fcs_files <- list.files(system.file("extdata", "GvHD_QC", package = "cytoqc"), full.names = TRUE)
 #' qc_cf_list <- cqc_load_fcs(fcs_files)
 #' 
 #' channel_groups <- cqc_check(qc_cf_list, type = "channel")
 #' diff(channel_groups)
-#' }
 #' @importFrom dplyr group_split inner_join anti_join
 #' @importFrom purrr reduce map map_dfr
 #' @export
