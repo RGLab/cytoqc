@@ -71,6 +71,10 @@ cqc_cf_list <- function(x) {
 #' qc operations on a \code{\link{cqc_cf_list}} object for the GatingSet's
 #' underlying data
 #' @param x a GatingSet object
+#' @examples
+#' gs_path <- system.file("extdata", "gslist_manual_QC", "gs1", package = "cytoqc")
+#' gs <- load_gs(gs_path)
+#' qc_gs <- cqc_gs(gs)
 #' @export
 cqc_gs <- function(x) {
   if (!is(x, "GatingSet")){
@@ -86,7 +90,7 @@ cqc_gs <- function(x) {
 }
 
 
-#' Write out tidied flow data (cqc_cf_list) back to fcs or h5
+#' Write out tidied flow data (\code{cqc_cf_list}) back to fcs or h5
 #' @param x cqc_cf_list
 #' @param out the output directory that the FCS or h5 will be written
 #' @param verbose whether to print each sample name during the writing process
@@ -130,6 +134,13 @@ cqc_write_h5 <- function(x, out, verbose = TRUE) {
 #' For the methods dispatching purpose
 #'
 #' @param x a list of 'GatingSet' objects
+#' @examples 
+#' gs_paths <- list.files(system.file("extdata", "gslist_manual_QC", package = "cytoqc"), full.names = TRUE)
+#' gs1 <- load_gs(gs_paths[[1]])
+#' gs2 <- load_gs(gs_paths[[2]])
+#' qc_gs_list <- cqc_gs_list(list(gs1, gs2))
+#' groups <- cqc_check(qc_gslist, type="gate")
+#' 
 #' @export
 cqc_gs_list <- function(x) {
   if (!is.list(x)) {

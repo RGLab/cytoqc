@@ -8,6 +8,10 @@
 #' @return a tibble with two columns: "channel" and 'marker'
 #' @importFrom dplyr select rename
 #' @importFrom flowCore parameters
+#' @examples 
+#' fcs_path <- system.file("extdata", "GvHD_QC", "s5a01.fcs", package = "cytoqc")
+#' cf <- load_cytoframe_from_fcs(fcs_path)
+#' cf_get_panel(cf)
 #' @export
 cf_get_panel <- function(cf, skip_na = FALSE) {
   res <- pData(parameters(cf)) %>%
@@ -60,7 +64,7 @@ cqc_check_gate <- function(x, ...){
 #' This provides a sample-wise data table for the further summary report.
 #'
 #' @return a tibble with 4 columns: object, qc type (e.g. channel), group_id and nobject (i.e. group count)
-#' @param x \code{\link{cqc_cf_list}}
+#' @param x \code{\link{cqc_cf_list}}, \code{\link{cqc_gs}}, or \code{\link{cqc_gs_list}} object
 #' @param ... additional arguments.
 #' 
 #'  type -- specify the qc type, can be "channel", "marker" or "panel"
@@ -72,17 +76,17 @@ cqc_check_gate <- function(x, ...){
 #'
 #' @examples
 #' fcs_files <- list.files(system.file("extdata", "GvHD_QC", package = "cytoqc"), full.names = TRUE)
-#' cqc_cf_list <- cqc_load_fcs(fcs_files)
+#' qc_cf_list <- cqc_load_fcs(fcs_files)
 #' 
 #' # You may directly call the method for the parameter you would like to check
-#' keyword_groups <- cqc_check_keyword(cqc_cf_list)
+#' keyword_groups <- cqc_check_keyword(qc_cf_list)
 #' keyword_groups
 #' 
 #' # Or use the type argument
-#' channel_groups <- cqc_check(cqc_cf_list, type = "channel")
+#' channel_groups <- cqc_check(qc_cf_list, type = "channel")
 #' channel_groups
 #' 
-#' panel_groups <- cqc_check(cqc_cf_list, type = "panel", by = "marker")
+#' panel_groups <- cqc_check(qc_cf_list, type = "panel", by = "marker")
 #' panel_groups
 #' 
 #' @export
@@ -208,9 +212,9 @@ cqc_check.cqc_gs <- function(x, type, keys = NULL, delimiter = "|", ...) {
 #' @param ... Additional arguments not for the user. Ignore.
 #' @examples
 #' fcs_files <- list.files(system.file("extdata", "GvHD_QC", package = "cytoqc"), full.names = TRUE)
-#' cqc_cf_list <- cqc_load_fcs(fcs_files)
+#' qc_cf_list <- cqc_load_fcs(fcs_files)
 #' 
-#' channel_groups <- cqc_check(cqc_cf_list, type = "channel")
+#' channel_groups <- cqc_check(qc_cf_list, type = "channel")
 #' summary(channel_groups)
 #' 
 #' @export
@@ -254,10 +258,10 @@ diff.cqc_check_panel <- function(x, ...) {
 #' @examples
 #' \dontrun{
 #' fcs_files <- list.files(system.file("extdata", "GvHD_QC", package = "cytoqc"), full.names = TRUE)
-#' cqc_cf_list <- cqc_load_fcs(fcs_files)
+#' qc_cf_list <- cqc_load_fcs(fcs_files)
 #' 
-#' channel_groups <- cqc_check(cqc_cf_list, type = "channel")
-#' summary(channel_groups)
+#' channel_groups <- cqc_check(qc_cf_list, type = "channel")
+#' diff(channel_groups)
 #' }
 #' @importFrom dplyr group_split inner_join anti_join
 #' @importFrom purrr reduce map map_dfr
@@ -273,13 +277,21 @@ diff.cqc_check <- function(x, vars, ...) {
 
 }
 
-#' Split the result of 'cqc_check' into groups
+#' Split the result of \code{cqc_check} into groups
 #'
-#' It is used to split samples into separate groups when they can't be reconciled into the sampe group.
+#' It is used to split samples into separate groups when they can't be reconciled into the same group.
 #'
 #' @importFrom purrr walk
 #' @param x cqc_check object
 #' @param f,drop,... not used
+#' @examples 
+#' fcs_files <- list.files(system.file("extdata", "GvHD_QC", package = "cytoqc"), full.names = TRUE)
+#' qc_cf_list <- cqc_load_fcs(fcs_files)
+#' channel_groups <- cqc_check(qc_cf_list, type = "channel")
+#' # Show the different groups that will result from the split
+#' summary(channel_groups)
+#' split_groups <- split(channel_groups)
+#' split_groups
 #' @export
 split.cqc_check <- function(x, f, drop = FALSE, ...) {
   cqc_data <- attr(x, "data")
@@ -294,9 +306,17 @@ split.cqc_check <- function(x, f, drop = FALSE, ...) {
   })
 }
 
-#' visualize the tree structure differnece among the GatingSets
+#' visualize the tree structure difference among the GatingSets
 #'
 #' @param groups \code{cqc_check_gate} grouping resulte from \code{cqc_check}.
+#' @examples
+#' gs_paths <- list.files(system.file("extdata", "gslist_manual_QC", package = "cytoqc"), full.names = TRUE)
+#' gs1 <- load_gs(gs_paths[[1]])
+#' gs2 <- load_gs(gs_paths[[2]])
+#' qc_gslist <- cqc_gs_list(list(gs1, gs2))
+#' groups <- cqc_check(qc_gslist, type="gate")
+#' plot_diff(groups)
+#' 
 #' @export
 #' @import Rgraphviz graph
 plot_diff <- function(groups) {
@@ -417,6 +437,13 @@ plot_diff <- function(groups) {
 #'
 #' @param groups the object returned by 'cqc_checks'
 #' @param id the group id to be dropped from the dataset
+#' @examples 
+#' fcs_files <- list.files(system.file("extdata", "GvHD_QC", package = "cytoqc"), full.names = TRUE)
+#' qc_cf_list <- cqc_load_fcs(fcs_files)
+#' channel_groups <- cqc_check(qc_cf_list, type = "channel")
+#' summary(channel_groups)
+#' channel_groups <- cqc_drop_groups(channel_groups, 2)
+#' channel_groups
 #' @export
 cqc_drop_groups <- function(groups, id) {
   cqc_data <- attr(groups, "data")
@@ -431,10 +458,18 @@ cqc_drop_groups <- function(groups, id) {
   groups
 }
 
-#' Extract the data from the result of a 'cqc_checks' call.
+#' Extract the data from the result of a \code{cqc_check} call.
 #'
-#' @param groups the object returned by 'cqc_checks'
+#' @param groups the object returned by \code{\link{cqc_checks}}
 #' @param id the group id to be selected from the dataset, default is NULL, meaning all data
+#' @examples 
+#' fcs_files <- list.files(system.file("extdata", "GvHD_QC", package = "cytoqc"), full.names = TRUE)
+#' qc_cf_list <- cqc_load_fcs(fcs_files)
+#' channel_groups <- cqc_check(qc_cf_list, type = "channel")
+#' summary(channel_groups)
+#' group_3_cf_list <- cqc_get_data(channel_groups, 3)
+#' # A list of cytoframes
+#' group_3_cf_list
 #' @export
 cqc_get_data <- function(groups, id = NULL) {
   cqc_data <- attr(groups, "data")

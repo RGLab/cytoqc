@@ -22,7 +22,7 @@ cqc_check_gate(x, ...)
 cqc_check(x, ...)
 }
 \arguments{
-\item{x}{\code{\link{cqc_cf_list}}}
+\item{x}{\code{\link{cqc_cf_list}}, \code{\link{cqc_gs}}, or \code{\link{cqc_gs_list}} object}
 
 \item{...}{additional arguments.
 
@@ -45,17 +45,17 @@ This provides a sample-wise data table for the further summary report.
 }
 \examples{
 fcs_files <- list.files(system.file("extdata", "GvHD_QC", package = "cytoqc"), full.names = TRUE)
-cqc_cf_list <- cqc_load_fcs(fcs_files)
+qc_cf_list <- cqc_load_fcs(fcs_files)
 
 # You may directly call the method for the parameter you would like to check
-keyword_groups <- cqc_check_keyword(cqc_cf_list)
+keyword_groups <- cqc_check_keyword(qc_cf_list)
 keyword_groups
 
 # Or use the type argument
-channel_groups <- cqc_check(cqc_cf_list, type = "channel")
+channel_groups <- cqc_check(qc_cf_list, type = "channel")
 channel_groups
 
-panel_groups <- cqc_check(cqc_cf_list, type = "panel", by = "marker")
+panel_groups <- cqc_check(qc_cf_list, type = "panel", by = "marker")
 panel_groups
 
 }

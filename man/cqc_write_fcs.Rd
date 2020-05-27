@@ -3,7 +3,7 @@
 \name{cqc_write_fcs}
 \alias{cqc_write_fcs}
 \alias{cqc_write_h5}
-\title{Write out tidied flow data (cqc_cf_list) back to fcs or h5}
+\title{Write out tidied flow data (\code{cqc_cf_list}) back to fcs or h5}
 \usage{
 cqc_write_fcs(x, out, verbose = TRUE, ...)
 
@@ -19,5 +19,5 @@ cqc_write_h5(x, out, verbose = TRUE)
 \item{...}{other arguments passed down to 'write.FCS'}
 }
 \description{
-Write out tidied flow data (cqc_cf_list) back to fcs or h5
+Write out tidied flow data (\code{cqc_cf_list}) back to fcs or h5
 }
