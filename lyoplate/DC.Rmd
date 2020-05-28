@@ -43,13 +43,7 @@ check_res
 
 ## Match reference
 ```{r}
-match_res <- cqc_match(check_res, ref = 7, max.dist = 0.6)
-match_res
-```
-
-## Manually update the match
-```{r}
-match_res <- cqc_update_match(match_res, c("Lineage APC-H7" = "CD3CD19CD20"))
+match_res <- cqc_match(check_res, ref = 7)
 match_res
 ```
 
