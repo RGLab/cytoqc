@@ -22,14 +22,15 @@ cqc_check_gate(x, ...)
 cqc_check(x, ...)
 }
 \arguments{
-\item{x}{cqc_cf_list}
+\item{x}{\code{\link{cqc_cf_list}}, \code{\link{cqc_gs}}, or \code{\link{cqc_gs_list}} object}
 
 \item{...}{additional arguments.
- type specify the qc type, can be "channel", "marker" or "panel"
 
- delimiter a special character used to separate channel and marker
+ type -- specify the qc type, can be "channel", "marker" or "panel"
 
- keys The vector to supply the keys to be grouped on. default is NULL, which is extracted automatically from the flow data}
+ delimiter -- a special character used to separate channel and marker
+
+ keys -- The vector to supply the keys to be grouped on. default is NULL, which is extracted automatically from the flow data}
 
 \item{by}{the column used as the anchor when 'x' is the check result of panel, it can be either 'channel' or 'marker'}
 }
@@ -43,7 +44,18 @@ and compare/group them across samples.
 This provides a sample-wise data table for the further summary report.
 }
 \examples{
-\dontrun{
-groups <- cqc_check(cqc_cf_list, "channel")
-}
+fcs_files <- list.files(system.file("extdata", "GvHD_QC", package = "cytoqc"), full.names = TRUE)
+qc_cf_list <- cqc_load_fcs(fcs_files)
+
+# You may directly call the method for the parameter you would like to check
+keyword_groups <- cqc_check_keyword(qc_cf_list)
+keyword_groups
+
+# Or use the type argument
+channel_groups <- cqc_check(qc_cf_list, type = "channel")
+channel_groups
+
+panel_groups <- cqc_check(qc_cf_list, type = "panel", by = "marker")
+panel_groups
+
 }

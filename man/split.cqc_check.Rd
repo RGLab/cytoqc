@@ -2,7 +2,7 @@
 % Please edit documentation in R/cqc_check.R
 \name{split.cqc_check}
 \alias{split.cqc_check}
-\title{Split the result of 'cqc_check' into groups}
+\title{Split the result of \code{cqc_check} into groups}
 \usage{
 \method{split}{cqc_check}(x, f, drop = FALSE, ...)
 }
@@ -12,5 +12,14 @@
 \item{f, drop, ...}{not used}
 }
 \description{
-It is used to split samples into separate groups when they can't be reconciled into the sampe group.
+It is used to split samples into separate groups when they can't be reconciled into the same group.
+}
+\examples{
+fcs_files <- list.files(system.file("extdata", "GvHD_QC", package = "cytoqc"), full.names = TRUE)
+qc_cf_list <- cqc_load_fcs(fcs_files)
+channel_groups <- cqc_check(qc_cf_list, type = "channel")
+# Show the different groups that will result from the split
+summary(channel_groups)
+split_groups <- split(channel_groups)
+split_groups
 }

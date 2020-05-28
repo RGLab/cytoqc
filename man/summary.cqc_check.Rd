@@ -7,7 +7,7 @@
 \method{summary}{cqc_check}(object, ...)
 }
 \arguments{
-\item{object}{qc table returned by 'cqc_check'}
+\item{object}{qc table returned by \code{\link{cqc_check}}}
 
 \item{...}{Additional arguments not for the user. Ignore.}
 }
@@ -16,7 +16,10 @@ It summarize the itemized check report into group overview.
 It is automatically triggered by print method of `cqc_check` result.
 }
 \examples{
-\dontrun{
-su <- summary(groups)
-}
+fcs_files <- list.files(system.file("extdata", "GvHD_QC", package = "cytoqc"), full.names = TRUE)
+qc_cf_list <- cqc_load_fcs(fcs_files)
+
+channel_groups <- cqc_check(qc_cf_list, type = "channel")
+summary(channel_groups)
+
 }

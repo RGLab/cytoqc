@@ -14,3 +14,11 @@ cqc_drop_groups(groups, id)
 \description{
 Remove outlier groups from the result of 'cqc_check'.
 }
+\examples{
+fcs_files <- list.files(system.file("extdata", "GvHD_QC", package = "cytoqc"), full.names = TRUE)
+qc_cf_list <- cqc_load_fcs(fcs_files)
+channel_groups <- cqc_check(qc_cf_list, type = "channel")
+summary(channel_groups)
+channel_groups <- cqc_drop_groups(channel_groups, 2)
+channel_groups
+}

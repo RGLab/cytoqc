@@ -17,3 +17,8 @@ a tibble with two columns: "channel" and 'marker'
 \description{
 Extract channel/marker info from a cytoframe object
 }
+\examples{
+fcs_path <- system.file("extdata", "GvHD_QC", "s5a01.fcs", package = "cytoqc")
+cf <- load_cytoframe_from_fcs(fcs_path)
+cf_get_panel(cf)
+}

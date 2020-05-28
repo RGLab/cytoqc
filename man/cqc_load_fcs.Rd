@@ -3,9 +3,7 @@
 \name{cqc_load_fcs}
 \alias{cqc_load_fcs}
 \alias{cqc_load_h5}
-\title{Load cqc_data
-load fcs or h5 files into 'cqc_cf_list' object which is a list of cytoframes.
-This is the method to construct the core data object for cytoQC.}
+\title{Load cqc_data}
 \usage{
 cqc_load_fcs(files, is_h5 = TRUE, ...)
 
@@ -20,7 +18,15 @@ It is ignored for \code{cqc_load_h5}}
 \item{...}{parameters passed to 'load_cytoframe_from_fcs' or 'load_cytoframe_from_h5'}
 }
 \description{
-Load cqc_data
-load fcs or h5 files into 'cqc_cf_list' object which is a list of cytoframes.
-This is the method to construct the core data object for cytoQC.
+load fcs or h5 files into \code{\link{cqc_cf_list}} object which is a list of \code{\link[flowWorkspace]{cytoframe}} objects.
+This is the method to construct the core data object for \code{\link[cytoqc:cytoqc-package]{cytoqc}}.
+}
+\examples{
+fcs_files <- list.files(system.file("extdata", "GvHD_QC", package = "cytoqc"), full.names = TRUE)
+cqc_cf_list <- cqc_load_fcs(fcs_files)
+\dontrun{
+h5_files <- list.files(system.file("extdata", "gs_bcell_auto", package = "flowWorkspaceData"),
+                       pattern = ".h5", full.names = TRUE)
+cqc_cf_list <- cqc_load_h5(h5_files)
+}
 }

@@ -9,12 +9,20 @@ cqc_match(x, ...)
 \arguments{
 \item{x}{\code{cqc_check} result returned by cqc_check call}
 
-\item{...}{ref specifies the reference, which can be either an integer group id or a characte vector giving the actual values of the reference
+\item{...}{ref -- specifies the reference, which can be either an integer group id or a character vector giving the actual values of the reference
 
-       select the group ids selected for processing
+       select -- the group ids selected for processing
 
-       type the qc type (either "channle", "marker", "gate")}
+       type -- the qc type (either "channel", "marker", "gate"), automatically determined by the type of \code{x}}
 }
 \description{
 find the the difference between the reference and target group
+}
+\examples{
+fcs_files <- list.files(system.file("extdata", "GvHD_QC", package = "cytoqc"), full.names = TRUE)
+qc_cf_list <- cqc_load_fcs(fcs_files)
+channel_groups <- cqc_check(qc_cf_list, type = "channel")
+summary(channel_groups)
+channel_match <- cqc_match(channel_groups, 3)
+channel_match
 }

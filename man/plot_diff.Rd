@@ -2,7 +2,7 @@
 % Please edit documentation in R/cqc_check.R
 \name{plot_diff}
 \alias{plot_diff}
-\title{visualize the tree structure differnece among the GatingSets}
+\title{visualize the tree structure difference among the GatingSets}
 \usage{
 plot_diff(groups)
 }
@@ -10,5 +10,14 @@ plot_diff(groups)
 \item{groups}{\code{cqc_check_gate} grouping resulte from \code{cqc_check}.}
 }
 \description{
-visualize the tree structure differnece among the GatingSets
+visualize the tree structure difference among the GatingSets
+}
+\examples{
+gs_paths <- list.files(system.file("extdata", "gslist_manual_QC", package = "cytoqc"), full.names = TRUE)
+gs1 <- load_gs(gs_paths[[1]])
+gs2 <- load_gs(gs_paths[[2]])
+qc_gslist <- cqc_gs_list(list(gs1, gs2))
+groups <- cqc_check(qc_gslist, type="gate")
+plot_diff(groups)
+
 }
