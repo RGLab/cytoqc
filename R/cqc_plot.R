@@ -1,3 +1,12 @@
+#' Specialized plots for objects from the \code{cytoqc} package
+#' 
+#' This is a generic function for plotting functionality specific
+#' to objects from the \code{\link[=cytoqc-package]{cytoqc}} package.
+#' 
+#' It is currently only implemented for results of \code{\link{cqc_cluster}}.
+#' 
+#' @param y object to be plotted
+#' @param ... additional arguments (currently unused)
 #' @export
 cqc_plot <- function(y, ...) UseMethod("cqc_plot")
 

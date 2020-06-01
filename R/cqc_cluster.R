@@ -4,7 +4,7 @@
 #' will be clustered based on the summed distances of their aligned elements. This provides an automated way to look for groups with
 #' sets of labels that likely represent the same underlying values but with minor differences or errors.
 #'
-#' @param x \code{cqc_check} result returned by cqc_check call
+#' @param x object resulting from a call to \code{\link{cqc_check}}
 #' @param ...
 #'        ngroup: integer specifying number of groups in to which the clusters will be combined
 #'        
@@ -12,8 +12,8 @@
 #'        
 #'        missing_penalty: multiplicative factor used to impose penalty for labels missing from a group. The distance for a missing label
 #'        will be calculated as missing_penalty times the largest distance between non-missing labels. Defaults to 1.
-#' @return a cqc_cluster object whose primary value is the tibble in its group_membership slot providing the map between the original
-#' groups and the combined groups resulting from clustering
+#' @return a \code{cqc_cluster} object whose primary value is the tibble in its \code{group_membership} slot providing the map between the original
+#' groups and the combined groups resulting from clustering.
 #' @export
 cqc_cluster <- function(x, ...) UseMethod("cqc_cluster")
 

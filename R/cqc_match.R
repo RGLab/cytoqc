@@ -19,8 +19,12 @@
 #' qc_cf_list <- cqc_load_fcs(fcs_files)
 #' channel_groups <- cqc_check(qc_cf_list, type = "channel")
 #' summary(channel_groups)
+#' 
+#' # Match to a reference group of samples
 #' channel_match <- cqc_match(channel_groups, 3)
-#' channel_match
+#' 
+#' # Match to a character vector of target channel names
+#' channel_match <- cqc_match(channel_groups, ref = c("FL1-H", "FL2-A", "FL2-H", "FL3-H", "FL4-H", "FSC-Height", "SSC-Height", "Time"))
 #' @export
 cqc_match <- function(x, ...) UseMethod("cqc_match")
 
