@@ -168,6 +168,8 @@ cqc_update_match <- function(x, map, group_id = NULL){
   if(is.null(group_id))
   {
     group_id <- names(match_res)
+  }else{
+    group_id <- as.character(group_id)
   }
   from <- names(map)#grab the src from new input
 
