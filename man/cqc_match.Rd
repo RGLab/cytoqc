@@ -13,7 +13,11 @@ cqc_match(x, ...)
 
        select -- the group ids selected for processing
 
-       type -- the qc type (either "channel", "marker", "gate"), automatically determined by the type of \code{x}}
+       type -- the qc type (either "channel", "marker", "gate"), automatically determined by the type of \code{x}
+       
+       max.distance -- Maximum distance allowed for a match. See ?agrep
+       
+       partial whether -- to do the partial sub string matching before the approximate string matching}
 }
 \description{
 find the the difference between the reference and target group

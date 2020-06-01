@@ -131,6 +131,14 @@ cqc_recommend.cqc_match_result <- function(x, max.distance = 0.1, partial = TRUE
          targets_queue <- character()
 
     }
+    # If unmatched channels remain, add warning message
+    # as work must be done before calling cqc_fix
+    if(length(targets_queue) > 0 || length(refs_queue) > 0){
+      warning("Unmatched channels remain after cqc_match.\n
+              Before using cqc_fix, please resolve these unmatched channels manually using cqc_update_match\n
+              or re-attempt automatic matching with cqc_match with a larger max.distance argument.")
+    }
+    
     df
   }, .id = "group_id") %>% mutate(group_id = as.integer(group_id))
   attr(res, "class") <- c("cqc_solution", attr(res, "class"))
