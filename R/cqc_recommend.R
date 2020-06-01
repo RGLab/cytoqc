@@ -41,6 +41,7 @@ cqc_recommend.cqc_match_result_gate <- function(x, ...) {
 #' @importFrom tibble tibble add_row
 #' @importFrom utils adist
 cqc_recommend.cqc_match_result <- function(x, max.distance = 0.1, partial = TRUE, ...) {
+  unmatched_channels <- FALSE
   res <- map_dfr(x, function(check_result) {
     targets_queue <- targets <- check_result[["unknown"]]
     refs_queue <- refs <- check_result[["missing"]]
@@ -131,16 +132,20 @@ cqc_recommend.cqc_match_result <- function(x, max.distance = 0.1, partial = TRUE
          targets_queue <- character()
 
     }
-    # If unmatched channels remain, add warning message
-    # as work must be done before calling cqc_fix
-    if(length(targets_queue) > 0 || length(refs_queue) > 0){
-      warning(paste("Unmatched channels remain after cqc_match. Before using cqc_fix, please resolve these unmatched channels",
-                    "manually using cqc_update_match or re-attempt automatic matching with cqc_match with a larger max.distance argument."),
-              call. = FALSE)
-    }
+    if(length(targets_queue) > 0 || length(refs_queue) > 0)
+      unmatched_channels <<- TRUE
     
     df
   }, .id = "group_id") %>% mutate(group_id = as.integer(group_id))
+  
+  # If unmatched channels remain for any group, add warning message
+  # as work must be done before calling cqc_fix
+  if(unmatched_channels){
+    warning(paste("Unmatched channels remain after cqc_match. Before using cqc_fix, please resolve these unmatched channels",
+                  "manually using cqc_update_match or re-attempt automatic matching with cqc_match with a larger max.distance argument."),
+            call. = FALSE)
+  }
+  
   attr(res, "class") <- c("cqc_solution", attr(res, "class"))
   attr(res, "group") <- attr(x, "group")
   res
