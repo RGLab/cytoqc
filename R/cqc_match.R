@@ -55,15 +55,11 @@ cqc_match.cqc_check_panel <- function(x, ref, ...) {
   #check if anchor is already standardized
   stopifnot(is(ref, "numeric"))
   ref_by <- filter(x, group_id == ref)[[by]]
-  
-  if(unique(x$group_id) > 1){
-    x %>% filter(group_id != ref) %>%
-      group_by(group_id) %>% group_walk(function(df,...){
-        if(!setequal(df[[by]], ref_by))
-          stop(by, " is not consistent across panel groups!Please standardize it first!")
-      })
-  }
-
+  x %>% filter(group_id != ref) %>%
+    group_by(group_id) %>% group_walk(function(df,...){
+      if(!setequal(df[[by]], ref_by))
+        stop(by, " is not consistent across panel groups!Please standardize it first!")
+    })
   #simply store the ref and by(or anchor)
   #the actual matching(or alignment) is done in format method
   attr(x, "ref") <- ref
@@ -125,8 +121,6 @@ match_reference <- function(x, ref, select = NULL, type, delimiter = "|", ...) {
   class(res) <- c(paste0("cqc_match_result_", type), "cqc_match_result", class(res))
 
   attr(res, "groups") <- x
-  if(refid > 0)
-    attr(res, "ref_id") <- refid
   #perform the auto matching between the unknown and missing entries
   solution <- cqc_recommend(res, ...)
 
