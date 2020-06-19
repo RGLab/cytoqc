@@ -35,18 +35,18 @@ test_that("cqc_check_gate", {
 
   groups <- cqc_check(cqc_data, "gate")
   expect_is(groups, "cqc_check_gate")
-  expect_equal(groups, test_results_gate[["check"]][["result"]])
-  expect_equal(summary(groups), test_results_gate[["check"]][["summary"]])
-  expect_equal(diff(groups), test_results_gate[["check"]][["diff"]])
+  expect_equivalent(groups, test_results_gate[["check"]][["result"]])
+  expect_equivalent(summary(groups), test_results_gate[["check"]][["summary"]])
+  expect_equivalent(diff(groups), test_results_gate[["check"]][["diff"]])
 
   expect_error(cqc_match(cqc_data, ref = 1), "not a valid")
   match_result <- cqc_match(groups, ref = 1)
-  expect_equal(match_result, test_results_gate[["match"]][["result"]])#strange that this test fail at package check (but succeed in console)
+  expect_equivalent(match_result, test_results_gate[["match"]][["result"]])#strange that this test fail at package check (but succeed in console)
   expect_equal(match_result_color_tbl(match_result), test_results_gate[["match"]][["match_result_color_tbl"]])
 
   expect_error(cqc_fix(groups), "not a valid")
   cqc_fix(match_result)
-  expect_equal(cqc_check(cqc_data, "gate"), test_results_gate[["check"]][["fixed_result"]])
+  expect_equivalent(cqc_check(cqc_data, "gate"), test_results_gate[["check"]][["fixed_result"]])
 
 })
 
@@ -54,10 +54,10 @@ test_that("cqc_check_marker", {
   test_results_marker <- test_results[["marker"]]
 
   groups <- cqc_check(cqc_data, "marker")
-  expect_equal(groups, test_results_marker[["check"]][["result"]])
+  expect_equivalent(groups, test_results_marker[["check"]][["result"]])
 
   match_result <- cqc_match(groups, ref = 3)
-  expect_equal(match_result, test_results_marker[["match"]][["result"]])
+  expect_equivalent(match_result, test_results_marker[["match"]][["result"]])
   expect_equal(format(match_result), test_results_marker[["match"]][["format"]])
   expect_equal(match_result_color_tbl(match_result), test_results_marker[["match"]][["match_result_color_tbl"]])
 
@@ -88,14 +88,14 @@ test_that("cqc_check_marker", {
   expect_equivalent(match_result, test_results_marker[["match"]][["result_update"]])
 
   match_result <- cqc_delete_match(match_result,  map = c("CD197"))
-  expect_equal(match_result, test_results_marker[["match"]][["result"]])
+  expect_equivalent(match_result, test_results_marker[["match"]][["result"]])
   expect_error(match_result <- cqc_delete_match(match_result,  map = c("CD197")), "No existing")
-  expect_equal(match_result, test_results_marker[["match"]][["result"]])
+  expect_equivalent(match_result, test_results_marker[["match"]][["result"]])
 
 
   match_result <- cqc_update_match(match_result,  map = c("CD197" = "CCR7"))
   cqc_fix(match_result)
-  expect_equal(cqc_check(cqc_data, "marker"), test_results_marker[["check"]][["fixed_result"]])
+  expect_equivalent(cqc_check(cqc_data, "marker"), test_results_marker[["check"]][["fixed_result"]])
 
 })
 
@@ -103,7 +103,7 @@ test_that("cqc_check_panel", {
   test_results_panel <- test_results[["panel"]]
 
   groups <- cqc_check(cqc_data, "panel")
-  expect_equal(groups, test_results_panel[["check"]][["result"]])
+  expect_equivalent(groups, test_results_panel[["check"]][["result"]])
   expres <- test_results_panel[["check"]][["format"]]
   expect_error(match_res <- cqc_match(groups, ref = 1), "not consistent")
 
@@ -112,7 +112,7 @@ test_that("cqc_check_panel", {
   match_res <- cqc_match(groups, ref = 6)
   cqc_fix(match_res)
   groups <- cqc_check(cqc_data, "panel")
-  expect_equal(groups, test_results_panel[["check"]][["fixed_result"]])
+  expect_equivalent(groups, test_results_panel[["check"]][["fixed_result"]])
 
 })
 
@@ -120,14 +120,14 @@ test_that("cqc_check_channel", {
   test_results_channel <- test_results[["channel"]]
 
   groups <- cqc_check(cqc_data, "channel")
-  expect_equal(groups, test_results_channel[["check"]][["result"]])
+  expect_equivalent(groups, test_results_channel[["check"]][["result"]])
 
   match_result <- cqc_match(groups, ref = 4)
-  expect_equal(match_result, test_results_channel[["match"]][["result"]])
+  expect_equivalent(match_result, test_results_channel[["match"]][["result"]])
   expect_equal(format(match_result), test_results_channel[["match"]][["format"]])
   expect_equal(match_result_color_tbl(match_result), test_results_channel[["match"]][["match_result_color_tbl"]])
 
   cqc_fix(match_result)
-  expect_equal(cqc_check(cqc_data, "channel"), test_results_channel[["check"]][["fixed_result"]])
+  expect_equivalent(cqc_check(cqc_data, "channel"), test_results_channel[["check"]][["fixed_result"]])
 
 })

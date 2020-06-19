@@ -38,7 +38,8 @@ test_that("cqc_fix_panel -- rotated", {
 
   cqc_fix_panel(groups, 1, "marker")
   pnl <- cf_get_panel(cqc_data[[1]])
-  expect_equal(pnl,  cf_get_panel(cqc_data[[2]]))
+  # The rows may be re-arranged (this is currently allowed)
+  expect_equal(arrange(pnl, channel),  arrange(cf_get_panel(cqc_data[[2]]), channel))
 
 
   })
