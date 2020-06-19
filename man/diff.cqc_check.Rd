@@ -17,11 +17,9 @@
 Display the differences among QC groups
 }
 \examples{
-\dontrun{
 fcs_files <- list.files(system.file("extdata", "GvHD_QC", package = "cytoqc"), full.names = TRUE)
 qc_cf_list <- cqc_load_fcs(fcs_files)
 
 channel_groups <- cqc_check(qc_cf_list, type = "channel")
 diff(channel_groups)
-}
 }

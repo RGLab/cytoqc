@@ -39,14 +39,13 @@ cqc_recommend.cqc_match_result_gate <- function(x, ...) {
 #' @param partial whether to do the partial sub string matching before the approximate string matching
 #' @param ... additional arguments not for the user.
 #' @importFrom tibble tibble add_row
-#' @importFrom dplyr bind_rows anti_join inner_join
 #' @importFrom utils adist
 cqc_recommend.cqc_match_result <- function(x, max.distance = 0.1, partial = TRUE, ...) {
-  res <- map_dfr(names(x), function(check_result_name) {
-    check_result <- x[[check_result_name]]
+  unmatched_channels <- FALSE
+  res <- map_dfr(x, function(check_result) {
     targets_queue <- targets <- check_result[["unknown"]]
     refs_queue <- refs <- check_result[["missing"]]
-    df <- tibble(group_id = integer(), from = character(), to = character())
+    df <- tibble(from = character(), to = character())
 
     if (length(refs_queue) > 0 && length(targets_queue) > 0)
     {
@@ -117,7 +116,7 @@ cqc_recommend.cqc_match_result <- function(x, max.distance = 0.1, partial = TRUE
         #if new match then add them to the solution
         if(!is.na(tind) && !is.na(rind) )
         {
-          df <- add_row(df, group_id = as.integer(check_result_name), from = from, to = to)
+          df <- add_row(df, from = from, to = to)
 
           # pop the processed item
           refs_queue <- refs_queue[-rind]
@@ -126,49 +125,25 @@ cqc_recommend.cqc_match_result <- function(x, max.distance = 0.1, partial = TRUE
 
       }#end for
     }
-    # Add all remaining unmatched channels from targets
-    # AND reference to deletion list
-    if (length(targets_queue) > 0) {
-      df <- add_row(df, group_id = as.integer(check_result_name), from = targets_queue, to = NA)
-      targets_queue <- character()
+    #add those extra items to deletion list
+    if (length(targets_queue) > 0 && length(refs_queue) == 0) {
+
+         df <- add_row(df, from = targets_queue, to = NA)
+         targets_queue <- character()
+
     }
-    if (length(refs_queue) > 0) {
-      ref_id <- attr(x, "ref_id")
-      if(!is.null(ref_id))
-        df <- add_row(df, group_id = as.integer(ref_id), from = refs_queue, to = NA)
-      refs_queue <- character()
-    }
-    df
-  })
-  
-  # Now channels flagged for removal from ref need to also be flagged for removal
-  # from targets where those channels were matched (basically a set intersection on channels)
-  
-  # Channels flagged for removal from ref
-  if(nrow(res) > 0){
-    to_drop_ref <- res %>%
-      distinct() %>%
-      filter(is.na(to) & (group_id == as.integer(attr(x, "ref_id"))))
+    if(length(targets_queue) > 0 || length(refs_queue) > 0)
+      unmatched_channels <<- TRUE
     
-    if(nrow(to_drop_ref) > 0){
-      # Expand to rows for targets
-      to_drop_targets <- map_dfr(as.integer(names(x)), function(group){
-        to_drop_ref %>%
-          mutate(group_id=group)
-      })
-      # Handle the possibility that target matched ref by fuzzy matching (rename)
-      to_drop_renamed <- inner_join(to_drop_targets, res, by = c("group_id" = "group_id", "from" = "to"), suffix=c(".ref", ".res"))
-      # Change those rename rows to delete rows
-      res[res$from %in% to_drop_renamed$from.res, "to"] <- NA
-      # Remove the exact-match rows for rows without exact match (also drops exact-match drop rows for fuzzy-match channels)
-      drop_filter <- sapply(1:nrow(to_drop_targets), function(rownum){
-        !(to_drop_targets[rownum, "from"] %in% x[[as.character(to_drop_targets[rownum, "group_id"])]]$missing)
-      })
-      to_drop_targets <- to_drop_targets[drop_filter, ]
-      
-      # Add in the proper exact match delete rows
-      res <- bind_rows(res, to_drop_targets)
-    }
+    df
+  }, .id = "group_id") %>% mutate(group_id = as.integer(group_id))
+  
+  # If unmatched channels remain for any group, add warning message
+  # as work must be done before calling cqc_fix
+  if(unmatched_channels){
+    warning(paste("Unmatched channels remain after cqc_match. Before using cqc_fix, please resolve these unmatched channels",
+                  "manually using cqc_update_match or re-attempt automatic matching with cqc_match with a larger max.distance argument."),
+            call. = FALSE)
   }
   
   attr(res, "class") <- c("cqc_solution", attr(res, "class"))

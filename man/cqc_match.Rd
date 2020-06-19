@@ -13,7 +13,11 @@ cqc_match(x, ...)
 
        select -- the group ids selected for processing
 
-       type -- the qc type (either "channel", "marker", "gate"), automatically determined by the type of \code{x}}
+       type -- the qc type (either "channel", "marker", "gate"), automatically determined by the type of \code{x}
+       
+       max.distance -- Maximum distance allowed for a match. See ?agrep
+       
+       partial whether -- to do the partial sub string matching before the approximate string matching}
 }
 \description{
 find the the difference between the reference and target group
@@ -23,6 +27,10 @@ fcs_files <- list.files(system.file("extdata", "GvHD_QC", package = "cytoqc"), f
 qc_cf_list <- cqc_load_fcs(fcs_files)
 channel_groups <- cqc_check(qc_cf_list, type = "channel")
 summary(channel_groups)
+
+# Match to a reference group of samples
 channel_match <- cqc_match(channel_groups, 3)
-channel_match
+
+# Match to a character vector of target channel names
+channel_match <- cqc_match(channel_groups, ref = c("FL1-H", "FL2-A", "FL2-H", "FL3-H", "FL4-H", "FSC-Height", "SSC-Height", "Time"))
 }

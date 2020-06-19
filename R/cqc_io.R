@@ -91,12 +91,43 @@ cqc_gs <- function(x) {
 
 
 #' Write out tidied flow data (\code{cqc_cf_list}) back to fcs or h5
-#' @param x cqc_cf_list
+#' @param x \code{\link{cqc_cf_list}}
 #' @param out the output directory that the FCS or h5 will be written
 #' @param verbose whether to print each sample name during the writing process
 #' @param ... other arguments passed down to 'write.FCS'
 #' @importFrom flowCore write.FCS
 #' @rdname cqc_write_fcs
+#' @examples
+#' # Read in FCS files with inconsistencies
+#' fcs_files <- list.files(system.file("extdata", "GvHD_QC", package = "cytoqc"), full.names = TRUE)
+#' qc_cf_list <- cqc_load_fcs(fcs_files)
+#' 
+#' # Check for marker inconsitencies
+#' groups <- cqc_check(qc_cf_list, type = "marker")
+#' 
+#' # Attempt to fix them automatically
+#' match_result <- cqc_match(groups, ref = c("CD14 PerCP", "CD15 FITC", "CD33 APC", "CD45 PE", "FSC-Height", "SSC-Height", "Time"))
+#' 
+#' # Add a manual match that automatic matching could not find
+#' match_result <- cqc_update_match(match_result, map = c("PTPRC PE" = "CD45 PE"))
+#' 
+#' # Apply the fix to the original cytoframes
+#' cqc_fix(match_result)
+#' 
+#' # There is still one sample in its own group, because it is missing the Time channel entirely
+#' # One approach is to simply drop this group.
+#' groups <- cqc_check(qc_cf_list, type = "marker")
+#' groups <- cqc_drop_groups(groups, 1)
+#' 
+#' qc_data <- cqc_get_data(groups)
+#' 
+#' # Write out fcs files
+#' tmp_fcs_dir <- tempfile()
+#' cqc_write_fcs(qc_data, tmp_fcs_dir)
+#' 
+#' # Write out h5 files
+#' tmp_h5_dir <- tempfile()
+#' cqc_write_h5(qc_data, tmp_h5_dir)
 #' @export
 cqc_write_fcs <- function(x, out, verbose = TRUE, ...) {
   if (!dir.exists(out)) {

@@ -1,8 +1,24 @@
 #' Apply the cqc_solution
 #'
 #' Peform the actual fixing action (i.e update or delete)
-#' @param x the cqc_solution returned by 'find_solution' calls
+#' @param x the \code{cqc_solution} returned by \code{\link{cqc_match}} calls
 #' @param ... addiitional arguments not for the user.
+#' @examples 
+#' # Read in FCS files with inconsistencies
+#' fcs_files <- list.files(system.file("extdata", "GvHD_QC", package = "cytoqc"), full.names = TRUE)
+#' qc_cf_list <- cqc_load_fcs(fcs_files)
+#' 
+#' # Check for marker inconsitencies
+#' groups <- cqc_check(qc_cf_list, type = "marker")
+#' 
+#' # Attempt to fix them automatically
+#' match_result <- cqc_match(groups, ref = c("CD14 PerCP", "CD15 FITC", "CD33 APC", "CD45 PE", "FSC-Height", "SSC-Height", "Time"))
+#' 
+#' # Add a manual match that automatic matching could not find
+#' match_result <- cqc_update_match(match_result, map = c("PTPRC PE" = "CD45 PE"))
+#' 
+#' # Apply the fix to the original cytoframes
+#' cqc_fix(match_result)
 #' @export
 cqc_fix <- function(x, ...) UseMethod("cqc_fix")
 

@@ -10,7 +10,7 @@ cqc_cluster(x, ...)
 \method{cqc_plot}{cqc_cluster}(y, ...)
 }
 \arguments{
-\item{x}{\code{cqc_check} result returned by cqc_check call}
+\item{x}{object resulting from a call to \code{\link{cqc_check}}}
 
 \item{...}{ngroup: integer specifying number of groups in to which the clusters will be combined
 
@@ -22,8 +22,8 @@ will be calculated as missing_penalty times the largest distance between non-mis
 \item{y}{an object of class cqc_cluster resulting from a cqc_cluster call}
 }
 \value{
-a cqc_cluster object whose primary value is the tibble in its group_membership slot providing the map between the original
-groups and the combined groups resulting from clustering
+a \code{cqc_cluster} object whose primary value is the tibble in its \code{group_membership} slot providing the map between the original
+groups and the combined groups resulting from clustering.
 }
 \description{
 Sets of labels (strings representing channels, markers, keywords, or panels consisting of channel/marker pairs) for each group
