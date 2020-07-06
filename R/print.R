@@ -304,7 +304,7 @@ knit_print.cqc_cluster_panel <- function(x, ...){
   kable(df, escape = F) %>% 
     kable_styling(latex_options = "scale_down") %>%
     row_spec(nrow(df), color="black", bold=TRUE, background = "white", hline_after = TRUE) %>%
-    column_spec(2:ncol(df), border_left = TRUE, border_right = TRUE) %>%
+    # column_spec(2:ncol(df), border_left = TRUE, border_right = TRUE) %>%
     knit_print()
 }
 
