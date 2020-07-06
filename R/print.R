@@ -262,6 +262,7 @@ print.cqc_check <- function(x, ...){
 }
 
 #' @noRd
+#' @importFrom knitr is_latex_output is_html_output
 #' @export
 knit_print.cqc_cluster_panel <- function(x, ...){
   # browser()
@@ -297,15 +298,22 @@ knit_print.cqc_cluster_panel <- function(x, ...){
   group_row <- c("New Group:", new_groups)
   df <- rbind(df, group_row)
   
-  # Should try to convert this for loop if possible, but column_spec makes it a little difficult
-  for (i in 2:ncol(df)){
-    df[,i]<- cell_spec(df[,i], color="black", background=colors[[new_groups[[i-1]]]])
+  if(is_latex_output()){
+    for (i in 2:ncol(df)){
+      df[,i]<- cell_spec(df[,i], color="black", background=colors[[new_groups[[i-1]]]])
+    }
+    output <- kable(df, escape = F) %>% 
+      kable_styling(latex_options = "scale_down") %>%
+      row_spec(nrow(df), color="black", bold=TRUE, background = "white", hline_after = TRUE) %>%
+      knit_print()
+  }else{
+    output <- kable(df) %>% kable_styling()
+    for (i in 2:ncol(df)){
+      output <- column_spec(output, i, color="black", background=colors[[new_groups[[i-1]]]], border_left = TRUE, border_right = TRUE)
+    }
+    output <- row_spec(output, nrow(df), color="darkgray", bold=TRUE, background = "white", hline_after = TRUE)
   }
-  kable(df, escape = F) %>% 
-    kable_styling(latex_options = "scale_down") %>%
-    row_spec(nrow(df), color="black", bold=TRUE, background = "white", hline_after = TRUE) %>%
-    # column_spec(2:ncol(df), border_left = TRUE, border_right = TRUE) %>%
-    knit_print()
+  knit_print(output)
 }
 
 #' @importFrom crayon make_style style
