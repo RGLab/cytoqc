@@ -2,12 +2,12 @@
 % Please edit documentation in R/cqc_io.R
 \name{cqc_load_fcs}
 \alias{cqc_load_fcs}
-\alias{cqc_load_h5}
+\alias{cqc_load_cytoframe}
 \title{Load cqc_data}
 \usage{
 cqc_load_fcs(files, ...)
 
-cqc_load_h5(files, is_h5 = TRUE, ...)
+cqc_load_cytoframe(files, ...)
 }
 \arguments{
 \item{files}{the fcs or h5 file paths}
@@ -24,6 +24,6 @@ cqc_cf_list <- cqc_load_fcs(fcs_files)
 \dontrun{
 h5_files <- list.files(system.file("extdata", "gs_bcell_auto", package = "flowWorkspaceData"),
                        pattern = ".h5", full.names = TRUE)
-cqc_cf_list <- cqc_load_h5(h5_files)
+cqc_cf_list <- cqc_load_cytoframe(h5_files)
 }
 }

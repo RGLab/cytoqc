@@ -22,10 +22,10 @@ cqc_load_fcs <- function(files,  ...) {
 #' \dontrun{
 #' h5_files <- list.files(system.file("extdata", "gs_bcell_auto", package = "flowWorkspaceData"),
 #'                        pattern = ".h5", full.names = TRUE)
-#' cqc_cf_list <- cqc_load_h5(h5_files)
+#' cqc_cf_list <- cqc_load_cytoframe(h5_files)
 #' }
 #' @export
-cqc_load_h5 <- function(files, is_h5 = TRUE, ...) {
+cqc_load_cytoframe <- function(files, ...) {
   res <- sapply(files, function(file) load_cytoframe(file, readonly = FALSE, ...))
   names(res) <- basename(names(res))
   cqc_cf_list(res)
