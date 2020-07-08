@@ -1,15 +1,15 @@
 #' Load cqc_data
-#' 
+#'
 #' load fcs or h5 files into \code{\link{cqc_cf_list}} object which is a list of \code{\link[flowWorkspace]{cytoframe}} objects.
 #' This is the method to construct the core data object for \code{\link[cytoqc:cytoqc-package]{cytoqc}}.
 #' @param files the fcs or h5 file paths
 #' @param is_h5 \code{logical} should the cytoframe be constructed as an h5 disk-backed structure. Default \code{TRUE}.
 #'                              It is ignored for \code{cqc_load_h5}
-#' @param ... parameters passed to 'load_cytoframe_from_fcs' or 'load_cytoframe_from_h5'
+#' @param ... parameters passed to 'load_cytoframe_from_fcs' or 'load_cytoframe'
 #' @rdname cqc_load_fcs
 #' @import flowWorkspace
 #' @importFrom methods is
-#' @examples 
+#' @examples
 #' fcs_files <- list.files(system.file("extdata", "GvHD_QC", package = "cytoqc"), full.names = TRUE)
 #' cqc_cf_list <- cqc_load_fcs(fcs_files)
 #' @export
@@ -28,7 +28,7 @@ cqc_load_fcs <- function(files, is_h5 = TRUE, ...) {
 #' }
 #' @export
 cqc_load_h5 <- function(files, is_h5 = TRUE, ...) {
-  res <- sapply(files, function(file) load_cytoframe_from_h5(file, readonly = FALSE, ...))
+  res <- sapply(files, function(file) load_cytoframe(file, readonly = FALSE, ...))
   names(res) <- basename(names(res))
   cqc_cf_list(res)
 }
@@ -38,15 +38,15 @@ cqc_load_h5 <- function(files, is_h5 = TRUE, ...) {
 #' This is the core data object for \code{\link[cytoqc:cytoqc-package]{cytoqc}}.
 #'
 #' @param x a named list of \code{\link[flowWorkspace]{cytoframe}} objects
-#' @examples 
+#' @examples
 #' # This is just for illustration. cqc_load_fcs will normally take care of this step.
 #' fcs_files <- list.files(system.file("extdata", "GvHD_QC", package = "cytoqc"), full.names = TRUE)
 #' cf_list <- lapply(fcs_files[1:3], load_cytoframe_from_fcs)
 #' names(cf_list) <- fcs_files[1:3]
-#' 
+#'
 #' # Construct a cqc_cf_list object from a list of cytoframes
 #' cf_list <- cqc_cf_list(cf_list)
-#' 
+#'
 #' @export
 cqc_cf_list <- function(x) {
   if (!is.list(x)) {
@@ -101,30 +101,30 @@ cqc_gs <- function(x) {
 #' # Read in FCS files with inconsistencies
 #' fcs_files <- list.files(system.file("extdata", "GvHD_QC", package = "cytoqc"), full.names = TRUE)
 #' qc_cf_list <- cqc_load_fcs(fcs_files)
-#' 
+#'
 #' # Check for marker inconsitencies
 #' groups <- cqc_check(qc_cf_list, type = "marker")
-#' 
+#'
 #' # Attempt to fix them automatically
 #' match_result <- cqc_match(groups, ref = c("CD14 PerCP", "CD15 FITC", "CD33 APC", "CD45 PE", "FSC-Height", "SSC-Height", "Time"))
-#' 
+#'
 #' # Add a manual match that automatic matching could not find
 #' match_result <- cqc_update_match(match_result, map = c("PTPRC PE" = "CD45 PE"))
-#' 
+#'
 #' # Apply the fix to the original cytoframes
 #' cqc_fix(match_result)
-#' 
+#'
 #' # There is still one sample in its own group, because it is missing the Time channel entirely
 #' # One approach is to simply drop this group.
 #' groups <- cqc_check(qc_cf_list, type = "marker")
 #' groups <- cqc_drop_groups(groups, 1)
-#' 
+#'
 #' qc_data <- cqc_get_data(groups)
-#' 
+#'
 #' # Write out fcs files
 #' tmp_fcs_dir <- tempfile()
 #' cqc_write_fcs(qc_data, tmp_fcs_dir)
-#' 
+#'
 #' # Write out h5 files
 #' tmp_h5_dir <- tempfile()
 #' cqc_write_h5(qc_data, tmp_h5_dir)
@@ -165,13 +165,13 @@ cqc_write_h5 <- function(x, out, verbose = TRUE) {
 #' For the methods dispatching purpose
 #'
 #' @param x a list of 'GatingSet' objects
-#' @examples 
+#' @examples
 #' gs_paths <- list.files(system.file("extdata", "gslist_manual_QC", package = "cytoqc"), full.names = TRUE)
 #' gs1 <- load_gs(gs_paths[[1]])
 #' gs2 <- load_gs(gs_paths[[2]])
 #' qc_gs_list <- cqc_gs_list(list(gs1, gs2))
 #' groups <- cqc_check(qc_gslist, type="gate")
-#' 
+#'
 #' @export
 cqc_gs_list <- function(x) {
   if (!is.list(x)) {

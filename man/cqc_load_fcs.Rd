@@ -15,7 +15,7 @@ cqc_load_h5(files, is_h5 = TRUE, ...)
 \item{is_h5}{\code{logical} should the cytoframe be constructed as an h5 disk-backed structure. Default \code{TRUE}.
 It is ignored for \code{cqc_load_h5}}
 
-\item{...}{parameters passed to 'load_cytoframe_from_fcs' or 'load_cytoframe_from_h5'}
+\item{...}{parameters passed to 'load_cytoframe_from_fcs' or 'load_cytoframe'}
 }
 \description{
 load fcs or h5 files into \code{\link{cqc_cf_list}} object which is a list of \code{\link[flowWorkspace]{cytoframe}} objects.
