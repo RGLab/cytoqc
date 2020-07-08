@@ -35,7 +35,7 @@ cqc_recommend.cqc_match_result_gate <- function(x, ...) {
 #' solution <- cqc_recommend(groups, select = c(1, 4))
 #' }
 #' @param x A CQC object of some kind. See vignettes.
-#' @param max.distance Maximum distance allowed for a match. See ?agrep
+#' @param max.distance -- Maximum distance allowed for a match. This is passed to the max.distance argument in \code{\link{agrep}}.
 #' @param partial whether to do the partial sub string matching before the approximate string matching
 #' @param ... additional arguments not for the user.
 #' @importFrom tibble tibble add_row
