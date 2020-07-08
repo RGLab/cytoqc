@@ -3,8 +3,6 @@
 #' load fcs or h5 files into \code{\link{cqc_cf_list}} object which is a list of \code{\link[flowWorkspace]{cytoframe}} objects.
 #' This is the method to construct the core data object for \code{\link[cytoqc:cytoqc-package]{cytoqc}}.
 #' @param files the fcs or h5 file paths
-#' @param is_h5 \code{logical} should the cytoframe be constructed as an h5 disk-backed structure. Default \code{TRUE}.
-#'                              It is ignored for \code{cqc_load_h5}
 #' @param ... parameters passed to 'load_cytoframe_from_fcs' or 'load_cytoframe'
 #' @rdname cqc_load_fcs
 #' @import flowWorkspace
@@ -13,8 +11,8 @@
 #' fcs_files <- list.files(system.file("extdata", "GvHD_QC", package = "cytoqc"), full.names = TRUE)
 #' cqc_cf_list <- cqc_load_fcs(fcs_files)
 #' @export
-cqc_load_fcs <- function(files, is_h5 = TRUE, ...) {
-  res <- sapply(files, function(file) load_cytoframe_from_fcs(file, is_h5 = is_h5, ...))
+cqc_load_fcs <- function(files,  ...) {
+  res <- sapply(files, function(file) load_cytoframe_from_fcs(file, ...))
   names(res) <- basename(names(res))
   cqc_cf_list(res)
 }

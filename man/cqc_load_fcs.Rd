@@ -5,15 +5,12 @@
 \alias{cqc_load_h5}
 \title{Load cqc_data}
 \usage{
-cqc_load_fcs(files, is_h5 = TRUE, ...)
+cqc_load_fcs(files, ...)
 
 cqc_load_h5(files, is_h5 = TRUE, ...)
 }
 \arguments{
 \item{files}{the fcs or h5 file paths}
-
-\item{is_h5}{\code{logical} should the cytoframe be constructed as an h5 disk-backed structure. Default \code{TRUE}.
-It is ignored for \code{cqc_load_h5}}
 
 \item{...}{parameters passed to 'load_cytoframe_from_fcs' or 'load_cytoframe'}
 }
