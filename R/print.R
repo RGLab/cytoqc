@@ -262,6 +262,7 @@ print.cqc_check <- function(x, ...){
 }
 
 #' @noRd
+#' @importFrom knitr is_latex_output is_html_output
 #' @export
 knit_print.cqc_cluster_panel <- function(x, ...){
   # browser()
@@ -296,13 +297,23 @@ knit_print.cqc_cluster_panel <- function(x, ...){
   })
   group_row <- c("New Group:", new_groups)
   df <- rbind(df, group_row)
-  rough <- kable(df) %>% kable_styling()
-  # Should try to convert this for loop if possible, but column_spec makes it a little difficult
-  for (i in 2:ncol(df)){
-    rough <- column_spec(rough, i, color="black", background=colors[[new_groups[[i-1]]]], border_left = TRUE, border_right=TRUE)
+  
+  if(is_latex_output()){
+    for (i in 2:ncol(df)){
+      df[,i]<- cell_spec(df[,i], color="black", background=colors[[new_groups[[i-1]]]])
+    }
+    output <- kable(df, escape = F) %>% 
+      kable_styling(latex_options = "scale_down") %>%
+      row_spec(nrow(df), color="black", bold=TRUE, background = "white", hline_after = TRUE) %>%
+      knit_print()
+  }else{
+    output <- kable(df) %>% kable_styling()
+    for (i in 2:ncol(df)){
+      output <- column_spec(output, i, color="black", background=colors[[new_groups[[i-1]]]], border_left = TRUE, border_right = TRUE)
+    }
+    output <- row_spec(output, nrow(df), color="darkgray", bold=TRUE, background = "white", hline_after = TRUE)
   }
-  rough <- row_spec(rough, nrow(df), color="gray", bold=TRUE, background = "white", hline_after = TRUE)
-  knit_print(rough)
+  knit_print(output)
 }
 
 #' @importFrom crayon make_style style
@@ -589,7 +600,7 @@ kable_cqc_check_panel <- function(x, ...){
 }
 gen_color_palette <- function(n, output=c("styles", "colors")){
   output <- match.arg(output, c("styles", "colors"))
-  colors <- rainbow(n, alpha = 0.3)
+  colors <- rainbow(n, s = 0.3)
   if(output == "colors")
     colors
   else
