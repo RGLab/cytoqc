@@ -15,7 +15,7 @@ cqc_match(x, ...)
 
        type -- the qc type (either "channel", "marker", "gate"), automatically determined by the type of \code{x}
        
-       max.distance -- Maximum distance allowed for a match. See ?agrep
+       max.distance -- Maximum distance allowed for a match. This is passed to the max.distance argument in \code{\link{agrep}}.
        
        partial whether -- to do the partial sub string matching before the approximate string matching}
 }

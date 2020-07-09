@@ -10,7 +10,7 @@
 \arguments{
 \item{x}{A CQC object of some kind. See vignettes.}
 
-\item{max.distance}{Maximum distance allowed for a match. See ?agrep}
+\item{max.distance}{-- Maximum distance allowed for a match. This is passed to the max.distance argument in \code{\link{agrep}}.}
 
 \item{partial}{whether to do the partial sub string matching before the approximate string matching}
 
