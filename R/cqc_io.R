@@ -90,8 +90,9 @@ cqc_gs <- function(x) {
 
 #' Write out tidied flow data (\code{cqc_cf_list}) back to fcs or h5
 #' @param x \code{\link{cqc_cf_list}}
-#' @param out the output directory that the FCS or h5 will be written
+#' @param out the output directory that the FCS or cytoframe on-disk formats will be written
 #' @param verbose whether to print each sample name during the writing process
+#' @param backend either "h5" or "tile" (only relevant for cqc_write_cytoframe)
 #' @param ... other arguments passed down to 'write.FCS'
 #' @importFrom flowCore write.FCS
 #' @rdname cqc_write_fcs
@@ -125,7 +126,7 @@ cqc_gs <- function(x) {
 #'
 #' # Write out h5 files
 #' tmp_h5_dir <- tempfile()
-#' cqc_write_h5(qc_data, tmp_h5_dir)
+#' cqc_write_cytoframe(qc_data, tmp_h5_dir)
 #' @export
 cqc_write_fcs <- function(x, out, verbose = TRUE, ...) {
   if (!dir.exists(out)) {
@@ -143,17 +144,20 @@ cqc_write_fcs <- function(x, out, verbose = TRUE, ...) {
 
 #' @rdname cqc_write_fcs
 #' @export
-cqc_write_h5 <- function(x, out, verbose = TRUE) {
+cqc_write_cytoframe <- function(x, out, verbose = TRUE, backend = get_default_backend(), ...) {
+  backend <- match.arg(backend, c("h5", "tile"))
+
   if (!dir.exists(out)) {
     dir.create(out)
   }
   for (sn in names(x))
   {
+    fr <- x[[sn]]
+    sn <- paste0(sn, ",", backend)
     if (verbose) {
       message("writing ", sn)
     }
-    fr <- x[[sn]]
-    cf_write_h5(fr, filename = file.path(out, sn))
+    cf_write_disk(fr, filename = file.path(out, sn), backend = backend, ...)
   }
 }
 

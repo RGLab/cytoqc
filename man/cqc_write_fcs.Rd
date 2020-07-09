@@ -2,12 +2,12 @@
 % Please edit documentation in R/cqc_io.R
 \name{cqc_write_fcs}
 \alias{cqc_write_fcs}
-\alias{cqc_write_h5}
+\alias{cqc_write_cytoframe}
 \title{Write out tidied flow data (\code{cqc_cf_list}) back to fcs or h5}
 \usage{
 cqc_write_fcs(x, out, verbose = TRUE, ...)
 
-cqc_write_h5(x, out, verbose = TRUE)
+cqc_write_cytoframe(x, out, verbose = TRUE, ...)
 }
 \arguments{
 \item{x}{\code{\link{cqc_cf_list}}}
