@@ -116,21 +116,13 @@ cqc_fix(match_result)
 
 ## Refresh QC report 
 ```{r}
-groups <- cqc_check(cqc_data, "keyword")
-groups
+cqc_check(cqc_data, "keyword")
 ```
 
-## Check the difference
+## Verify the insertion
 ```{r}
-res <- cqc_match(groups, ref = 1)
-res
+sub_data_ref <- cqc_get_data(groups, id = 5)
+unique(sapply(sub_data_ref, keyword, keyword = "Patient ID"))
 ```
 
-## split into two groups if they can't be merged
-```{r}
-grps <- split(groups)
-grps
-```
-
-## or insert the missing keywords for selected groups
 

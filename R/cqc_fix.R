@@ -46,7 +46,7 @@ cqc_fix.cqc_solution <- function(x, ...) {
         cqc_update(obj, .[["from"]], .[["to"]], type)
       } else if(is.na(.[["from"]])&&!is.na(.[["to"]]))#NA -> yyy
       {
-        cqc_insert(obj, is.na(.[["to"]]))
+        cqc_insert(obj, .[["to"]], type)
       }else#NA -> NA
         stop("both 'from' and 'to' are NA!")
       tibble()
@@ -58,10 +58,10 @@ cqc_fix.cqc_solution <- function(x, ...) {
 #' It is typically called automatically by cqc_fix call
 #'
 #' @param x cytoframe or GatingSet
-#' @param value the value to be deleted
-#' @param type one of qc task "channel", "marker", "keyword", "gate"
+#' @param value the value to be inserted
+#' @param type one of qc task only  "keyword" is valid for now.
 #' @param ... unused
-cqc_insert <- function(x, value, type, ...) UseMethod("cqc_delete")
+cqc_insert <- function(x, value, type, ...) UseMethod("cqc_insert")
 
 cqc_insert.cytoframe <- function(x, value, type, ...) {
   if  (type == "keyword") {
