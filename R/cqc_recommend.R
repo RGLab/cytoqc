@@ -42,6 +42,7 @@ cqc_recommend.cqc_match_result_gate <- function(x, ...) {
 #' @importFrom utils adist
 cqc_recommend.cqc_match_result <- function(x, max.distance = 0.1, partial = TRUE, ...) {
   unmatched_channels <- FALSE
+  type <- sub("cqc_match_result_", "", class(x)[1])
   res <- map_dfr(x, function(check_result) {
     targets_queue <- targets <- check_result[["unknown"]]
     refs_queue <- refs <- check_result[["missing"]]
@@ -125,19 +126,32 @@ cqc_recommend.cqc_match_result <- function(x, max.distance = 0.1, partial = TRUE
 
       }#end for
     }
+
+    ## add missing items to insertion list (only for keywords task at the moment)
+    if(type == "keyword")
+    {
+      if (length(targets_queue) == 0 && length(refs_queue) > 0) {
+
+        df <- add_row(df, from = NA, to = refs_queue)
+        refs_queue <- character()
+
+      }
+    }
+
     #add those extra items to deletion list
     if (length(targets_queue) > 0 && length(refs_queue) == 0) {
 
-         df <- add_row(df, from = targets_queue, to = NA)
-         targets_queue <- character()
+      df <- add_row(df, from = targets_queue, to = NA)
+      targets_queue <- character()
 
     }
+
     if(length(targets_queue) > 0 || length(refs_queue) > 0)
       unmatched_channels <<- TRUE
-    
+
     df
   }, .id = "group_id") %>% mutate(group_id = as.integer(group_id))
-  
+
   # If unmatched channels remain for any group, add warning message
   # as work must be done before calling cqc_fix
   if(unmatched_channels){
@@ -145,7 +159,7 @@ cqc_recommend.cqc_match_result <- function(x, max.distance = 0.1, partial = TRUE
                   "manually using cqc_update_match or re-attempt automatic matching with cqc_match with a larger max.distance argument."),
             call. = FALSE)
   }
-  
+
   attr(res, "class") <- c("cqc_solution", attr(res, "class"))
   attr(res, "group") <- attr(x, "group")
   res
