@@ -24,7 +24,7 @@ for(center in centers) {
     dir.create(this_out)
   this_ws_path <- file.path(ws_path, center, paste0("CA c3 v2 ", center, ".xml"))
   ws <- open_flowjo_xml(this_ws_path)
-  groupNames <- levels(fj_ws_get_sample_groups(ws)[,"groupName"])
+  groupNames <- unique(fj_ws_get_sample_groups(ws)[,"groupName"])
   #NOTE: here we use the fussy match due to the short name used in auto gating
   #ideally, we want to do the strict full string match avoid picking up the wrong panel
   #in case the panel name are similar. But in this particular panel set, it is safe to do so.

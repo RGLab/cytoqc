@@ -3,20 +3,20 @@
 #' Peform the actual fixing action (i.e update or delete)
 #' @param x the \code{cqc_solution} returned by \code{\link{cqc_match}} calls
 #' @param ... addiitional arguments not for the user.
-#' @examples 
+#' @examples
 #' # Read in FCS files with inconsistencies
 #' fcs_files <- list.files(system.file("extdata", "GvHD_QC", package = "cytoqc"), full.names = TRUE)
 #' qc_cf_list <- cqc_load_fcs(fcs_files)
-#' 
+#'
 #' # Check for marker inconsitencies
 #' groups <- cqc_check(qc_cf_list, type = "marker")
-#' 
+#'
 #' # Attempt to fix them automatically
 #' match_result <- cqc_match(groups, ref = c("CD14 PerCP", "CD15 FITC", "CD33 APC", "CD45 PE", "FSC-Height", "SSC-Height", "Time"))
-#' 
+#'
 #' # Add a manual match that automatic matching could not find
 #' match_result <- cqc_update_match(match_result, map = c("PTPRC PE" = "CD45 PE"))
-#' 
+#'
 #' # Apply the fix to the original cytoframes
 #' cqc_fix(match_result)
 #' @export
@@ -40,13 +40,43 @@ cqc_fix.cqc_solution <- function(x, ...) {
   invisible(group %>% inner_join(x, "group_id") %>%
     select(object, from, to) %>% distinct() %>% rowwise() %>% do({
       obj <- cqc_data[[.[["object"]]]]
-      if (is.na(.[["to"]])) {
+      if (!is.na(.[["from"]])&&is.na(.[["to"]])) {#xxx -> NA
         cqc_delete(obj, .[["from"]], type)
-      } else {
+      } else if(!is.na(.[["from"]])&&!is.na(.[["to"]])){#xxx -> yyy
         cqc_update(obj, .[["from"]], .[["to"]], type)
-      }
+      } else if(is.na(.[["from"]])&&!is.na(.[["to"]]))#NA -> yyy
+      {
+        cqc_insert(obj, is.na(.[["to"]]))
+      }else#NA -> NA
+        stop("both 'from' and 'to' are NA!")
       tibble()
     }))
+}
+
+#' insertion methods for cyto data
+#'
+#' It is typically called automatically by cqc_fix call
+#'
+#' @param x cytoframe or GatingSet
+#' @param value the value to be deleted
+#' @param type one of qc task "channel", "marker", "keyword", "gate"
+#' @param ... unused
+cqc_insert <- function(x, value, type, ...) UseMethod("cqc_delete")
+
+cqc_insert.cytoframe <- function(x, value, type, ...) {
+  if  (type == "keyword") {
+    cf_keyword_insert(x, value, "")
+  } else {
+    stop("insert ", type, " not supported yet!")
+  }
+}
+
+cqc_insert.GatingSet <- function(x, value, type, ...) {
+  cs <- gs_cyto_data(x) # cs is a new view
+  lapply(cs, function(cf) {
+    cqc_insert(cf, value, type, ...)
+  })
+
 }
 
 

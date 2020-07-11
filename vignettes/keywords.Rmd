@@ -26,7 +26,8 @@ library(cytoqc)
 ```{r include=FALSE}
 # prepare the test data
 data("GvHD")
-fs <- GvHD
+set.seed(1)
+fs <- Subset(GvHD, sampleFilter(10))
 data_dir <- tempfile()
 dir.create(data_dir)
 write.flowSet(fs, data_dir)
@@ -131,5 +132,5 @@ grps <- split(groups)
 grps
 ```
 
-
+## or insert the missing keywords for selected groups
 

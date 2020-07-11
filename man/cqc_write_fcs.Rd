@@ -7,16 +7,24 @@
 \usage{
 cqc_write_fcs(x, out, verbose = TRUE, ...)
 
-cqc_write_cytoframe(x, out, verbose = TRUE, ...)
+cqc_write_cytoframe(
+  x,
+  out,
+  verbose = TRUE,
+  backend = get_default_backend(),
+  ...
+)
 }
 \arguments{
 \item{x}{\code{\link{cqc_cf_list}}}
 
-\item{out}{the output directory that the FCS or h5 will be written}
+\item{out}{the output directory that the FCS or cytoframe on-disk formats will be written}
 
 \item{verbose}{whether to print each sample name during the writing process}
 
 \item{...}{other arguments passed down to 'write.FCS'}
+
+\item{backend}{either "h5" or "tile" (only relevant for cqc_write_cytoframe)}
 }
 \description{
 Write out tidied flow data (\code{cqc_cf_list}) back to fcs or h5
@@ -51,5 +59,5 @@ cqc_write_fcs(qc_data, tmp_fcs_dir)
 
 # Write out h5 files
 tmp_h5_dir <- tempfile()
-cqc_write_h5(qc_data, tmp_h5_dir)
+cqc_write_cytoframe(qc_data, tmp_h5_dir)
 }
