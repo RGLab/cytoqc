@@ -142,6 +142,8 @@ format.cqc_match_result_and_solution <- function(x, show_check_mark = TRUE, ...)
         unknown <- this_res[["unknown"]]
          #drop the recommended deletion
         df1 <- filter(df, !is.na(to))
+        #drop the recommended insertion
+        df1 <- filter(df1, !is.na(from))
         #fill the refs with the recommended edit
         matched.ref <- df1[["to"]]
         matched.target <- df1[["from"]]
@@ -154,6 +156,10 @@ format.cqc_match_result_and_solution <- function(x, show_check_mark = TRUE, ...)
 
         ## the redundant item
         torm <- filter(df, is.na(to))[["from"]]
+
+        #insertion item (may overwrite unmatched entry of NA)
+        insert.ref <- filter(df, is.na(from))[["to"]]
+        col_to_show[match(insert.ref, ref)] <- "<TO INSERT>"
 
         # the unmatched target
         if(length(matched.target)>0)
@@ -297,12 +303,12 @@ knit_print.cqc_cluster_panel <- function(x, ...){
   })
   group_row <- c("New Group:", new_groups)
   df <- rbind(df, group_row)
-  
+
   if(is_latex_output()){
     for (i in 2:ncol(df)){
       df[,i]<- cell_spec(df[,i], color="black", background=colors[[new_groups[[i-1]]]])
     }
-    output <- kable(df, escape = F) %>% 
+    output <- kable(df, escape = F) %>%
       kable_styling(latex_options = "scale_down") %>%
       row_spec(nrow(df), color="black", bold=TRUE, background = "white", hline_after = TRUE) %>%
       knit_print()
