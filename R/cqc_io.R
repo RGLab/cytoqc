@@ -153,7 +153,7 @@ cqc_write_cytoframe <- function(x, out, verbose = TRUE, backend = get_default_ba
   for (sn in names(x))
   {
     fr <- x[[sn]]
-    sn <- paste0(sn, ",", backend)
+    sn <- paste0(sn, ".", backend)
     if (verbose) {
       message("writing ", sn)
     }
