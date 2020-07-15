@@ -30,11 +30,12 @@ test_that("cf_get_panel", {
 
 })
 
-Sys.setlocale("LC_COLLATE", "en_US.UTF-8")
+
 test_that("keywords insertion", {
-  # skip("TO fix order of string")
+  locale <- Sys.getlocale("LC_COLLATE")
+  Sys.setlocale("LC_COLLATE", "en_US.UTF-8")#so that the character ordering is the same as the interactive console
+
   test_results_keys <- test_results[["keywords"]]
-  browser()
   check_res <- cqc_check_keyword(cqc_data)
   expect_is(check_res, "cqc_check_keyword")
 
@@ -52,6 +53,8 @@ test_that("keywords insertion", {
 
   cqc_fix(match_result)
   expect_equivalent(cqc_check(cqc_data, "keyword"), test_results_keys[["check"]][["fixed_result"]])
+
+  Sys.setlocale("LC_COLLATE", locale)#restore
 })
 test_that("cqc_check_gate", {
   test_results_gate <- test_results[["gate"]]
