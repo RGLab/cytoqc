@@ -29,21 +29,26 @@ test_that("cf_get_panel", {
   expect_equal(as.vector(tbl[["marker"]]),as.vector(pData(parameters(cf))[["desc"]]))
 
 })
-# Sys.setlocale("LC_COLLATE", "n_US.UTF-8")
+
+Sys.setlocale("LC_COLLATE", "en_US.UTF-8")
 test_that("keywords insertion", {
-  skip("TO fix order of string")
+  # skip("TO fix order of string")
   test_results_keys <- test_results[["keywords"]]
+  browser()
   check_res <- cqc_check_keyword(cqc_data)
   expect_is(check_res, "cqc_check_keyword")
-  browser()
+
   #sort strings because devtool::test() run yields different order from the interactive session
-  check_res$keyword <- sort(check_res$keyword)
-  test_results_keys[["check"]][["result"]]$keyword <- sort(test_results_keys[["check"]][["result"]]$keyword)
+  # check_res$keyword <- sort(check_res$keyword)
+  # test_results_keys[["check"]][["result"]]$keyword <- sort(test_results_keys[["check"]][["result"]]$keyword)
   expect_equivalent(check_res, test_results_keys[["check"]][["result"]])
 
   match_result <- cqc_match(check_res, ref = 3)
   expect_equivalent(match_result, test_results_keys[["match"]][["result"]])
   expect_equal(match_result_color_tbl(match_result), test_results_keys[["match"]][["match_result_color_tbl"]])
+
+  match_result <- cqc_match_delete_unmatched(match_result, c("EXPORT_GATE","PARENT_GUID"))
+  expect_equivalent(match_result, test_results_keys[["match"]][["result1"]])
 
   cqc_fix(match_result)
   expect_equivalent(cqc_check(cqc_data, "keyword"), test_results_keys[["check"]][["fixed_result"]])

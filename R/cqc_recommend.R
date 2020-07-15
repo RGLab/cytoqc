@@ -156,7 +156,7 @@ cqc_recommend.cqc_match_result <- function(x, max.distance = 0.1, partial = TRUE
   # as work must be done before calling cqc_fix
   if(unmatched_items){
     warning(paste("Unmatched items remain after cqc_match. Before using cqc_fix, please resolve these unmatched items",
-                  "manually using cqc_update_match or re-attempt automatic matching with cqc_match with a larger max.distance argument."),
+                  "manually using cqc_match_update/remove/delete_unmatched or re-attempt automatic matching with cqc_match with a larger max.distance argument."),
             call. = FALSE)
   }
 
