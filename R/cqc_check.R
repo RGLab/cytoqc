@@ -130,20 +130,32 @@ cqc_check.cqc_cf_list <- function(x, type, keys = NULL, delimiter = "|", by = "c
   sep <- paste0(delimiter, delimiter) # double delimiter for sep params and single delimiter for sep channel and marker
   #if keys are not supplied then extract them from data according to the type
    if (is.null(keys)) {
-    keys <- sapply(x, function(cf) {
+    keys <- lapply(x, function(cf) {
       if (type == "keyword") {
         key <- names(keyword(cf, compact = TRUE))
       } else {
         key <- cf_get_panel(cf) # %>% arrange(channel)
-        if (type != "channel") {
-          key <- filter(key, is.na(marker) == FALSE)
-        }
-        if (type == "panel") {
-          key <- unite(key, panel, channel, marker, sep = delimiter)
-        }
-        key <- key[[type]]
       }
-
+      key
+    })
+    if (type != "channel") {
+      # Filter out those rows where the marker is NA for all groups (usually scatter channels)
+      empty_in_all <- Reduce(intersect, lapply(keys, function(df){
+        filter(df, is.na(marker))$channel
+      }))
+      keys <- lapply(keys, function(key){
+        key %>% 
+          filter(!(channel %in% empty_in_all))
+          # Replacing with empty string causes problems due in collapsing/separation of rows
+          # so this currently relies on the conversion of NA->"NA" by tidyr::unite (not ideal)
+          # replace_na(list(marker=""))
+      })
+    }
+    keys <- sapply(keys, function(key){
+      if (type == "panel")
+        key <- unite(key, panel, channel, marker, sep = delimiter)
+      if(type != "keyword")
+        key <- key[[type]]
       key %>%
         sort() %>%
         paste(collapse = sep)
