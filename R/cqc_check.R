@@ -98,17 +98,22 @@ cqc_check.cqc_gs_list <- function(x, type, delimiter = "|", ...) {
   #extract the first cf from each gs
   cflist <- sapply(x, function(gs) get_cytoframe_from_cs(gs_pop_get_data(gs), 1)) # TODO:qc within gs to ensure all data are consistent
   cflist <- cqc_cf_list(cflist)
-  if (type == "gate") {
-    sep <- paste0(delimiter, delimiter)
-    keys <- sapply(x, function(gs) {
-      key <- gs_get_pop_paths(gs, path = "auto")#extract gate paths
-      #order them alphabetically and collapse them as a string
-      key %>%
-        sort() %>%
-        paste(collapse = sep)
-    })
-  } else {
-    keys <- NULL
+  
+  # If keys are explicitly provided, pass that down
+  keys <- list(...)[["keys"]]
+  if(is.null(keys)){
+    if (type == "gate") {
+      sep <- paste0(delimiter, delimiter)
+      keys <- sapply(x, function(gs) {
+        key <- gs_get_pop_paths(gs, path = "auto")#extract gate paths
+        #order them alphabetically and collapse them as a string
+        key %>%
+          sort() %>%
+          paste(collapse = sep)
+      })
+    } else {
+      keys <- NULL
+    }
   }
   #dispatch to cqc_check.cqc_cf_list
   res <- cqc_check(cflist, type, keys, delimiter, ...)
@@ -119,8 +124,8 @@ cqc_check.cqc_gs_list <- function(x, type, delimiter = "|", ...) {
 }
 
 #' @export
-#' @importFrom dplyr filter arrange pull mutate group_indices distinct count add_count
-#' @importFrom tidyr separate separate_rows
+#' @importFrom dplyr filter arrange pull mutate group_indices distinct count add_count across right_join cur_group_id if_else
+#' @importFrom tidyr separate separate_rows pivot_wider pivot_longer
 cqc_check.cqc_cf_list <- function(x, type, keys = NULL, delimiter = "|", by = "channel", ...) {
   by <- match.arg(by, c("channel", "marker"))
   types <-  c("channel", "marker", "panel", "keyword")
@@ -129,46 +134,92 @@ cqc_check.cqc_cf_list <- function(x, type, keys = NULL, delimiter = "|", by = "c
   type = match.arg(type, types)
   sep <- paste0(delimiter, delimiter) # double delimiter for sep params and single delimiter for sep channel and marker
   #if keys are not supplied then extract them from data according to the type
-   if (is.null(keys)) {
-    keys <- sapply(x, function(cf) {
+  if (is.null(keys)) {
+    keys <- lapply(x, function(cf) {
       if (type == "keyword") {
         key <- names(keyword(cf, compact = TRUE))
       } else {
         key <- cf_get_panel(cf) # %>% arrange(channel)
-        if (type != "channel") {
-          key <- filter(key, is.na(marker) == FALSE)
-        }
-        if (type == "panel") {
-          key <- unite(key, panel, channel, marker, sep = delimiter)
-        }
-        key <- key[[type]]
       }
-
-      key %>%
-        sort() %>%
-        paste(collapse = sep)
+      key
+    })
+    
+    # For merker-checking types, filter out those rows where the marker is NA for all groups (usually scatter channels)
+    if (type %in% c("marker", "panel")) {
+      empty_in_all <- Reduce(intersect, lapply(keys, function(df){
+        filter(df, is.na(marker))$channel
+      }))
+      keys <- lapply(keys, function(key){
+        key %>% 
+          filter(!(channel %in% empty_in_all))
+      })
+    }
+    
+    # For single-type checks, collapse to single keystring
+    if(type != "panel"){
+      keys <- sapply(keys, function(key){
+        if(type != "keyword")
+          key <- key[[type]]
+        key %>%
+          sort() %>%
+          paste(collapse = sep)
+      })
+    }
+  }else if(type == "panel"){
+    keys <- lapply(x, function(cf) {
+      cf_get_panel(cf) %>%
+        filter(!!as.symbol(by) %in% keys)
     })
   }
-  #convert to itemized(one entry per object&key) tbl
-  res <- tibble(object = names(keys), key = keys)
-  #generate group id based on the key
-  gid <- res %>%
-    group_by(key) %>%
-    group_indices()
-  res <- res %>%
-    mutate(group_id = gid) %>%
-    add_count(group_id, key) %>%
-    rename(nObject = n) %>%
-    separate_rows(key, sep = paste0("\\Q", sep, "\\E"))#split the collapsed key string into separate rows(one key per row)
-  if (type == "panel") {#for panel check, need to split chnl and marker into separate columns
-    res <- separate(res, key, c("channel", "marker"), sep = paste0("\\Q", delimiter, "\\E"))
-    attr(res, "by") <- by
+  
+  if(type == "panel"){
+    # Spread channel and marker for multi-column key
+    key_names <- names(keys)
+    keys <- lapply(seq_along(keys), function(key_idx){
+      keys[[key_idx]] %>%
+        mutate(object = names(keys)[[key_idx]])
+    })
+    names(keys) <- key_names
+    res <- lapply(keys, function(key){
+      key %>%
+        arrange(channel, marker) %>%
+        pivot_wider(names_from = channel, values_from = marker)
+    })
+    # Generate group_id based on key and gather back
+    # Note that bind_rows will fill in "FALSE" NAs for channel discrepancies
+    # so those need to be clipped out after pivot_longer
+    res <- bind_rows(res) %>%
+      group_by(across(c(-object))) %>%
+      mutate(group_id = cur_group_id()) %>%
+      add_count(`group_id`, name = "nObject") %>%
+      pivot_longer(-c(object, group_id, nObject), names_to = "channel", values_to = "marker") %>%
+      right_join(bind_rows(keys), by = c("object", "channel", "marker")) # Remove artifacts of bind_rows
 
-  } else {
+    if(any(is.na(res[[by]]))){
+      other_column = if_else(by == "channel", "marker", "channel")
+      stop(by, " is being used as anchor but is missing values for one or more samples. This can result from inconsistency in "
+           , other_column, " so you may need to standardize it first.")
+    }
+    
+    if(nrow(res) == 0)
+      stop("No markers available for panel check.")
+    attr(res, "by") <- by
+    
+  }else{
+    #convert to itemized(one entry per object&key) tbl
+    res <- tibble(object = names(keys), key = keys)
+    #generate group id based on the key
+    gid <- res %>%
+      group_by(key) %>%
+      group_indices()
+    res <- res %>%
+      mutate(group_id = gid) %>%
+      add_count(group_id, key) %>%
+      rename(nObject = n) %>%
+      separate_rows(key, sep = paste0("\\Q", sep, "\\E"))#split the collapsed key string into separate rows(one key per row)
     res <- rename(res, !!type := key)
   }
-
-
+  
   class(res) <- c("cqc_check", class(res))
   class(res) <- c(paste0("cqc_check_", type), class(res))
   attr(res, "data") <- x
