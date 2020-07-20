@@ -133,13 +133,7 @@ test_that("cqc_check_panel", {
   expres <- test_results_panel[["check"]][["format"]]
   expect_error(match_res <- cqc_match(groups, ref = 1), "not consistent")
 
-  # Now cqc_check will appropriately error out if the anchor column has residual NA
-  # In this case this is due to extra/missing scatter channels between groups
-  expect_error(groups <- cqc_check(cqc_data, "panel", by = "marker"), "marker is being used as anchor but is missing values")
-  
-  # To handle this, explicitly specify markers to match on
-  all_markers <- unique(do.call(c,lapply(cqc_data, markernames)))
-  groups <- cqc_check(cqc_data, "panel", by = "marker", keys = all_markers)
+  groups <- cqc_check(cqc_data, "panel", by = "marker")
 
   expect_equal(format(groups), test_results_panel[["check"]][["format_by_marker"]])
   match_res <- cqc_match(groups, ref = 1)

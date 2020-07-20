@@ -194,12 +194,6 @@ cqc_check.cqc_cf_list <- function(x, type, keys = NULL, delimiter = "|", by = "c
       add_count(`group_id`, name = "nObject") %>%
       pivot_longer(-c(object, group_id, nObject), names_to = "channel", values_to = "marker") %>%
       right_join(bind_rows(keys), by = c("object", "channel", "marker")) # Remove artifacts of bind_rows
-
-    if(any(is.na(res[[by]]))){
-      other_column = if_else(by == "channel", "marker", "channel")
-      stop(by, " is being used as anchor but is missing values for one or more samples. This can result from inconsistency in "
-           , other_column, " so you may need to standardize it first.")
-    }
     
     if(nrow(res) == 0)
       stop("No markers available for panel check.")

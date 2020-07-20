@@ -549,6 +549,7 @@ format.cqc_check_panel <- function(x, color_ref = FALSE, ...){
     value <- "channel"
   # #long to wide
    x %>% summary %>%
+    filter(!is.na(!!as.name(anchor))) %>%
     mutate(group_id := paste("group", group_id), nObject := paste0("(n=", nObject, ")")) %>%
     unite(grp, group_id, nObject, sep = "") %>% #merge grp cols
     spread(grp, !!value) %>%

@@ -62,6 +62,9 @@ cqc_match.cqc_check_panel <- function(x, ref, ...) {
   by <- attr(x, "by")
   #check if anchor is already standardized
   stopifnot(is(ref, "numeric"))
+  # Drop rows with NA in anchor
+  x <- x %>% filter(!is.na(!!as.name(by)))
+  
   ref_by <- filter(x, group_id == ref)[[by]]
   x %>% filter(group_id != ref) %>%
     group_by(group_id) %>% group_walk(function(df,...){
