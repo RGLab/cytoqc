@@ -133,12 +133,25 @@ test_that("cqc_check_panel", {
   expres <- test_results_panel[["check"]][["format"]]
   expect_error(match_res <- cqc_match(groups, ref = 1), "not consistent")
 
-  groups <- cqc_check(cqc_data, "panel", by = "marker")
+  # Now cqc_check will appropriately error out if the anchor column has residual NA
+  # In this case this is due to extra/missing scatter channels between groups
+  expect_error(groups <- cqc_check(cqc_data, "panel", by = "marker"), "marker is being used as anchor but is missing values")
+  
+  # To handle this, explicitly specify markers to match on
+  all_markers <- unique(do.call(c,lapply(cqc_data, markernames)))
+  groups <- cqc_check(cqc_data, "panel", by = "marker", keys = all_markers)
+
   expect_equal(format(groups), test_results_panel[["check"]][["format_by_marker"]])
-  match_res <- cqc_match(groups, ref = 6)
+  match_res <- cqc_match(groups, ref = 1)
   cqc_fix(match_res)
   groups <- cqc_check(cqc_data, "panel")
+  
+  # Panel check still shows non-overlapping scatter channels (handled in next test block)
   expect_equivalent(groups, test_results_panel[["check"]][["fixed_result"]])
+  groups <- cqc_check(cqc_data, "channel")
+  expect_equivalent(groups, test_results_panel[["check"]][["post_panel_fix"]])
+  match_res <- cqc_match(groups, ref = 4)
+  expect_equivalent(match_res, test_results_panel[["check"]][["post_panel_channel_match"]])
 
 })
 
@@ -156,4 +169,37 @@ test_that("cqc_check_channel", {
   cqc_fix(match_result)
   expect_equivalent(cqc_check(cqc_data, "channel"), test_results_channel[["check"]][["fixed_result"]])
 
+})
+
+test_that("missing_markers", {
+  
+  skip_if_not(require(flowWorkspaceData))
+  
+  test_results_missing <- test_results[["missing_markers"]]
+  
+  # Construct case with missing markers to be filled in by panel check aligned on channels
+  cs <- load_cytoset_from_fcs(list.files(system.file("extdata", package = "flowWorkspaceData"), pattern = "a2004", full.names = TRUE))
+  drop_cols <- which(grepl("-A", colnames(cs)))
+  cs <- realize_view(cs[,-drop_cols])
+  empty_markers <- rep("",8)
+  names(empty_markers) <- colnames(cs)[5:12]
+  markernames(cs[[2]]) <- empty_markers
+  cqc_data <- cqc_cf_list(cytoset_to_list(cs))
+  
+  # Test error message for case where no samples have values to match up
+  # This could happen if the user chooses the wrong ref in the example below
+  expect_error(cqc_check(cqc_cf_list(cytoset_to_list(cs[2])), type = "panel", by = "channel"), "No markers available for panel check")
+  
+  # Check should show 2 groups due to missing markers
+  check_res <- cqc_check(cqc_data, type = "panel", by = "channel")
+  expect_equivalent(check_res, test_results_missing[["pre_check"]])
+  
+  # Match to the sample with channels present and apply fix
+  match_res <- cqc_match(check_res, ref = 1)
+  expect_equivalent(match_res, test_results_missing[["match"]])
+  
+  cqc_fix(match_res)
+  
+  check_res <- cqc_check(cqc_data, type = "panel", by = "channel")
+  expect_equivalent(check_res, test_results_missing[["post_fix_check"]])
 })
