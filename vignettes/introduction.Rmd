@@ -150,7 +150,7 @@ solution
 
 ## Manually fix the match
 ```{r}
-solution <- cqc_update_match(solution, map = c("apc cd33" = "CD33 APC"))
+solution <- cqc_match_update(solution, map = c("apc cd33" = "CD33 APC"))
 solution
 ```
 
@@ -183,7 +183,7 @@ cleaned <- data_list[[2]]
 
 ```{r eval=F}
 out <- tempfile()
-write_fcs(cleaned, out)
+cqc_write_fcs(cleaned, out)
 ```
 
 
