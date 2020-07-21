@@ -2,3 +2,4 @@
 # saveRDS(test_results_all, "tests/testthat/test_results.rds")
 # test_results_all <- readRDS("tests/testthat/test_results.rds")
 test_results_all <- readRDS("test_results.rds")
+Sys.setlocale("LC_COLLATE", "C")#ensure the consistent string order across different machines (especially when test_results.rds is updated by someone)
