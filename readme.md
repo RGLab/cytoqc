@@ -7,7 +7,6 @@ the cytodata .
 ## Installation
 
 ``` r
-remotes::install_github("thebioengineer/colortable")
 remotes::install_github("RGLab/cytoqc")
 ```
 

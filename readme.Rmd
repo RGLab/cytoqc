@@ -14,7 +14,6 @@ library(knitr)
 
 ## Installation
 ```{r, eval=FALSE}
-remotes::install_github("thebioengineer/colortable")
 remotes::install_github("RGLab/cytoqc")
 ```
 
