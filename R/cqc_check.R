@@ -8,7 +8,8 @@
 #' @return a tibble with two columns: "channel" and 'marker'
 #' @importFrom dplyr select rename
 #' @importFrom flowCore parameters
-#' @examples 
+#' @examples
+#' library(flowWorkspace)
 #' fcs_path <- system.file("extdata", "GvHD_QC", "s5a01.fcs", package = "cytoqc")
 #' cf <- load_cytoframe_from_fcs(fcs_path)
 #' cf_get_panel(cf)
@@ -66,7 +67,7 @@ cqc_check_gate <- function(x, ...){
 #' @return a tibble with 4 columns: object, qc type (e.g. channel), group_id and nobject (i.e. group count)
 #' @param x \code{\link{cqc_cf_list}}, \code{\link{cqc_gs}}, or \code{\link{cqc_gs_list}} object
 #' @param ... additional arguments.
-#' 
+#'
 #'  type -- specify the qc type, can be "channel", "marker" or "panel"
 #'
 #'  delimiter -- a special character used to separate channel and marker
@@ -77,18 +78,18 @@ cqc_check_gate <- function(x, ...){
 #' @examples
 #' fcs_files <- list.files(system.file("extdata", "GvHD_QC", package = "cytoqc"), full.names = TRUE)
 #' qc_cf_list <- cqc_load_fcs(fcs_files)
-#' 
+#'
 #' # You may directly call the method for the parameter you would like to check
 #' keyword_groups <- cqc_check_keyword(qc_cf_list)
 #' keyword_groups
-#' 
+#'
 #' # Or use the type argument
 #' channel_groups <- cqc_check(qc_cf_list, type = "channel")
 #' channel_groups
-#' 
+#'
 #' panel_groups <- cqc_check(qc_cf_list, type = "panel", by = "marker")
 #' panel_groups
-#' 
+#'
 #' @export
 cqc_check <- function(x, ...) UseMethod("cqc_check")
 
@@ -98,7 +99,7 @@ cqc_check.cqc_gs_list <- function(x, type, delimiter = "|", ...) {
   #extract the first cf from each gs
   cflist <- sapply(x, function(gs) get_cytoframe_from_cs(gs_pop_get_data(gs), 1)) # TODO:qc within gs to ensure all data are consistent
   cflist <- cqc_cf_list(cflist)
-  
+
   # If keys are explicitly provided, pass that down
   keys <- list(...)[["keys"]]
   if(is.null(keys)){
@@ -143,18 +144,18 @@ cqc_check.cqc_cf_list <- function(x, type, keys = NULL, delimiter = "|", by = "c
       }
       key
     })
-    
+
     # For merker-checking types, filter out those rows where the marker is NA for all groups (usually scatter channels)
     if (type %in% c("marker", "panel")) {
       empty_in_all <- Reduce(intersect, lapply(keys, function(df){
         filter(df, is.na(marker))$channel
       }))
       keys <- lapply(keys, function(key){
-        key %>% 
+        key %>%
           filter(!(channel %in% empty_in_all))
       })
     }
-    
+
     # For single-type checks, collapse to single keystring
     if(type != "panel"){
       keys <- sapply(keys, function(key){
@@ -171,7 +172,7 @@ cqc_check.cqc_cf_list <- function(x, type, keys = NULL, delimiter = "|", by = "c
         filter(!!as.symbol(by) %in% keys)
     })
   }
-  
+
   if(type == "panel"){
     # Spread channel and marker for multi-column key
     key_names <- names(keys)
@@ -194,11 +195,11 @@ cqc_check.cqc_cf_list <- function(x, type, keys = NULL, delimiter = "|", by = "c
       add_count(`group_id`, name = "nObject") %>%
       pivot_longer(-c(object, group_id, nObject), names_to = "channel", values_to = "marker") %>%
       right_join(bind_rows(keys), by = c("object", "channel", "marker")) # Remove artifacts of bind_rows
-    
+
     if(nrow(res) == 0)
       stop("No markers available for panel check.")
     attr(res, "by") <- by
-    
+
   }else{
     #convert to itemized(one entry per object&key) tbl
     res <- tibble(object = names(keys), key = keys)
@@ -213,7 +214,7 @@ cqc_check.cqc_cf_list <- function(x, type, keys = NULL, delimiter = "|", by = "c
       separate_rows(key, sep = paste0("\\Q", sep, "\\E"))#split the collapsed key string into separate rows(one key per row)
     res <- rename(res, !!type := key)
   }
-  
+
   class(res) <- c("cqc_check", class(res))
   class(res) <- c(paste0("cqc_check_", type), class(res))
   attr(res, "data") <- x
@@ -258,10 +259,10 @@ cqc_check.cqc_gs <- function(x, type, keys = NULL, delimiter = "|", ...) {
 #' @examples
 #' fcs_files <- list.files(system.file("extdata", "GvHD_QC", package = "cytoqc"), full.names = TRUE)
 #' qc_cf_list <- cqc_load_fcs(fcs_files)
-#' 
+#'
 #' channel_groups <- cqc_check(qc_cf_list, type = "channel")
 #' summary(channel_groups)
-#' 
+#'
 #' @export
 summary.cqc_check <- function(object, ...) {
   res <- object %>%
@@ -303,7 +304,7 @@ diff.cqc_check_panel <- function(x, ...) {
 #' @examples
 #' fcs_files <- list.files(system.file("extdata", "GvHD_QC", package = "cytoqc"), full.names = TRUE)
 #' qc_cf_list <- cqc_load_fcs(fcs_files)
-#' 
+#'
 #' channel_groups <- cqc_check(qc_cf_list, type = "channel")
 #' diff(channel_groups)
 #' @importFrom dplyr group_split inner_join anti_join
@@ -327,7 +328,7 @@ diff.cqc_check <- function(x, vars, ...) {
 #' @importFrom purrr walk
 #' @param x cqc_check object
 #' @param f,drop,... not used
-#' @examples 
+#' @examples
 #' fcs_files <- list.files(system.file("extdata", "GvHD_QC", package = "cytoqc"), full.names = TRUE)
 #' qc_cf_list <- cqc_load_fcs(fcs_files)
 #' channel_groups <- cqc_check(qc_cf_list, type = "channel")
@@ -353,13 +354,14 @@ split.cqc_check <- function(x, f, drop = FALSE, ...) {
 #'
 #' @param groups \code{cqc_check_gate} grouping resulte from \code{cqc_check}.
 #' @examples
+#' library(flowWorkspace)
 #' gs_paths <- list.files(system.file("extdata", "gslist_manual_QC", package = "cytoqc"), full.names = TRUE)
 #' gs1 <- load_gs(gs_paths[[1]])
 #' gs2 <- load_gs(gs_paths[[2]])
 #' qc_gslist <- cqc_gs_list(list(gs1, gs2))
 #' groups <- cqc_check(qc_gslist, type="gate")
 #' plot_diff(groups)
-#' 
+#'
 #' @export
 #' @import Rgraphviz graph
 plot_diff <- function(groups) {
@@ -480,7 +482,7 @@ plot_diff <- function(groups) {
 #'
 #' @param groups the object returned by 'cqc_checks'
 #' @param id the group id to be dropped from the dataset
-#' @examples 
+#' @examples
 #' fcs_files <- list.files(system.file("extdata", "GvHD_QC", package = "cytoqc"), full.names = TRUE)
 #' qc_cf_list <- cqc_load_fcs(fcs_files)
 #' channel_groups <- cqc_check(qc_cf_list, type = "channel")
@@ -505,7 +507,7 @@ cqc_drop_groups <- function(groups, id) {
 #'
 #' @param groups the object returned by \code{\link{cqc_checks}}
 #' @param id the group id to be selected from the dataset, default is NULL, meaning all data
-#' @examples 
+#' @examples
 #' fcs_files <- list.files(system.file("extdata", "GvHD_QC", package = "cytoqc"), full.names = TRUE)
 #' qc_cf_list <- cqc_load_fcs(fcs_files)
 #' channel_groups <- cqc_check(qc_cf_list, type = "channel")

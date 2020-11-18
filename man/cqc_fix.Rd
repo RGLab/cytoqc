@@ -26,7 +26,7 @@ groups <- cqc_check(qc_cf_list, type = "marker")
 match_result <- cqc_match(groups, ref = c("CD14 PerCP", "CD15 FITC", "CD33 APC", "CD45 PE", "FSC-Height", "SSC-Height", "Time"))
 
 # Add a manual match that automatic matching could not find
-match_result <- cqc_update_match(match_result, map = c("PTPRC PE" = "CD45 PE"))
+match_result <- cqc_match_update(match_result, map = c("PTPRC PE" = "CD45 PE"))
 
 # Apply the fix to the original cytoframes
 cqc_fix(match_result)

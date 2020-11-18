@@ -15,7 +15,9 @@ qc operations on a \code{\link{cqc_cf_list}} object for the GatingSet's
 underlying data
 }
 \examples{
+\dontrun{
 gs_path <- system.file("extdata", "gslist_manual_QC", "gs1", package = "cytoqc")
 gs <- load_gs(gs_path)
 qc_gs <- cqc_gs(gs)
+}
 }

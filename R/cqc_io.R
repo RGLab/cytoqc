@@ -37,6 +37,7 @@ cqc_load_cytoframe <- function(files, ...) {
 #'
 #' @param x a named list of \code{\link[flowWorkspace]{cytoframe}} objects
 #' @examples
+#' \dontrun{
 #' # This is just for illustration. cqc_load_fcs will normally take care of this step.
 #' fcs_files <- list.files(system.file("extdata", "GvHD_QC", package = "cytoqc"), full.names = TRUE)
 #' cf_list <- lapply(fcs_files[1:3], load_cytoframe_from_fcs)
@@ -44,7 +45,7 @@ cqc_load_cytoframe <- function(files, ...) {
 #'
 #' # Construct a cqc_cf_list object from a list of cytoframes
 #' cf_list <- cqc_cf_list(cf_list)
-#'
+#'}
 #' @export
 cqc_cf_list <- function(x) {
   if (!is.list(x)) {
@@ -70,9 +71,11 @@ cqc_cf_list <- function(x) {
 #' underlying data
 #' @param x a GatingSet object
 #' @examples
+#' \dontrun{
 #' gs_path <- system.file("extdata", "gslist_manual_QC", "gs1", package = "cytoqc")
 #' gs <- load_gs(gs_path)
 #' qc_gs <- cqc_gs(gs)
+#' }
 #' @export
 cqc_gs <- function(x) {
   if (!is(x, "GatingSet")){
@@ -108,7 +111,7 @@ cqc_gs <- function(x) {
 #' match_result <- cqc_match(groups, ref = c("CD14 PerCP", "CD15 FITC", "CD33 APC", "CD45 PE", "FSC-Height", "SSC-Height", "Time"))
 #'
 #' # Add a manual match that automatic matching could not find
-#' match_result <- cqc_update_match(match_result, map = c("PTPRC PE" = "CD45 PE"))
+#' match_result <- cqc_match_update(match_result, map = c("PTPRC PE" = "CD45 PE"))
 #'
 #' # Apply the fix to the original cytoframes
 #' cqc_fix(match_result)
@@ -168,10 +171,11 @@ cqc_write_cytoframe <- function(x, out, verbose = TRUE, backend = get_default_ba
 #'
 #' @param x a list of 'GatingSet' objects
 #' @examples
+#' library(flowWorkspace)
 #' gs_paths <- list.files(system.file("extdata", "gslist_manual_QC", package = "cytoqc"), full.names = TRUE)
 #' gs1 <- load_gs(gs_paths[[1]])
 #' gs2 <- load_gs(gs_paths[[2]])
-#' qc_gs_list <- cqc_gs_list(list(gs1, gs2))
+#' qc_gslist <- cqc_gs_list(list(gs1, gs2))
 #' groups <- cqc_check(qc_gslist, type="gate")
 #'
 #' @export

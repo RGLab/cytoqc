@@ -13,6 +13,7 @@ plot_diff(groups)
 visualize the tree structure difference among the GatingSets
 }
 \examples{
+library(flowWorkspace)
 gs_paths <- list.files(system.file("extdata", "gslist_manual_QC", package = "cytoqc"), full.names = TRUE)
 gs1 <- load_gs(gs_paths[[1]])
 gs2 <- load_gs(gs_paths[[2]])

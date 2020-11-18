@@ -13,6 +13,7 @@ cqc_cf_list(x)
 This is the core data object for \code{\link[cytoqc:cytoqc-package]{cytoqc}}.
 }
 \examples{
+\dontrun{
 # This is just for illustration. cqc_load_fcs will normally take care of this step.
 fcs_files <- list.files(system.file("extdata", "GvHD_QC", package = "cytoqc"), full.names = TRUE)
 cf_list <- lapply(fcs_files[1:3], load_cytoframe_from_fcs)
@@ -20,5 +21,5 @@ names(cf_list) <- fcs_files[1:3]
 
 # Construct a cqc_cf_list object from a list of cytoframes
 cf_list <- cqc_cf_list(cf_list)
-
+}
 }
