@@ -70,7 +70,7 @@ new_col <- exprs(fr)[,8,drop=F]
 colnames(new_col) <- "channelA"
 fr <- fr_append_cols(fr, new_col)
 write.FCS(fr, files[2])
-cqc_data[[2]] <- load_cytoframe_from_fcs(thisfile, is_h5 = TRUE)
+cqc_data[[2]] <- load_cytoframe_from_fcs(thisfile)
 
 #typo
 cf <- cqc_data[[2]]
