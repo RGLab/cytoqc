@@ -30,7 +30,8 @@ Imports:
     crayon,
     colortable
 Remotes: thebioengineer/colortable
-License: Artistic-2.0
+License: file LICENSE
+License_restricts_use: yes
 biocViews: Infrastructure, FlowCytometry, CellBasedAssays
 Suggests: 
     rmarkdown,
