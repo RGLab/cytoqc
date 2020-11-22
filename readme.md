@@ -30,11 +30,19 @@ cqc_data
     ## cytoqc data: 
     ## 21 samples
 
-## The basic workflow can be summarised as four steps:
+## The basic workflow can be summarised as three steps:
 
 1.  check
+
+The consistency of markers, keywords and gating schemes.
+
 2.  match
+
+Inconsistent annotations to their nearest correct samples.
+
 3.  fix
+
+The inconsistent samples.
 
 ### 1\. Check the consistency across samples
 
