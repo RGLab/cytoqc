@@ -12,7 +12,7 @@
 #' cqc_cf_list <- cqc_load_fcs(fcs_files)
 #' @export
 cqc_load_fcs <- function(files,  ...) {
-  res <- sapply(files, function(file) load_cytoframe_from_fcs(file, ...))
+  res <- load_cytoframe_from_fcs(files, ...)
   names(res) <- basename(names(res))
   cqc_cf_list(res)
 }
@@ -26,7 +26,7 @@ cqc_load_fcs <- function(files,  ...) {
 #' }
 #' @export
 cqc_load_cytoframe <- function(files, ...) {
-  res <- sapply(files, function(file) load_cytoframe(file, readonly = FALSE, ...))
+  res <- load_cytoframes(files, readonly = FALSE, ...)
   names(res) <- basename(names(res))
   cqc_cf_list(res)
 }
@@ -153,15 +153,8 @@ cqc_write_cytoframe <- function(x, out, verbose = TRUE, backend = get_default_ba
   if (!dir.exists(out)) {
     dir.create(out)
   }
-  for (sn in names(x))
-  {
-    fr <- x[[sn]]
-    sn <- paste0(sn, ".", backend)
-    if (verbose) {
-      message("writing ", sn)
-    }
-    cf_write_disk(fr, filename = file.path(out, sn), backend = backend, ...)
-  }
+	sn <- paste0(names(x), ".", backend)
+	write_cytoframes(x, filename = file.path(out, sn), backend = backend, ...)
 }
 
 
