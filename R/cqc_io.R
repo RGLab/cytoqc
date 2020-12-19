@@ -13,7 +13,7 @@
 #' @export
 cqc_load_fcs <- function(files,  ...) {
   res <- load_cytoframe_from_fcs(files, ...)
-  names(res) <- basename(names(res))
+  names(res) <- sapply(names(res), basename)
   cqc_cf_list(res)
 }
 
@@ -27,7 +27,7 @@ cqc_load_fcs <- function(files,  ...) {
 #' @export
 cqc_load_cytoframe <- function(files, ...) {
   res <- load_cytoframes(files, readonly = FALSE, ...)
-  names(res) <- basename(names(res))
+  names(res) <- sapply(names(res), basename)
   cqc_cf_list(res)
 }
 
