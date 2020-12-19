@@ -13,7 +13,7 @@
 #' @export
 cqc_load_fcs <- function(files,  ...) {
   res <- load_cytoframe_from_fcs(files, ...)
-  names(res) <- sapply(names(res), basename)
+  names(res) <- sapply(files, basename)
   cqc_cf_list(res)
 }
 
@@ -149,6 +149,7 @@ cqc_write_fcs <- function(x, out, verbose = TRUE, ...) {
 #' @export
 cqc_write_cytoframe <- function(x, out, verbose = TRUE, backend = get_default_backend(), ...) {
   backend <- match.arg(backend, c("h5", "tile"))
+  stopifnot(is(x, "cqc_cf_list"))
 
   if (!dir.exists(out)) {
     dir.create(out)
