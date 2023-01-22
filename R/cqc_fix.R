@@ -95,7 +95,7 @@ cqc_delete.cytoframe <- function(x, value, type, ...) {
   if (type == "channel") {
     cols <- flowWorkspace::colnames(x)
     j <- which(!cols %in% value)
-    flowWorkspace:::subset_cytoframe_by_cols(x@pointer, j - 1)
+    flowWorkspace:::subset_cytoframe_by_cols(x@pointer, as.integer(j - 1))
   } else if (type == "marker") {
     cf_rename_marker(x, value, "")
   } else if (type == "keyword") {

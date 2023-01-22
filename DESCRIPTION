@@ -3,7 +3,7 @@ Type: Package
 Title: Quality control and standardization of cytometry data
 Version: 0.99.2
 Author: Mike Jiang, Jake Wagner, Greg Finak
-Maintainer: Mike Jiang <wjiang2@fhcrc.org>
+Maintainer: Mike Jiang <mike@ozette.com>
 Description: Provides quality control, quality assessment, and data standardization tools for cytometry. 
 Depends: R (>= 3.5.0)
 Imports: 
