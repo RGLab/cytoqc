@@ -270,7 +270,7 @@ cqc_data
     ## cytoqc data: 
     ## 21 samples
 
-## Coerce it inot `cytoset`
+## Coerce it into `cytoset`
 
 ``` r
 cytoset(cqc_data)
